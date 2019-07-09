@@ -123,6 +123,7 @@ class ModbusMeter(object):
     def __init__(self, modbus, unit):
         self.modbus = modbus
         self.unit = unit
+        self.info = {}
 
     def __str__(self):
         if isinstance(self.modbus, ModbusTcpClient):
@@ -168,16 +169,17 @@ class ModbusMeter(object):
         return DEVINSTANCE
 
     def init(self):
-        info = {}
-        self.read_single_regs(self.info_regs, info)
 
-        if '/Serial' not in info:
+        self.read_single_regs(self.info_regs, self.info)
+
+        if '/Serial' not in self.info:
             return False
 
         role = self.get_role()
+        ident = self.get_ident()
         devinstance = self.get_devinstance()
 
-        svcname = 'com.victronenergy.%s.cg_%s' % (role, info['/Serial'])
+        svcname = 'com.victronenergy.%s.%s' % (role, ident)
         self.dbus = VeDbusService(svcname, private_bus())
 
         self.dbus.add_path('/Mgmt/Processname', NAME)
@@ -188,8 +190,8 @@ class ModbusMeter(object):
         self.dbus.add_path('/ProductName', self.productname)
         self.dbus.add_path('/Connected', 1)
 
-        for p in info:
-            self.dbus.add_path(p, info[p])
+        for p in self.info:
+            self.dbus.add_path(p, self.info[p])
 
         for r in self.data_regs:
             self.dbus.add_path(r.name, None)
@@ -256,6 +258,9 @@ class CG_EM24_Meter(ModbusMeter):
             Reg_int32( 0x0044, 2, '/Ac/L3/Energy/Forward', 10,   '%.1f kWh'),
             Reg_int32( 0x004e, 2, '/Ac/Energy/Reverse',    10,   '%.1f kWh'),
         ]
+
+    def get_ident(self):
+        return 'cg_%s' % self.info['/Serial']
 
 cg_models = {
     1648: {
