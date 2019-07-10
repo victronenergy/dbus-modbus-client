@@ -12,6 +12,7 @@ import pymodbus.exceptions
 import re
 from settingsdevice import SettingsDevice
 import struct
+import threading
 import traceback
 from vedbus import VeDbusService
 
@@ -324,7 +325,8 @@ def make_modbus(m):
 
     return ModbusSerialClient(method, port=m[1], baudrate=int(m[2]))
 
-def probe_meters(mlist):
+def probe_meters(mlist, progress_cb=None, progress_interval=10):
+    num_probed = 0
     found = []
 
     for m in mlist:
@@ -338,6 +340,15 @@ def probe_meters(mlist):
                 found.append(model['handler'](modbus, unit))
                 break
 
+        num_probed += 1
+
+        if progress_cb and num_probed == progress_interval:
+            progress_cb(num_probed)
+            num_probed = 0;
+
+    if progress_cb:
+        progress_cb(num_probed)
+
     return found
 
 if_blacklist = [
@@ -346,6 +357,7 @@ if_blacklist = [
 
 def get_nets():
     nets = []
+    num_addrs = 0
 
     try:
         with os.popen('ip -br -4 addr show scope global up') as ip:
@@ -356,22 +368,46 @@ def get_nets():
 
                 net = ipaddress.IPv4Network(u'' + v[2], strict=False)
                 nets.append(net)
+                num_addrs += net.num_addresses - 2
     except:
+        log.warn('Unable to get network addresses')
         pass
 
-    return nets
+    return nets, num_addrs
+
+class Progress(object):
+    def __init__(self, dbus, num):
+        self.dbus = dbus
+        self.num = num
+        self.scanned = 0
+
+    def progress(self, n):
+        self.scanned += n
+        self.dbus['/ScanProgress'] = 100 * self.scanned / self.num
 
 def scan_net():
-    nets = get_nets()
+    global meters
+    global settings
+    global svc
+
+    nets, num_addrs = get_nets()
+    num_probed = 0
     found = []
+    pr = Progress(svc, num_addrs)
 
     for net in nets:
         log.info('scanning %s' % net)
         hosts = net.hosts()
         mlist = [['tcp', str(h), MODBUS_PORT, MODBUS_UNIT] for h in hosts]
-        found += probe_meters(mlist)
+        found += probe_meters(mlist, pr.progress)
 
-    return found
+    log.info('Scan complete, %d device(s) found' % len(found))
+
+    for m in found:
+        m.init()
+
+    meters = found
+    settings['meters'] = ','.join([str(m) for m in meters])
 
 meters = []
 
@@ -388,6 +424,7 @@ def update_meters():
 def main():
     global meters
     global settings
+    global svc
 
     parser = ArgumentParser(add_help=True)
     parser.add_argument('-d', '--debug', help='enable debug logging',
@@ -399,6 +436,8 @@ def main():
     logging.basicConfig(format='%(levelname)-8s %(message)s',
                         level=(logging.DEBUG if args.debug else logging.INFO))
 
+    gobject.threads_init()
+    dbus.mainloop.glib.threads_init()
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     mainloop = gobject.MainLoop()
 
@@ -419,15 +458,15 @@ def main():
             meters = probe_meters([m.split(':') for m in known_meters])
             if len(meters) != len(known_meters):
                 meters = []
+
+            for m in meters:
+                m.init()
         except:
             meters = []
 
     if not meters:
-        meters = scan_net()
-        settings['meters'] = ','.join([str(m) for m in meters])
-
-    for m in meters:
-        m.init()
+        log.info('Starting background scan')
+        threading.Thread(target=scan_net).start()
 
     gobject.timeout_add(1000, update_meters)
     mainloop.run()
