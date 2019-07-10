@@ -340,26 +340,32 @@ def probe_meters(mlist):
 
     return found
 
-def get_addrs(iface):
-    addrs = []
+if_blacklist = [
+    'ap0',
+]
+
+def get_nets():
+    nets = []
 
     try:
-        with os.popen('ip addr show dev %s' % iface) as ip:
+        with os.popen('ip -br -4 addr show scope global up') as ip:
             for line in ip:
-                m = re.match(r'inet\s+(\S+)', line.strip())
-                if m:
-                    addrs.append(m.group(1))
+                v = line.split()
+                if v[0] in if_blacklist:
+                    continue
+
+                net = ipaddress.IPv4Network(u'' + v[2], strict=False)
+                nets.append(net)
     except:
         pass
 
-    return addrs
+    return nets
 
-def scan_net(iface):
-    host_addrs = get_addrs(iface)
+def scan_net():
+    nets = get_nets()
     found = []
 
-    for addr in host_addrs:
-        net = ipaddress.IPv4Network(u'' + addr, strict=False)
+    for net in nets:
         log.info('scanning %s' % net)
         hosts = net.hosts()
         mlist = [['tcp', str(h), MODBUS_PORT, MODBUS_UNIT] for h in hosts]
@@ -387,7 +393,6 @@ def main():
     parser.add_argument('-d', '--debug', help='enable debug logging',
                         action='store_true')
     parser.add_argument('-f', '--force-scan', action='store_true')
-    parser.add_argument('-i', '--interface', default='eth0')
 
     args = parser.parse_args()
 
@@ -404,6 +409,8 @@ def main():
     log.info('waiting for localsettings')
     settings = SettingsDevice(svc.dbusconn, SETTINGS, None, timeout=10)
 
+    known_meters = None
+
     if not args.force_scan:
         known_meters = settings['meters'].split(',')
 
@@ -416,7 +423,7 @@ def main():
             meters = []
 
     if not meters:
-        meters = scan_net(args.interface)
+        meters = scan_net()
         settings['meters'] = ','.join([str(m) for m in meters])
 
     for m in meters:
