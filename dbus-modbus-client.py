@@ -21,8 +21,6 @@ log = logging.getLogger()
 NAME = os.path.basename(__file__)
 VERSION = '0.1'
 
-DEVINSTANCE = 40
-
 MODBUS_PORT = 502
 MODBUS_UNIT = 1
 
@@ -164,11 +162,8 @@ class ModbusMeter(object):
         # TODO: get from settings
         return self.default_role
 
-    def get_devinstance(self):
-        # TODO: get from localsettings
-        return DEVINSTANCE
-
     def init(self):
+        global settings
 
         self.read_single_regs(self.info_regs, self.info)
 
@@ -177,7 +172,8 @@ class ModbusMeter(object):
 
         role = self.get_role()
         ident = self.get_ident()
-        devinstance = self.get_devinstance()
+        devinstance = settings.getVrmDeviceInstance(ident, role,
+                                                    self.default_instance)
 
         svcname = 'com.victronenergy.%s.%s' % (role, ident)
         self.dbus = VeDbusService(svcname, private_bus())
@@ -229,6 +225,7 @@ class CG_EM24_Meter(ModbusMeter):
     productid = 0xb002
     productname = 'Carlo Gavazzi EM24 Energy Meter'
     default_role = 'grid'
+    default_instance = 40
 
     def __init__(self, *args):
         ModbusMeter.__init__(self, *args)
