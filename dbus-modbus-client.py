@@ -123,6 +123,11 @@ class ModbusMeter(object):
         self.modbus = modbus
         self.unit = unit
         self.info = {}
+        self.dbus = None
+
+    def __del__(self):
+        if self.dbus:
+            self.dbus.__del__()
 
     def __str__(self):
         if isinstance(self.modbus, ModbusTcpClient):
@@ -375,6 +380,9 @@ def get_nets():
 
     return nets, num_addrs
 
+class ScanAborted(Exception):
+    pass
+
 class Progress(object):
     def __init__(self, dbus, num):
         self.dbus = dbus
@@ -382,13 +390,24 @@ class Progress(object):
         self.scanned = 0
 
     def progress(self, n):
+        global scanning
+
         self.scanned += n
         self.dbus['/ScanProgress'] = 100 * self.scanned / self.num
 
+        if not scanning:
+            raise ScanAborted()
+
 def scan_net():
     global meters
+    global scan_lock
     global settings
     global svc
+
+    with scan_lock:
+        for m in meters:
+            m.__del__()
+        meters = []
 
     nets, num_addrs = get_nets()
     num_probed = 0
@@ -409,12 +428,63 @@ def scan_net():
     meters = found
     settings['meters'] = ','.join([str(m) for m in meters])
 
+scanning = False
+scan_lock = threading.Lock()
+
+def run_scan():
+    global scanning
+    global svc
+
+    try:
+        scan_net()
+    except ScanAborted:
+        log.info('Scan aborted')
+    except:
+        log.warn('Exception during network scan')
+        traceback.print_exc()
+        pass
+
+    scanning = False
+    svc['/Scan'] = False
+    svc['/ScanProgress'] = None
+
+def start_scan():
+    global scanning
+    global scan_lock
+
+    with scan_lock:
+        if scanning:
+            return
+
+        log.info('Starting background scan')
+
+        scanning = True
+        threading.Thread(target=run_scan).start()
+
+def stop_scan():
+    global scanning
+    global scan_lock
+
+    with scan_lock:
+        scanning = False
+
+def set_scan(path, val):
+    if val:
+        start_scan()
+    else:
+        stop_scan()
+
+    return True
+
 meters = []
 
 def update_meters():
+    global scan_lock
+
     try:
-        for m in meters:
-            m.update()
+        with scan_lock:
+            for m in meters:
+                m.update()
     except:
         traceback.print_exc()
         os._exit(1)
@@ -443,6 +513,7 @@ def main():
 
     svc = VeDbusService('com.victronenergy.modbusclient')
 
+    svc.add_path('/Scan', False, writeable=True, onchangecallback=set_scan)
     svc.add_path('/ScanProgress', None)
 
     log.info('waiting for localsettings')
@@ -465,8 +536,7 @@ def main():
             meters = []
 
     if not meters:
-        log.info('Starting background scan')
-        threading.Thread(target=scan_net).start()
+        start_scan()
 
     gobject.timeout_add(1000, update_meters)
     mainloop.run()
