@@ -145,6 +145,15 @@ class ModbusMeter(object):
                                     self.unit)
         return str(self.modbus)
 
+    def connection(self):
+        if isinstance(self.modbus, ModbusTcpClient):
+            return 'Modbus TCP'
+        elif isinstance(self.modbus, ModbusUdpClient):
+            return 'Modbus UDP'
+        elif isinstance(self.modbus, ModbusSerialClient):
+            return 'Modbus %s' % self.modbus.method.upper()
+        return 'Modbus'
+
     def read_single_regs(self, regs, d):
         for reg in regs:
             rr = self.modbus.read_holding_registers(reg.base, reg.count,
@@ -186,7 +195,7 @@ class ModbusMeter(object):
 
         self.dbus.add_path('/Mgmt/Processname', NAME)
         self.dbus.add_path('/Mgmt/ProcessVersion', VERSION)
-        self.dbus.add_path('/Mgmt/Connection', 'Modbus TCP')
+        self.dbus.add_path('/Mgmt/Connection', self.connection())
         self.dbus.add_path('/DeviceInstance', devinstance)
         self.dbus.add_path('/ProductId', self.productid)
         self.dbus.add_path('/ProductName', self.productname)
