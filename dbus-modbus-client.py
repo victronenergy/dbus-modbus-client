@@ -29,6 +29,8 @@ pymodbus.constants.Defaults.Timeout = 0.5
 MODBUS_PORT = 502
 MODBUS_UNIT = 1
 
+MAX_ERRORS = 5
+
 SETTINGS = {
     'devices': ['/Settings/ModbusClient/Devices', '', 0, 0],
 }
@@ -38,6 +40,7 @@ if_blacklist = [
 ]
 
 devices = []
+failed = []
 scanner = None
 
 def start_scan():
@@ -81,7 +84,34 @@ def set_scan(path, val):
 
     return True
 
+def update_device(dev):
+    try:
+        dev.update()
+        dev.err_count = 0
+    except:
+        dev.err_count += 1
+        if dev.err_count == MAX_ERRORS:
+            devices.remove(dev)
+            failed.append(str(dev))
+            dev.__del__()
+
+def init_devices(devlist):
+    global settings
+
+    devs = device.probe(devlist)
+
+    for d in devs:
+        try:
+            d.init(settings)
+            devices.append(d)
+            devlist.remove(str(d))
+        except:
+            pass
+
+    return devlist
+
 def update():
+    global failed
     global scanner
     global svc
 
@@ -93,12 +123,10 @@ def update():
             scan_complete()
             scanner = None
 
-    try:
-        for d in devices:
-            d.update()
-    except:
-        traceback.print_exc()
-        os._exit(1)
+    for d in devices:
+        update_device(d)
+
+    init_devices(failed)
 
     return True
 
