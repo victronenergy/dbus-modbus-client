@@ -134,7 +134,6 @@ def percent(path, val):
     return '%d%%' % val
 
 def main():
-    global devices
     global settings
     global svc
 
@@ -161,24 +160,9 @@ def main():
     log.info('waiting for localsettings')
     settings = SettingsDevice(svc.dbusconn, SETTINGS, None, timeout=10)
 
-    saved_devices = None
+    saved_devices = settings['devices']
 
-    if not args.force_scan:
-        saved_devices = settings['devices'].split(',')
-
-    if saved_devices:
-        try:
-            devices = device.probe(saved_devices)
-            if len(devices) != len(saved_devices):
-                devices = []
-
-            for d in devices:
-                d.init(settings)
-        except:
-            traceback.print_exc()
-            devices = []
-
-    if not devices:
+    if not saved_devices or init_devices(saved_devices.split(',')):
         start_scan()
 
     gobject.timeout_add(1000, update)
