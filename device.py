@@ -22,6 +22,11 @@ class ModbusDevice(object):
         if self.dbus:
             self.dbus.__del__()
 
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return str(self) == str(other)
+        return False
+
     def __str__(self):
         if isinstance(self.modbus, ModbusTcpClient):
             return 'tcp:%s:%d:%d' % (self.modbus.host,

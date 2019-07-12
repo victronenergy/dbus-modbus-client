@@ -60,14 +60,17 @@ def stop_scan():
 def scan_complete():
     global settings
 
-    for d in devices:
-        d.__del__()
-    devices = []
-
     for d in scanner.devices:
-        d.init(settings)
+        if d in devices:
+            continue
 
-    devices = scanner.devices
+        try:
+            d.init(settings)
+            devices.append(d)
+        except:
+            log.info('Error initialising %d, skipping' % d)
+            traceback.print_exc()
+
     settings['devices'] = ','.join([str(d) for d in devices])
 
 def set_scan(path, val):
