@@ -5,6 +5,7 @@ import dbus
 import dbus.mainloop.glib
 import gobject
 import os
+import pymodbus.constants
 from settingsdevice import SettingsDevice
 import traceback
 from vedbus import VeDbusService
@@ -22,6 +23,8 @@ NAME = os.path.basename(__file__)
 VERSION = '0.1'
 
 __all__ = ['NAME', 'VERSION']
+
+pymodbus.constants.Defaults.Timeout = 0.5
 
 MODBUS_PORT = 502
 MODBUS_UNIT = 1
