@@ -500,6 +500,9 @@ def update_meters():
 
     return True
 
+def percent(path, val):
+    return '%d%%' % val
+
 def main():
     global meters
     global settings
@@ -523,7 +526,7 @@ def main():
     svc = VeDbusService('com.victronenergy.modbusclient')
 
     svc.add_path('/Scan', False, writeable=True, onchangecallback=set_scan)
-    svc.add_path('/ScanProgress', None)
+    svc.add_path('/ScanProgress', 0, gettextcallback=percent)
 
     log.info('waiting for localsettings')
     settings = SettingsDevice(svc.dbusconn, SETTINGS, None, timeout=10)
