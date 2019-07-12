@@ -58,7 +58,9 @@ class Scanner(object):
         self.done = 0
         self.running = True
 
-        threading.Thread(target=self.run).start()
+        t = threading.Thread(target=self.run)
+        t.daemon = True
+        t.start()
 
         return True
 
