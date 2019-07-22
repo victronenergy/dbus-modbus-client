@@ -137,6 +137,9 @@ def probe(mlist, progress_cb=None, progress_interval=10):
         if isinstance(m, (str, type(u''))):
             m = m.split(':')
 
+        if len(m) < 4:
+            continue
+
         modbus = make_modbus(m)
         unit = int(m[-1])
 
