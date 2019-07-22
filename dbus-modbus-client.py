@@ -31,116 +31,140 @@ MODBUS_UNIT = 1
 
 MAX_ERRORS = 5
 
-SETTINGS = {
-    'devices': ['/Settings/ModbusClient/Devices', '', 0, 0],
-}
-
 if_blacklist = [
     'ap0',
 ]
 
-devices = []
-failed = []
-scanner = None
-
-def start_scan():
-    global scanner
-
-    if scanner:
-        return
-
-    log.info('Starting background scan')
-
-    s = NetScanner('tcp', MODBUS_PORT, MODBUS_UNIT, if_blacklist)
-
-    if s.start():
-        scanner = s
-
-def stop_scan():
-    if scanner:
-        scanner.stop()
-
-def scan_complete():
-    global settings
-
-    for d in scanner.devices:
-        if d in devices:
-            continue
-
-        try:
-            d.init(settings)
-            devices.append(d)
-        except:
-            log.info('Error initialising %d, skipping' % d)
-            traceback.print_exc()
-
-    settings['devices'] = ','.join([str(d) for d in devices])
-
-def set_scan(path, val):
-    if val:
-        start_scan()
-    else:
-        stop_scan()
-
-    return True
-
-def update_device(dev):
-    try:
-        dev.update()
-        dev.err_count = 0
-    except:
-        dev.err_count += 1
-        if dev.err_count == MAX_ERRORS:
-            devices.remove(dev)
-            failed.append(str(dev))
-            dev.__del__()
-
-def init_devices(devlist):
-    global settings
-
-    devs = device.probe(devlist)
-
-    for d in devs:
-        try:
-            d.init(settings)
-            devices.append(d)
-            devlist.remove(str(d))
-        except:
-            pass
-
-    return devlist
-
-def update():
-    global failed
-    global scanner
-    global svc
-
-    if scanner:
-        svc['/Scan'] = scanner.running
-        svc['/ScanProgress'] = 100 * scanner.done / scanner.total
-
-        if not scanner.running:
-            scan_complete()
-            scanner = None
-
-    for d in devices:
-        update_device(d)
-
-    init_devices(failed)
-
-    return True
-
 def percent(path, val):
     return '%d%%' % val
 
-def main():
-    global settings
-    global svc
+class Client(object):
+    def __init__(self, name):
+        self.name = name
+        self.devices = []
+        self.failed = []
+        self.scanner = None
+        self.SETTINGS = {
+            'devices': ['/Settings/ModbusClient/%s/Devices' % name, '', 0, 0],
+        }
 
+    def start_scan(self):
+        if self.scanner:
+            return
+
+        log.info('Starting background scan')
+
+        s = self.new_scanner()
+
+        if s.start():
+            self.scanner = s
+
+    def stop_scan(self):
+        if self.scanner:
+            self.scanner.stop()
+
+    def scan_complete(self):
+        for d in self.scanner.devices:
+            if d in self.devices:
+                continue
+
+            try:
+                d.init(self.settings)
+                self.devices.append(d)
+            except:
+                log.info('Error initialising %s, skipping', d)
+                traceback.print_exc()
+
+        self.settings['devices'] = ','.join([str(d) for d in self.devices])
+
+    def set_scan(self, path, val):
+        if val:
+            self.start_scan()
+        else:
+            self.stop_scan()
+
+        return True
+
+    def update_device(self, dev):
+        try:
+            dev.update()
+            dev.err_count = 0
+        except:
+            dev.err_count += 1
+            if dev.err_count == MAX_ERRORS:
+                self.devices.remove(dev)
+                self.failed.append(str(dev))
+                dev.__del__()
+
+    def init_devices(self, devlist):
+        devs = device.probe(devlist)
+
+        for d in devs:
+            try:
+                d.init(self.settings)
+                self.devices.append(d)
+                devlist.remove(str(d))
+            except:
+                pass
+
+        return devlist
+
+    def init(self):
+        svcname = 'com.victronenergy.modbusclient.%s' % self.name
+        self.svc = VeDbusService(svcname, private_bus())
+        self.svc.add_path('/Scan', False, writeable=True,
+                          onchangecallback=self.set_scan)
+        self.svc.add_path('/ScanProgress', 0, gettextcallback=percent)
+
+        log.info('Waiting for localsettings')
+        self.settings = SettingsDevice(self.svc.dbusconn, self.SETTINGS,
+                                       None, timeout=10)
+
+        return self.init_devices(self.settings['devices'].split(','))
+
+    def update(self):
+        if self.scanner:
+            self.svc['/Scan'] = self.scanner.running
+            self.svc['/ScanProgress'] = \
+                100 * self.scanner.done / self.scanner.total
+
+            if not self.scanner.running:
+                self.scan_complete()
+                self.scanner = None
+
+        for d in self.devices:
+            self.update_device(d)
+
+        self.init_devices(self.failed)
+
+        return True
+
+class NetClient(Client):
+    def __init__(self, proto):
+        Client.__init__(self, proto)
+        self.proto = proto
+
+    def new_scanner(self):
+        return NetScanner(self.proto, MODBUS_PORT, MODBUS_UNIT, if_blacklist)
+
+class SerialClient(Client):
+    def __init__(self, tty, rate, mode):
+        Client.__init__(self, tty)
+        self.tty = tty
+        self.rate = rate
+        self.mode = mode
+
+    def new_scanner(self):
+        return SerialScanner(self.tty, self.rate, self.mode)
+
+def main():
     parser = ArgumentParser(add_help=True)
     parser.add_argument('-d', '--debug', help='enable debug logging',
                         action='store_true')
     parser.add_argument('-f', '--force-scan', action='store_true')
+    parser.add_argument('-m', '--mode', choices=['ascii', 'rtu'], default='rtu')
+    parser.add_argument('-r', '--rate', type=int, default=115200)
+    parser.add_argument('-s', '--serial')
 
     args = parser.parse_args()
 
@@ -152,20 +176,16 @@ def main():
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     mainloop = gobject.MainLoop()
 
-    svc = VeDbusService('com.victronenergy.modbusclient')
+    if args.serial:
+        tty = os.path.basename(args.serial)
+        client = SerialClient(tty, args.rate, args.mode)
+    else:
+        client = NetClient('tcp')
 
-    svc.add_path('/Scan', False, writeable=True, onchangecallback=set_scan)
-    svc.add_path('/ScanProgress', 0, gettextcallback=percent)
+    if client.init() or args.force_scan:
+        client.start_scan()
 
-    log.info('waiting for localsettings')
-    settings = SettingsDevice(svc.dbusconn, SETTINGS, None, timeout=10)
-
-    saved_devices = settings['devices']
-
-    if not saved_devices or init_devices(saved_devices.split(',')):
-        start_scan()
-
-    gobject.timeout_add(1000, update)
+    gobject.timeout_add(1000, client.update)
     mainloop.run()
 
 if __name__ == '__main__':
