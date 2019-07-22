@@ -1,4 +1,3 @@
-import logging
 import sys
 
 import device
@@ -85,16 +84,10 @@ cg_models = {
 }
 
 def probe(modbus, unit):
-    try:
-        logging.disable(logging.ERROR)
-        with timeout(modbus, 0.1):
-            rr = modbus.read_holding_registers(0xb, 1, unit=unit)
-        m = cg_models[rr.registers[0]]
-        return m['handler'](modbus, unit, m['model'])
-    except:
-        return None
-    finally:
-        logging.disable(logging.NOTSET)
+    with timeout(modbus, 0.1):
+        rr = modbus.read_holding_registers(0xb, 1, unit=unit)
+    m = cg_models[rr.registers[0]]
+    return m['handler'](modbus, unit, m['model'])
 
 __all__ = ['probe']
 

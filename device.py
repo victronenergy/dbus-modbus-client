@@ -120,6 +120,15 @@ def make_modbus(m):
 
     return ModbusSerialClient(method, port=m[1], baudrate=int(m[2]))
 
+def probe_one(devtype, modbus, unit):
+    try:
+        logging.disable(logging.ERROR)
+        return devtype.probe(modbus, unit)
+    except:
+        pass
+    finally:
+        logging.disable(logging.NOTSET)
+
 def probe(mlist, progress_cb=None, progress_interval=10):
     num_probed = 0
     found = []
@@ -132,7 +141,7 @@ def probe(mlist, progress_cb=None, progress_interval=10):
         unit = int(m[-1])
 
         for t in device_types:
-            d = t.probe(modbus, unit)
+            d = probe_one(t, modbus, unit)
             if d:
                 log.info('Found %s at %s' % (d.model, modbus))
                 found.append(d)
