@@ -51,7 +51,7 @@ def start_scan():
 
     log.info('Starting background scan')
 
-    s = Scanner(MODBUS_PORT, MODBUS_UNIT, if_blacklist)
+    s = NetScanner('tcp', MODBUS_PORT, MODBUS_UNIT, if_blacklist)
 
     if s.start():
         scanner = s

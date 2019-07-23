@@ -11,10 +11,7 @@ class ScanAborted(Exception):
     pass
 
 class Scanner(object):
-    def __init__(self, port, unit, blacklist):
-        self.port = port
-        self.unit = unit
-        self.blacklist = blacklist
+    def __init__(self):
         self.devices = None
         self.running = None
         self.total = None
@@ -26,35 +23,21 @@ class Scanner(object):
 
         self.done += n
 
-    def scan(self):
-        for net in self.nets:
-            log.info('Scanning %s' % net)
-            hosts = net.hosts()
-            mlist = [['tcp', str(h), self.port, self.unit] for h in hosts]
-            self.devices += device.probe(mlist, self.progress, 4)
-
-        log.info('Scan complete, %d device(s) found' % len(self.devices))
-
     def run(self):
         self.devices = []
 
         try:
             self.scan()
+            log.info('Scan complete, %d device(s) found', len(self.devices))
         except ScanAborted:
             log.info('Scan aborted')
         except:
-            log.warn('Exception during network scan')
+            log.warn('Exception during bus scan')
             traceback.print_exc()
 
         self.running = False
 
     def start(self):
-        self.nets = get_networks(self.blacklist)
-        if not self.nets:
-            log.warn('Unable to get network addresses')
-            return False
-
-        self.total = sum([n.num_addresses - 2 for n in self.nets])
         self.done = 0
         self.running = True
 
@@ -67,4 +50,29 @@ class Scanner(object):
     def stop(self):
         self.running = False
 
-__all__ = ['Scanner']
+class NetScanner(Scanner):
+    def __init__(self, proto, port, unit, blacklist):
+        Scanner.__init__(self)
+        self.proto = proto
+        self.port = port
+        self.unit = unit
+        self.blacklist = blacklist
+
+    def scan(self):
+        for net in self.nets:
+            log.info('Scanning %s', net)
+            hosts = net.hosts()
+            mlist = [[self.proto, str(h), self.port, self.unit] for h in hosts]
+            self.devices += device.probe(mlist, self.progress, 4)
+
+    def start(self):
+        self.nets = get_networks(self.blacklist)
+        if not self.nets:
+            log.warn('Unable to get network addresses')
+            return False
+
+        self.total = sum([n.num_addresses - 2 for n in self.nets])
+
+        return Scanner.start(self)
+
+__all__ = ['NetScanner']
