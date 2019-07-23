@@ -60,8 +60,7 @@ class ModbusDevice(object):
             reg.decode(rr.registers)
             d[reg.name] = reg
 
-    def read_data_regs(self, d):
-        regs = self.data_regs
+    def read_data_regs(self, regs, d):
         start = regs[0].base
         count = regs[-1].base + regs[-1].count - start
 
@@ -101,10 +100,12 @@ class ModbusDevice(object):
             self.dbus.add_path(p, self.info[p])
 
         for r in self.data_regs:
-            self.dbus.add_path(r.name, None)
+            for rr in r if isinstance(r, list) else [r]:
+                self.dbus.add_path(rr.name, None)
 
     def update(self):
-        self.read_data_regs(self.dbus)
+        for r in self.data_regs:
+            self.read_data_regs(r if isinstance(r, list) else [r], self.dbus)
 
 device_types = []
 

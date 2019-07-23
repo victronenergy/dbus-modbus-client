@@ -35,7 +35,7 @@ class CG_EM24_Meter(device.ModbusDevice):
             Reg_text(  0x5000, 7, '/Serial'),
         ]
 
-        self.data_regs = [
+        self.data_regs = [[
             Reg_int32( 0x0000, 2, '/Ac/L1/Voltage',        10,   '%.1f V'),
             Reg_int32( 0x0002, 2, '/Ac/L2/Voltage',        10,   '%.1f V'),
             Reg_int32( 0x0004, 2, '/Ac/L3/Voltage',        10,   '%.1f V'),
@@ -52,7 +52,7 @@ class CG_EM24_Meter(device.ModbusDevice):
             Reg_int32( 0x0042, 2, '/Ac/L2/Energy/Forward', 10,   '%.1f kWh'),
             Reg_int32( 0x0044, 2, '/Ac/L3/Energy/Forward', 10,   '%.1f kWh'),
             Reg_int32( 0x004e, 2, '/Ac/Energy/Reverse',    10,   '%.1f kWh'),
-        ]
+        ]]
 
     def get_ident(self):
         return 'cg_%s' % self.info['/Serial']
