@@ -166,7 +166,7 @@ def probe(mlist, progress_cb=None, progress_interval=10):
         for t in device_types:
             d = probe_one(t, modbus, unit)
             if d:
-                log.info('Found %s at %s' % (d.model, modbus))
+                log.info('Found %s at %s', d.model, d)
                 found.append(d)
                 break
 
