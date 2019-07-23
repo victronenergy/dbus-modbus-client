@@ -3,6 +3,7 @@ import dbus
 from pymodbus.client.sync import *
 import logging
 import os
+import threading
 
 from vedbus import VeDbusService
 
@@ -56,8 +57,9 @@ class ModbusDevice(object):
 
     def read_info_regs(self, d):
         for reg in self.info_regs:
-            rr = self.modbus.read_holding_registers(reg.base, reg.count,
-                                                    unit=self.unit)
+            with self.modbus.lock:
+                rr = self.modbus.read_holding_registers(reg.base, reg.count,
+                                                        unit=self.unit)
             reg.decode(rr.registers)
             d[reg.name] = reg
 
@@ -65,7 +67,9 @@ class ModbusDevice(object):
         start = regs[0].base
         count = regs[-1].base + regs[-1].count - start
 
-        rr = self.modbus.read_holding_registers(start, count, unit=self.unit)
+        with self.modbus.lock:
+            rr = self.modbus.read_holding_registers(start, count,
+                                                    unit=self.unit)
 
         for reg in regs:
             base = reg.base - start
@@ -111,14 +115,18 @@ class ModbusDevice(object):
 device_types = []
 serial_ports = {}
 
+def lockable(obj):
+    obj.lock = threading.Lock()
+    return obj
+
 def make_modbus(m):
     method = m[0]
 
     if method == 'tcp':
-        return ModbusTcpClient(m[1], int(m[2]))
+        return lockable(ModbusTcpClient(m[1], int(m[2])))
 
     if method == 'udp':
-        return ModbusUdpClient(m[1], int(m[2]))
+        return lockable(ModbusUdpClient(m[1], int(m[2])))
 
     tty = m[1]
 
@@ -126,7 +134,7 @@ def make_modbus(m):
         return serial_ports[tty]
 
     dev = '/dev/%s' % tty
-    client = ModbusSerialClient(method, port=dev, baudrate=int(m[2]))
+    client = lockable(ModbusSerialClient(method, port=dev, baudrate=int(m[2])))
     serial_ports[tty] = client
 
     return client
@@ -134,7 +142,8 @@ def make_modbus(m):
 def probe_one(devtype, modbus, unit):
     try:
         logging.disable(logging.ERROR)
-        return devtype.probe(modbus, unit)
+        with modbus.lock:
+            return devtype.probe(modbus, unit)
     except:
         pass
     finally:
