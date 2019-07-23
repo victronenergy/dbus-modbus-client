@@ -67,6 +67,14 @@ class Reg_int32(Reg_num):
         v = struct.unpack('<i', struct.pack('<2H', *values))[0]
         return self.set_raw_value(v)
 
+class Reg_float(Reg_num):
+    def __init__(self, base, *args):
+        Reg_num.__init__(self, base, 2, *args)
+
+    def decode(self, values):
+        v = struct.unpack('<f', struct.pack('<2H', *values))[0]
+        return self.set_raw_value(v)
+
 class Reg_text(Reg, str):
     def __new__(cls, *args):
         return str.__new__(cls)
