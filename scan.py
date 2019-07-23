@@ -7,6 +7,9 @@ import device
 
 log = logging.getLogger()
 
+MODBUS_UNIT_MIN = 1
+MODBUS_UNIT_MAX = 247
+
 class ScanAborted(Exception):
     pass
 
@@ -75,4 +78,21 @@ class NetScanner(Scanner):
 
         return Scanner.start(self)
 
-__all__ = ['NetScanner']
+class SerialScanner(Scanner):
+    def __init__(self, tty, rate, mode):
+        Scanner.__init__(self)
+        self.tty = tty
+        self.rate = rate
+        self.mode = mode
+
+    def scan(self):
+        log.info('Scanning %s', self.tty)
+        units = range(MODBUS_UNIT_MIN, MODBUS_UNIT_MAX + 1)
+        mlist = [[self.mode, self.tty, self.rate, u] for u in units]
+        self.devices += device.probe(mlist, self.progress, 4)
+
+    def start(self):
+        self.total = MODBUS_UNIT_MAX
+        return Scanner.start(self)
+
+__all__ = ['NetScanner', 'SerialScanner']
