@@ -2,6 +2,7 @@ from copy import copy
 import dbus
 from pymodbus.client.sync import *
 import logging
+import os
 
 from vedbus import VeDbusService
 
@@ -39,7 +40,7 @@ class ModbusDevice(object):
                                      self.unit)
         elif isinstance(self.modbus, ModbusSerialClient):
             return '%s:%s:%d:%d' % (self.modbus.method,
-                                    self.modbus.port,
+                                    os.path.basename(self.modbus.port),
                                     self.modbus.baudrate,
                                     self.unit)
         return str(self.modbus)
@@ -118,7 +119,9 @@ def make_modbus(m):
     if method == 'udp':
         return ModbusUdpClient(m[1], int(m[2]))
 
-    return ModbusSerialClient(method, port=m[1], baudrate=int(m[2]))
+    tty = m[1]
+    dev = '/dev/%s' % tty
+    return ModbusSerialClient(method, port=dev, baudrate=int(m[2]))
 
 def probe_one(devtype, modbus, unit):
     try:
