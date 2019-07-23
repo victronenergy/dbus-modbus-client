@@ -17,6 +17,7 @@ class ModbusDevice(object):
         self.model = model
         self.info = {}
         self.dbus = None
+        self.err_count = 0
 
     def __del__(self):
         if self.dbus:
