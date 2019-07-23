@@ -109,6 +109,7 @@ class ModbusDevice(object):
             self.read_data_regs(r if isinstance(r, list) else [r], self.dbus)
 
 device_types = []
+serial_ports = {}
 
 def make_modbus(m):
     method = m[0]
@@ -120,8 +121,15 @@ def make_modbus(m):
         return ModbusUdpClient(m[1], int(m[2]))
 
     tty = m[1]
+
+    if tty in serial_ports:
+        return serial_ports[tty]
+
     dev = '/dev/%s' % tty
-    return ModbusSerialClient(method, port=dev, baudrate=int(m[2]))
+    client = ModbusSerialClient(method, port=dev, baudrate=int(m[2]))
+    serial_ports[tty] = client
+
+    return client
 
 def probe_one(devtype, modbus, unit):
     try:
