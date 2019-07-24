@@ -19,6 +19,14 @@ class Reg_ver(Reg, int):
         v = values[0]
         return self.update((v >> 12, v >> 8 & 0xf, v & 0xff))
 
+nr_phase_map = {
+    0: 3, # 3P.n
+    1: 3, # 3P.1
+    2: 2, # 2P
+    3: 1, # 1P
+    4: 3, # 3P
+}
+
 class EM24_Meter(device.ModbusDevice):
     productid = 0xb002
     productname = 'Carlo Gavazzi EM24 Energy Meter'
@@ -31,27 +39,38 @@ class EM24_Meter(device.ModbusDevice):
         self.info_regs = [
             Reg_ver(   0x0302,    '/HardwareVersion'),
             Reg_ver(   0x0304,    '/FirmwareVersion'),
+            Reg_mapint(0x1002,    '/Phases', nr_phase_map),
             Reg_text(  0x5000, 7, '/Serial'),
         ]
 
-        self.data_regs = [[
-            Reg_int32( 0x0000,    '/Ac/L1/Voltage',        10,   '%.1f V'),
-            Reg_int32( 0x0002,    '/Ac/L2/Voltage',        10,   '%.1f V'),
-            Reg_int32( 0x0004,    '/Ac/L3/Voltage',        10,   '%.1f V'),
-            Reg_int32( 0x000c,    '/Ac/L1/Current',        1000, '%.1f A'),
-            Reg_int32( 0x000e,    '/Ac/L2/Current',        1000, '%.1f A'),
-            Reg_int32( 0x0010,    '/Ac/L3/Current',        1000, '%.1f A'),
-            Reg_int32( 0x0012,    '/Ac/L1/Power',          10,   '%.1f W'),
-            Reg_int32( 0x0014,    '/Ac/L2/Power',          10,   '%.1f W'),
-            Reg_int32( 0x0016,    '/Ac/L3/Power',          10,   '%.1f W'),
-            Reg_int32( 0x0028,    '/Ac/Power',             10,   '%.1f W'),
-            Reg_uint16(0x0033,    '/Ac/Frequency',         10,   '%.1f Hz'),
-            Reg_int32( 0x0034,    '/Ac/Energy/Forward',    10,   '%.1f kWh'),
-            Reg_int32( 0x0040,    '/Ac/L1/Energy/Forward', 10,   '%.1f kWh'),
-            Reg_int32( 0x0042,    '/Ac/L2/Energy/Forward', 10,   '%.1f kWh'),
-            Reg_int32( 0x0044,    '/Ac/L3/Energy/Forward', 10,   '%.1f kWh'),
-            Reg_int32( 0x004e,    '/Ac/Energy/Reverse',    10,   '%.1f kWh'),
-        ]]
+    def phase_regs(self, n):
+        s = 2 * (n - 1)
+        return [
+            Reg_int32(0x0000 + s, '/Ac/L%d/Voltage' % n,        10, '%.1f V'),
+            Reg_int32(0x000c + s, '/Ac/L%d/Current' % n,      1000, '%.1f A'),
+            Reg_int32(0x0012 + s, '/Ac/L%d/Power' % n,          10, '%.1f W'),
+            Reg_int32(0x0040 + s, '/Ac/L%d/Energy/Forward' % n, 10, '%.1f kWh'),
+        ]
+
+    def init(self, *args):
+        self.read_info()
+
+        phases = int(self.info['/Phases'])
+
+        regs = [
+            Reg_int32( 0x0028, '/Ac/Power',          10, '%.1f W'),
+            Reg_uint16(0x0033, '/Ac/Frequency',      10, '%.1f Hz'),
+            Reg_int32( 0x0034, '/Ac/Energy/Forward', 10, '%.1f kWh'),
+            Reg_int32( 0x004e, '/Ac/Energy/Reverse', 10, '%.1f kWh'),
+        ]
+
+        for n in range(1, phases + 1):
+            regs += self.phase_regs(n)
+
+        regs.sort(key=lambda r: r.base)
+        self.data_regs = [regs]
+
+        device.ModbusDevice.init(self, *args)
 
     def get_ident(self):
         return 'cg_%s' % self.info['/Serial']
