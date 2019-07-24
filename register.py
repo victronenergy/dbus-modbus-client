@@ -10,7 +10,7 @@ class Reg(object):
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return self.value == other.value
-        return False
+        return self.value == other
 
     def __float__(self):
         return float(self.value)
