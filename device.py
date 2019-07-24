@@ -77,12 +77,16 @@ class ModbusDevice(object):
             if reg.decode(rr.registers[base:end]):
                 d[reg.name] = copy(reg) if reg.isvalid() else None
 
+    def read_info(self):
+        if not self.info:
+            self.read_info_regs(self.info)
+
     def get_role(self):
         # TODO: get from settings
         return self.default_role
 
     def init(self, settings):
-        self.read_info_regs(self.info)
+        self.read_info()
 
         role = self.get_role()
         ident = self.get_ident()
