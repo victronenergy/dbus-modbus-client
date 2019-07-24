@@ -4,6 +4,7 @@ FILES =									\
 	device.py							\
 	register.py							\
 	scan.py								\
+	smappee.py							\
 	utils.py							\
 
 VELIB =									\

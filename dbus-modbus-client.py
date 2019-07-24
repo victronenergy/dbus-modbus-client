@@ -15,6 +15,7 @@ from scan import *
 from utils import *
 
 import carlo_gavazzi
+import smappee
 
 import logging
 log = logging.getLogger()
