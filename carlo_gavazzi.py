@@ -1,8 +1,5 @@
-import sys
-
 import device
 from register import *
-from utils import *
 
 class Reg_cgver(Reg, int):
     def __new__(cls, *args):
@@ -83,12 +80,4 @@ cg_models = {
     },
 }
 
-def probe(modbus, unit):
-    with timeout(modbus, 0.1):
-        rr = modbus.read_holding_registers(0xb, 1, unit=unit)
-    m = cg_models[rr.registers[0]]
-    return m['handler'](modbus, unit, m['model'])
-
-__all__ = ['probe']
-
-device.register(sys.modules[__name__])
+device.register(device.ModelRegister(0x000b, cg_models))

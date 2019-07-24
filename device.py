@@ -112,6 +112,18 @@ class ModbusDevice(object):
         for r in self.data_regs:
             self.read_data_regs(r if isinstance(r, list) else [r], self.dbus)
 
+class ModelRegister(object):
+    def __init__(self, reg, models, timeout=0.1):
+        self.reg = reg
+        self.models = models
+        self.timeout = timeout
+
+    def probe(self, modbus, unit):
+        with timeout(modbus, self.timeout):
+            rr = modbus.read_holding_registers(self.reg, 1, unit=unit)
+        m = self.models[rr.registers[0]]
+        return m['handler'](modbus, unit, m['model'])
+
 device_types = []
 serial_ports = {}
 
@@ -185,4 +197,4 @@ def register(devtype):
     if devtype not in device_types:
         device_types.append(devtype)
 
-__all__ = ['ModbusDevice', 'probe', 'register']
+__all__ = ['ModbusDevice', 'ModelRegister', 'probe', 'register']
