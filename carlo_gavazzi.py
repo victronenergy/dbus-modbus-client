@@ -1,7 +1,7 @@
 import device
 from register import *
 
-class Reg_cgver(Reg, int):
+class Reg_ver(Reg, int):
     def __new__(cls, *args):
         return int.__new__(cls)
 
@@ -19,7 +19,7 @@ class Reg_cgver(Reg, int):
         v = values[0]
         return self.update((v >> 12, v >> 8 & 0xf, v & 0xff))
 
-class CG_EM24_Meter(device.ModbusDevice):
+class EM24_Meter(device.ModbusDevice):
     productid = 0xb002
     productname = 'Carlo Gavazzi EM24 Energy Meter'
     default_role = 'grid'
@@ -29,8 +29,8 @@ class CG_EM24_Meter(device.ModbusDevice):
         device.ModbusDevice.__init__(self, *args)
 
         self.info_regs = [
-            Reg_cgver( 0x0302,    '/HardwareVersion'),
-            Reg_cgver( 0x0304,    '/FirmwareVersion'),
+            Reg_ver(   0x0302,    '/HardwareVersion'),
+            Reg_ver(   0x0304,    '/FirmwareVersion'),
             Reg_text(  0x5000, 7, '/Serial'),
         ]
 
@@ -56,31 +56,31 @@ class CG_EM24_Meter(device.ModbusDevice):
     def get_ident(self):
         return 'cg_%s' % self.info['/Serial']
 
-cg_models = {
+models = {
     1648: {
         'model':    'EM24DINAV23XE1X',
-        'handler':  CG_EM24_Meter
+        'handler':  EM24_Meter,
     },
     1649: {
         'model':    'EM24DINAV23XE1PFA',
-        'handler':  CG_EM24_Meter,
+        'handler':  EM24_Meter,
     },
     1650: {
         'model':    'EM24DINAV23XE1PFB',
-        'handler':  CG_EM24_Meter,
+        'handler':  EM24_Meter,
     },
     1651: {
         'model':    'EM24DINAV53XE1X',
-        'handler':  CG_EM24_Meter,
+        'handler':  EM24_Meter,
     },
     1652: {
         'model':    'EM24DINAV53XE1PFA',
-        'handler':  CG_EM24_Meter,
+        'handler':  EM24_Meter,
     },
     1653: {
         'model':    'EM24DINAV53XE1PFB',
-        'handler':  CG_EM24_Meter,
+        'handler':  EM24_Meter,
     },
 }
 
-device.register(device.ModelRegister(0x000b, cg_models))
+device.register(device.ModelRegister(0x000b, models))
