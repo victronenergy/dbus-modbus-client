@@ -47,6 +47,9 @@ class Reg_num(Reg, float):
         return self.update(val / self.scale)
 
 class Reg_uint16(Reg_num):
+    def __init__(self, base, *args):
+        Reg_num.__init__(self, base, 1, *args)
+
     def decode(self, values):
         if values[0] == 0x7ffff:
             return self.update(None)
@@ -54,6 +57,9 @@ class Reg_uint16(Reg_num):
         return self.set_raw_value(values[0])
 
 class Reg_int32(Reg_num):
+    def __init__(self, base, *args):
+        Reg_num.__init__(self, base, 2, *args)
+
     def decode(self, values):
         if values[1] == 0x7ffff:
             return self.update(None)
@@ -70,8 +76,8 @@ class Reg_text(Reg, str):
         return self.update(newval)
 
 class Reg_map(Reg):
-    def __init__(self, base, count, name, tab):
-        Reg.__init__(self, base, count, name)
+    def __init__(self, base, name, tab):
+        Reg.__init__(self, base, 1, name)
         self.tab = tab
 
     def decode(self, values):

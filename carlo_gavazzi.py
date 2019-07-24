@@ -5,6 +5,9 @@ class Reg_cgver(Reg, int):
     def __new__(cls, *args):
         return int.__new__(cls)
 
+    def __init__(self, base, name):
+        Reg.__init__(self, base, 1, name)
+
     def __int__(self):
         v = self.value
         return v[0] << 16 | v[1] << 8 | v[2]
@@ -26,28 +29,28 @@ class CG_EM24_Meter(device.ModbusDevice):
         device.ModbusDevice.__init__(self, *args)
 
         self.info_regs = [
-            Reg_cgver( 0x0302, 1, '/HardwareVersion'),
-            Reg_cgver( 0x0304, 1, '/FirmwareVersion'),
+            Reg_cgver( 0x0302,    '/HardwareVersion'),
+            Reg_cgver( 0x0304,    '/FirmwareVersion'),
             Reg_text(  0x5000, 7, '/Serial'),
         ]
 
         self.data_regs = [[
-            Reg_int32( 0x0000, 2, '/Ac/L1/Voltage',        10,   '%.1f V'),
-            Reg_int32( 0x0002, 2, '/Ac/L2/Voltage',        10,   '%.1f V'),
-            Reg_int32( 0x0004, 2, '/Ac/L3/Voltage',        10,   '%.1f V'),
-            Reg_int32( 0x000c, 2, '/Ac/L1/Current',        1000, '%.1f A'),
-            Reg_int32( 0x000e, 2, '/Ac/L2/Current',        1000, '%.1f A'),
-            Reg_int32( 0x0010, 2, '/Ac/L3/Current',        1000, '%.1f A'),
-            Reg_int32( 0x0012, 2, '/Ac/L1/Power',          10,   '%.1f W'),
-            Reg_int32( 0x0014, 2, '/Ac/L2/Power',          10,   '%.1f W'),
-            Reg_int32( 0x0016, 2, '/Ac/L3/Power',          10,   '%.1f W'),
-            Reg_int32( 0x0028, 2, '/Ac/Power',             10,   '%.1f W'),
-            Reg_uint16(0x0033, 1, '/Ac/Frequency',         10,   '%.1f Hz'),
-            Reg_int32( 0x0034, 2, '/Ac/Energy/Forward',    10,   '%.1f kWh'),
-            Reg_int32( 0x0040, 2, '/Ac/L1/Energy/Forward', 10,   '%.1f kWh'),
-            Reg_int32( 0x0042, 2, '/Ac/L2/Energy/Forward', 10,   '%.1f kWh'),
-            Reg_int32( 0x0044, 2, '/Ac/L3/Energy/Forward', 10,   '%.1f kWh'),
-            Reg_int32( 0x004e, 2, '/Ac/Energy/Reverse',    10,   '%.1f kWh'),
+            Reg_int32( 0x0000,    '/Ac/L1/Voltage',        10,   '%.1f V'),
+            Reg_int32( 0x0002,    '/Ac/L2/Voltage',        10,   '%.1f V'),
+            Reg_int32( 0x0004,    '/Ac/L3/Voltage',        10,   '%.1f V'),
+            Reg_int32( 0x000c,    '/Ac/L1/Current',        1000, '%.1f A'),
+            Reg_int32( 0x000e,    '/Ac/L2/Current',        1000, '%.1f A'),
+            Reg_int32( 0x0010,    '/Ac/L3/Current',        1000, '%.1f A'),
+            Reg_int32( 0x0012,    '/Ac/L1/Power',          10,   '%.1f W'),
+            Reg_int32( 0x0014,    '/Ac/L2/Power',          10,   '%.1f W'),
+            Reg_int32( 0x0016,    '/Ac/L3/Power',          10,   '%.1f W'),
+            Reg_int32( 0x0028,    '/Ac/Power',             10,   '%.1f W'),
+            Reg_uint16(0x0033,    '/Ac/Frequency',         10,   '%.1f Hz'),
+            Reg_int32( 0x0034,    '/Ac/Energy/Forward',    10,   '%.1f kWh'),
+            Reg_int32( 0x0040,    '/Ac/L1/Energy/Forward', 10,   '%.1f kWh'),
+            Reg_int32( 0x0042,    '/Ac/L2/Energy/Forward', 10,   '%.1f kWh'),
+            Reg_int32( 0x0044,    '/Ac/L3/Energy/Forward', 10,   '%.1f kWh'),
+            Reg_int32( 0x004e,    '/Ac/Energy/Reverse',    10,   '%.1f kWh'),
         ]]
 
     def get_ident(self):
