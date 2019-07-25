@@ -95,5 +95,9 @@ class Reg_map(Reg):
             v = None
         return self.update(v)
 
+class Reg_mapint(Reg_map, int):
+    def __new__(cls, *args):
+        return int.__new__(cls)
+
 class Reg_mapstr(Reg_map, Reg_text):
     pass
