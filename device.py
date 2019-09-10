@@ -81,17 +81,18 @@ class ModbusDevice(object):
         if not self.info:
             self.read_info_regs(self.info)
 
-    def get_role(self):
-        # TODO: get from settings
-        return self.default_role
+    def get_role_instance(self, settings):
+        path = '/Settings/Devices/%s/ClassAndVrmInstance' % self.get_ident()
+        default = '%s:%s' % (self.default_role, self.default_instance)
+        item = settings.addSetting(path, default, '', '')
+        val = item.get_value().split(':')
+        return val[0], int(val[1])
 
     def init(self, settings):
         self.read_info()
 
-        role = self.get_role()
+        role, devinstance = self.get_role_instance(settings)
         ident = self.get_ident()
-        devinstance = settings.getVrmDeviceInstance(ident, role,
-                                                    self.default_instance)
 
         svcname = 'com.victronenergy.%s.%s' % (role, ident)
         self.dbus = VeDbusService(svcname, private_bus())
