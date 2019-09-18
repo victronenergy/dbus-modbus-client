@@ -45,8 +45,10 @@ class Client(object):
         self.devices = []
         self.failed = []
         self.scanner = None
+        settings_path = '/Settings/ModbusClient/' + name
         self.SETTINGS = {
-            'devices': ['/Settings/ModbusClient/%s/Devices' % name, '', 0, 0],
+            'devices':  [settings_path + '/Devices', '', 0, 0],
+            'autoscan': [settings_path + '/AutoScan', 0, 0, 1],
         }
 
     def start_scan(self):
@@ -110,7 +112,7 @@ class Client(object):
 
         return devlist
 
-    def init(self):
+    def init(self, scan):
         svcname = 'com.victronenergy.modbusclient.%s' % self.name
         self.svc = VeDbusService(svcname, private_bus())
         self.svc.add_path('/Scan', False, writeable=True,
@@ -121,7 +123,14 @@ class Client(object):
         self.settings = SettingsDevice(self.svc.dbusconn, self.SETTINGS,
                                        None, timeout=10)
 
-        return self.init_devices(self.settings['devices'].split(','))
+        failed = self.init_devices(self.settings['devices'].split(','))
+
+        if not self.devices or failed:
+            if self.settings['autoscan']:
+                scan = True
+
+        if scan:
+            self.start_scan()
 
     def update(self):
         if self.scanner:
@@ -183,8 +192,7 @@ def main():
     else:
         client = NetClient('tcp')
 
-    if client.init() or args.force_scan:
-        client.start_scan()
+    client.init(args.force_scan)
 
     gobject.timeout_add(1000, client.update)
     mainloop.run()
