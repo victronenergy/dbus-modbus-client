@@ -88,13 +88,30 @@ class ModbusDevice(object):
 
         SETTINGS = {
             'instance':   [path + '/ClassAndVrmInstance', def_inst, 0, 0],
+            'customname': [path + '/CustomName', '', 0, 0],
         }
 
-        self.settings = SettingsDevice(dbus, SETTINGS, None)
+        self.settings = SettingsDevice(dbus, SETTINGS, self.setting_changed)
+
+    def setting_changed(self, name, old, new):
+        if name == 'customname':
+            self.dbus['/CustomName'] = new
+            return
+
 
     def get_role_instance(self):
         val = self.settings['instance'].split(':')
         return val[0], int(val[1])
+
+    def get_customname(self):
+        return self.settings['customname']
+
+    def set_customname(self, val):
+        self.settings['customname'] = val
+
+    def customname_changed(self, path, val):
+        self.set_customname(val)
+        return True
 
     def init(self, dbus):
         self.init_device_settings(dbus)
@@ -114,6 +131,10 @@ class ModbusDevice(object):
         self.dbus.add_path('/ProductName', self.productname)
         self.dbus.add_path('/Model', self.model)
         self.dbus.add_path('/Connected', 1)
+
+        self.dbus.add_path('/CustomName', self.get_customname(),
+                           writeable=True,
+                           onchangecallback=self.customname_changed)
 
         for p in self.info:
             self.dbus.add_path(p, self.info[p])
