@@ -5,6 +5,7 @@ import logging
 import os
 import threading
 
+from settingsdevice import SettingsDevice
 from vedbus import VeDbusService
 
 import __main__
@@ -81,17 +82,25 @@ class ModbusDevice(object):
         if not self.info:
             self.read_info_regs(self.info)
 
-    def get_role_instance(self, settings):
-        path = '/Settings/Devices/%s/ClassAndVrmInstance' % self.get_ident()
-        default = '%s:%s' % (self.default_role, self.default_instance)
-        item = settings.addSetting(path, default, '', '')
-        val = item.get_value().split(':')
+    def init_device_settings(self, dbus):
+        path = '/Settings/Devices/' + self.get_ident()
+        def_inst = '%s:%s' % (self.default_role, self.default_instance)
+
+        SETTINGS = {
+            'instance':   [path + '/ClassAndVrmInstance', def_inst, 0, 0],
+        }
+
+        self.settings = SettingsDevice(dbus, SETTINGS, None)
+
+    def get_role_instance(self):
+        val = self.settings['instance'].split(':')
         return val[0], int(val[1])
 
-    def init(self, settings):
+    def init(self, dbus):
+        self.init_device_settings(dbus)
         self.read_info()
 
-        role, devinstance = self.get_role_instance(settings)
+        role, devinstance = self.get_role_instance()
         ident = self.get_ident()
 
         svcname = 'com.victronenergy.%s.%s' % (role, ident)

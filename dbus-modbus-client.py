@@ -72,7 +72,7 @@ class Client(object):
                 continue
 
             try:
-                d.init(self.settings)
+                d.init(self.svc.dbusconn)
                 self.devices.append(d)
             except:
                 log.info('Error initialising %s, skipping', d)
@@ -104,7 +104,7 @@ class Client(object):
 
         for d in devs:
             try:
-                d.init(self.settings)
+                d.init(self.svc.dbusconn)
                 self.devices.append(d)
                 devlist.remove(str(d))
             except:
