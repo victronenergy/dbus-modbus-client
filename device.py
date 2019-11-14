@@ -20,6 +20,7 @@ class ModbusDevice(object):
         self.model = model
         self.info = {}
         self.dbus = None
+        self.settings = None
         self.err_count = 0
 
     def __del__(self):
@@ -83,6 +84,9 @@ class ModbusDevice(object):
             self.read_info_regs(self.info)
 
     def init_device_settings(self, dbus):
+        if self.settings:
+            return
+
         path = '/Settings/Devices/' + self.get_ident()
         def_inst = '%s:%s' % (self.default_role, self.default_instance)
 
@@ -98,10 +102,23 @@ class ModbusDevice(object):
             self.dbus['/CustomName'] = new
             return
 
+        if name == 'instance':
+            role, inst = self.get_role_instance()
+
+            if role != self.role:
+                self.role_changed()
+                return
+
+            self.dbus['/DeviceInstance'] = inst
+            return
 
     def get_role_instance(self):
         val = self.settings['instance'].split(':')
         return val[0], int(val[1])
+
+    def role_changed(self):
+        self.dbus.__del__()
+        self.init(None)
 
     def get_customname(self):
         return self.settings['customname']
@@ -117,10 +134,10 @@ class ModbusDevice(object):
         self.init_device_settings(dbus)
         self.read_info()
 
-        role, devinstance = self.get_role_instance()
+        self.role, devinstance = self.get_role_instance()
         ident = self.get_ident()
 
-        svcname = 'com.victronenergy.%s.%s' % (role, ident)
+        svcname = 'com.victronenergy.%s.%s' % (self.role, ident)
         self.dbus = VeDbusService(svcname, private_bus())
 
         self.dbus.add_path('/Mgmt/ProcessName', __main__.NAME)
