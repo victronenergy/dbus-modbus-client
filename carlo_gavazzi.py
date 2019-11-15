@@ -102,4 +102,4 @@ models = {
     },
 }
 
-device.register(device.ModelRegister(0x000b, models))
+device.add_handler(device.ModelRegister(0x000b, models))

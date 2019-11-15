@@ -198,8 +198,8 @@ def probe(mlist, progress_cb=None, progress_interval=10):
 
     return found
 
-def register(devtype):
+def add_handler(devtype):
     if devtype not in device_types:
         device_types.append(devtype)
 
-__all__ = ['ModbusDevice', 'ModelRegister', 'probe', 'register']
+__all__ = ['ModbusDevice', 'ModelRegister', 'probe', 'add_handler']
