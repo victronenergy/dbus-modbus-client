@@ -117,6 +117,10 @@ class ModbusDevice(object):
         for r in self.data_regs:
             self.read_data_regs(r if isinstance(r, list) else [r], self.dbus)
 
+class EnergyMeter(ModbusDevice):
+    default_role = 'grid'
+    default_instance = 40
+
 class ModelRegister(object):
     def __init__(self, reg, models, timeout=0.1):
         self.reg = reg
@@ -202,4 +206,10 @@ def add_handler(devtype):
     if devtype not in device_types:
         device_types.append(devtype)
 
-__all__ = ['ModbusDevice', 'ModelRegister', 'probe', 'add_handler']
+__all__ = [
+    'EnergyMeter',
+    'ModbusDevice',
+    'ModelRegister',
+    'probe',
+    'add_handler'
+]

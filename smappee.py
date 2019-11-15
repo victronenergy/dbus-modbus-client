@@ -26,11 +26,9 @@ class Reg_ver(Reg, int):
     def decode(self, values):
         return self.update((values[1], values[0]))
 
-class PowerBox(device.ModbusDevice):
+class PowerBox(device.EnergyMeter):
     productid = 0xbfff
     productname = 'Smappee Power Box'
-    default_role = 'grid'
-    default_instance = 40
 
     def __init__(self, *args):
         device.ModbusDevice.__init__(self, *args)

@@ -27,11 +27,9 @@ nr_phase_map = {
     4: 3, # 3P
 }
 
-class EM24_Meter(device.ModbusDevice):
+class EM24_Meter(device.EnergyMeter):
     productid = 0xb002
     productname = 'Carlo Gavazzi EM24 Energy Meter'
-    default_role = 'grid'
-    default_instance = 40
 
     def __init__(self, *args):
         device.ModbusDevice.__init__(self, *args)
