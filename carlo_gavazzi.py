@@ -28,8 +28,8 @@ nr_phase_map = {
 }
 
 class EM24_Meter(device.EnergyMeter):
-    productid = 0xb002
-    productname = 'Carlo Gavazzi EM24 Energy Meter'
+    productid = 0xb017
+    productname = 'Carlo Gavazzi EM24 Ethernet Energy Meter'
 
     def __init__(self, *args):
         device.ModbusDevice.__init__(self, *args)
