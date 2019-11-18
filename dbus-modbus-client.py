@@ -112,6 +112,24 @@ class Client(object):
 
         return devlist
 
+    def update_devlist(self, devlist):
+        for d in self.devices:
+            if d not in devlist:
+                self.devices.remove(d)
+                d.__del__()
+
+        for d in devlist:
+            if d in self.devices:
+                devlist.remove(d)
+
+        self.init_devices(devlist)
+        self.settings['devices'] = ','.join([str(d) for d in self.devices])
+
+    def setting_changed(self, name, old, new):
+        if name == 'devices':
+            self.update_devlist(new.split(','))
+            return
+
     def init(self, scan):
         svcname = 'com.victronenergy.modbusclient.%s' % self.name
         self.svc = VeDbusService(svcname, private_bus())
@@ -121,7 +139,7 @@ class Client(object):
 
         log.info('Waiting for localsettings')
         self.settings = SettingsDevice(self.svc.dbusconn, self.SETTINGS,
-                                       None, timeout=10)
+                                       self.setting_changed, timeout=10)
 
         failed = self.init_devices(self.settings['devices'].split(','))
 
