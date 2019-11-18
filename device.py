@@ -30,6 +30,8 @@ class ModbusDevice(object):
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return str(self) == str(other)
+        if isinstance(other, (str, type(u''))):
+            return str(self) == other
         return False
 
     def __str__(self):
