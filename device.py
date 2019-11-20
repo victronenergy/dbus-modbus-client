@@ -108,7 +108,7 @@ class ModbusDevice(object):
             role, inst = self.get_role_instance()
 
             if role != self.role:
-                self.role_changed()
+                self.update_role()
                 return
 
             self.dbus['/DeviceInstance'] = inst
@@ -118,7 +118,7 @@ class ModbusDevice(object):
         val = self.settings['instance'].split(':')
         return val[0], int(val[1])
 
-    def role_changed(self):
+    def update_role(self):
         self.dbus.__del__()
         self.init(None)
 
@@ -130,6 +130,14 @@ class ModbusDevice(object):
 
     def customname_changed(self, path, val):
         self.set_customname(val)
+        return True
+
+    def role_changed(self, path, val):
+        if val not in self.allowed_roles:
+            return False
+
+        old, inst = self.get_role_instance()
+        self.settings['instance'] = '%s:%s' % (val, inst)
         return True
 
     def init(self, dbus):
@@ -150,10 +158,13 @@ class ModbusDevice(object):
         self.dbus.add_path('/ProductName', self.productname)
         self.dbus.add_path('/Model', self.model)
         self.dbus.add_path('/Connected', 1)
+        self.dbus.add_path('/AllowedRoles', self.allowed_roles)
 
         self.dbus.add_path('/CustomName', self.get_customname(),
                            writeable=True,
                            onchangecallback=self.customname_changed)
+        self.dbus.add_path('/Role', self.role, writeable=True,
+                           onchangecallback=self.role_changed);
 
         for p in self.info:
             self.dbus.add_path(p, self.info[p])
@@ -167,6 +178,7 @@ class ModbusDevice(object):
             self.read_data_regs(r if isinstance(r, list) else [r], self.dbus)
 
 class EnergyMeter(ModbusDevice):
+    allowed_roles = ['grid', 'pvinverter', 'genset']
     default_role = 'grid'
     default_instance = 40
 
