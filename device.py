@@ -95,6 +95,7 @@ class ModbusDevice(object):
         SETTINGS = {
             'instance':   [path + '/ClassAndVrmInstance', def_inst, 0, 0],
             'customname': [path + '/CustomName', '', 0, 0],
+            'position':   [path + '/Position', 0, 0, 2],
         }
 
         self.settings = SettingsDevice(dbus, SETTINGS, self.setting_changed)
@@ -112,6 +113,11 @@ class ModbusDevice(object):
                 return
 
             self.dbus['/DeviceInstance'] = inst
+            return
+
+        if name == 'position':
+            if self.role == 'pvinverter':
+                self.dbus['/Position'] = new
             return
 
     def get_role_instance(self):
@@ -140,6 +146,13 @@ class ModbusDevice(object):
         self.settings['instance'] = '%s:%s' % (val, inst)
         return True
 
+    def position_changed(self, path, val):
+        if val not in range(3):
+            return False
+
+        self.settings['position'] = val
+        return True
+
     def init(self, dbus):
         self.init_device_settings(dbus)
         self.read_info()
@@ -165,6 +178,11 @@ class ModbusDevice(object):
                            onchangecallback=self.customname_changed)
         self.dbus.add_path('/Role', self.role, writeable=True,
                            onchangecallback=self.role_changed);
+
+        if self.role == 'pvinverter':
+            self.dbus.add_path('/Position', self.settings['position'],
+                               writeable=True,
+                               onchangecallback=self.position_changed)
 
         for p in self.info:
             self.dbus.add_path(p, self.info[p])
