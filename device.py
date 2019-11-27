@@ -241,13 +241,10 @@ def make_modbus(m):
 
 def probe_one(devtype, modbus, unit):
     try:
-        logging.disable(logging.ERROR)
         with modbus.lock:
             return devtype.probe(modbus, unit)
     except:
         pass
-    finally:
-        logging.disable(logging.NOTSET)
 
 def probe(mlist, progress_cb=None, progress_interval=10):
     num_probed = 0

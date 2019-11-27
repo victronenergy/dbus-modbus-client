@@ -208,6 +208,8 @@ def main():
     logging.basicConfig(format='%(levelname)-8s %(message)s',
                         level=(logging.DEBUG if args.debug else logging.INFO))
 
+    logging.getLogger('pymodbus.client.sync').setLevel(logging.CRITICAL)
+
     gobject.threads_init()
     dbus.mainloop.glib.threads_init()
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
