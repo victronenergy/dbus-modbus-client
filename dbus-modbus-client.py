@@ -78,7 +78,7 @@ class Client(object):
                 log.info('Error initialising %s, skipping', d)
                 traceback.print_exc()
 
-        self.settings['devices'] = ','.join([str(d) for d in self.devices])
+        self.save_devices()
 
     def set_scan(self, path, val):
         if val:
@@ -112,6 +112,10 @@ class Client(object):
 
         return devlist
 
+    def save_devices(self):
+        devs = [str(d) for d in self.devices + self.failed]
+        self.settings['devices'] = ','.join(devs)
+
     def update_devlist(self, devlist):
         for d in self.devices:
             if d not in devlist:
@@ -122,8 +126,8 @@ class Client(object):
             if d in self.devices:
                 devlist.remove(d)
 
-        self.init_devices(devlist)
-        self.settings['devices'] = ','.join([str(d) for d in self.devices])
+        self.failed = self.init_devices(devlist)
+        self.save_devices()
 
     def setting_changed(self, name, old, new):
         if name == 'devices':
@@ -141,9 +145,9 @@ class Client(object):
         self.settings = SettingsDevice(self.svc.dbusconn, self.SETTINGS,
                                        self.setting_changed, timeout=10)
 
-        failed = self.init_devices(self.settings['devices'].split(','))
+        self.failed = self.init_devices(self.settings['devices'].split(','))
 
-        if not self.devices or failed:
+        if not self.devices or self.failed:
             if self.settings['autoscan']:
                 scan = True
 
