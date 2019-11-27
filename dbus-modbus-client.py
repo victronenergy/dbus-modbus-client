@@ -7,6 +7,7 @@ import gobject
 import os
 import pymodbus.constants
 from settingsdevice import SettingsDevice
+import time
 import traceback
 from vedbus import VeDbusService
 
@@ -31,6 +32,7 @@ MODBUS_PORT = 502
 MODBUS_UNIT = 1
 
 MAX_ERRORS = 5
+SCAN_INTERVAL = 600
 
 if_blacklist = [
     'ap0',
@@ -45,6 +47,7 @@ class Client(object):
         self.devices = []
         self.failed = []
         self.scanner = None
+        self.scan_time = time.time()
         settings_path = '/Settings/ModbusClient/' + name
         self.SETTINGS = {
             'devices':  [settings_path + '/Devices', '', 0, 0],
@@ -67,6 +70,8 @@ class Client(object):
             self.scanner.stop()
 
     def scan_complete(self):
+        self.scan_time = time.time()
+
         for d in self.scanner.devices:
             if d in self.devices:
                 continue
@@ -173,6 +178,10 @@ class Client(object):
             self.update_device(d)
 
         self.init_devices(self.failed)
+
+        if self.failed and self.settings['autoscan']:
+            if time.time() - self.scan_time > SCAN_INTERVAL:
+                self.start_scan()
 
         return True
 
