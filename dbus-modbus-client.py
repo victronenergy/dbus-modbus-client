@@ -116,11 +116,16 @@ class Client(object):
         devs = [str(d) for d in self.devices + self.failed]
         self.settings['devices'] = ','.join(devs)
 
+    def filter_devices(self, devices, keep, cb=None):
+        for d in devices:
+            if d not in keep:
+                devices.remove(d)
+                if cb:
+                    cb(d)
+
     def update_devlist(self, devlist):
-        for d in self.devices:
-            if d not in devlist:
-                self.devices.remove(d)
-                d.__del__()
+        self.filter_devices(self.devices, devlist, lambda d: d.__del__())
+        self.filter_devices(self.failed, devlist)
 
         for d in devlist:
             if d in self.devices:
