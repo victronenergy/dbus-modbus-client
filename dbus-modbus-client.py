@@ -33,6 +33,7 @@ MODBUS_UNIT = 1
 
 MAX_ERRORS = 5
 SCAN_INTERVAL = 600
+UPDATE_INTERVAL = 250
 
 if_blacklist = [
     'ap0',
@@ -232,7 +233,7 @@ def main():
 
     client.init(args.force_scan)
 
-    gobject.timeout_add(1000, client.update)
+    gobject.timeout_add(UPDATE_INTERVAL, client.update)
     mainloop.run()
 
 if __name__ == '__main__':
