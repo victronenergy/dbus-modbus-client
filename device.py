@@ -3,6 +3,7 @@ import dbus
 from pymodbus.client.sync import *
 import logging
 import os
+import time
 import threading
 
 from settingsdevice import SettingsDevice
@@ -70,6 +71,7 @@ class ModbusDevice(object):
     def read_data_regs(self, regs, d):
         start = regs[0].base
         count = regs[-1].base + regs[-1].count - start
+        now = time.time()
 
         with self.modbus.lock:
             rr = self.modbus.read_holding_registers(start, count,
@@ -78,8 +80,11 @@ class ModbusDevice(object):
         for reg in regs:
             base = reg.base - start
             end = base + reg.count
-            if reg.decode(rr.registers[base:end]):
-                d[reg.name] = copy(reg) if reg.isvalid() else None
+
+            if now - reg.time > reg.max_age:
+                if reg.decode(rr.registers[base:end]):
+                    d[reg.name] = copy(reg) if reg.isvalid() else None
+                reg.time = now
 
     def read_info(self):
         if not self.info:

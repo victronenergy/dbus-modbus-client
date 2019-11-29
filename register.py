@@ -1,11 +1,22 @@
 import struct
 
+AGE_LIMIT_DEFAULT = 4
+
+AGE_LIMITS = {
+    '/Ac/L1/Power': 1,
+    '/Ac/L2/Power': 1,
+    '/Ac/L3/Power': 1,
+    '/Ac/Power': 0.25,
+}
+
 class Reg(object):
     def __init__(self, base, count, name):
         self.base = base
         self.count = count
         self.name = name
         self.value = None
+        self.time = 0
+        self.max_age = AGE_LIMITS.get(name, AGE_LIMIT_DEFAULT)
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
