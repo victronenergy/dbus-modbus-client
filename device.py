@@ -159,8 +159,8 @@ class ModbusDevice(object):
         return True
 
     def init(self, dbus):
-        self.init_device_settings(dbus)
         self.read_info()
+        self.init_device_settings(dbus)
 
         self.role, devinstance = self.get_role_instance()
         ident = self.get_ident()
