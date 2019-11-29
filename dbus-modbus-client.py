@@ -49,11 +49,7 @@ class Client(object):
         self.failed = []
         self.scanner = None
         self.scan_time = time.time()
-        settings_path = '/Settings/ModbusClient/' + name
-        self.SETTINGS = {
-            'devices':  [settings_path + '/Devices', '', 0, 0],
-            'autoscan': [settings_path + '/AutoScan', 0, 0, 1],
-        }
+        self.auto_scan = False
 
     def start_scan(self):
         if self.scanner:
@@ -146,6 +142,12 @@ class Client(object):
             return
 
     def init(self, scan):
+        settings_path = '/Settings/ModbusClient/' + self.name
+        SETTINGS = {
+            'devices':  [settings_path + '/Devices', '', 0, 0],
+            'autoscan': [settings_path + '/AutoScan', self.auto_scan, 0, 1],
+        }
+
         svcname = 'com.victronenergy.modbusclient.%s' % self.name
         self.svc = VeDbusService(svcname, private_bus())
         self.svc.add_path('/Scan', False, writeable=True,
@@ -153,7 +155,7 @@ class Client(object):
         self.svc.add_path('/ScanProgress', 0, gettextcallback=percent)
 
         log.info('Waiting for localsettings')
-        self.settings = SettingsDevice(self.svc.dbusconn, self.SETTINGS,
+        self.settings = SettingsDevice(self.svc.dbusconn, SETTINGS,
                                        self.setting_changed, timeout=10)
 
         self.failed = self.init_devices(self.settings['devices'].split(','))
@@ -200,6 +202,7 @@ class SerialClient(Client):
         self.tty = tty
         self.rate = rate
         self.mode = mode
+        self.auto_scan = True
 
     def new_scanner(self):
         return SerialScanner(self.tty, self.rate, self.mode)
