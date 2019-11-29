@@ -69,9 +69,13 @@ class ModbusDevice(object):
             d[reg.name] = reg
 
     def read_data_regs(self, regs, d):
+        now = time.time()
+
+        if all(now - r.time < r.max_age for r in regs):
+            return
+
         start = regs[0].base
         count = regs[-1].base + regs[-1].count - start
-        now = time.time()
 
         with self.modbus.lock:
             rr = self.modbus.read_holding_registers(start, count,
