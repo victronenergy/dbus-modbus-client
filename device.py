@@ -53,11 +53,13 @@ class ModbusDevice(object):
 
     def connection(self):
         if isinstance(self.modbus, ModbusTcpClient):
-            return 'Modbus TCP'
+            return 'Modbus TCP %s' % self.modbus.host
         elif isinstance(self.modbus, ModbusUdpClient):
-            return 'Modbus UDP'
+            return 'Modbus UDP % ' % self.modbus.host
         elif isinstance(self.modbus, ModbusSerialClient):
-            return 'Modbus %s' % self.modbus.method.upper()
+            return 'Modbus %s %s:%d' % (self.modbus.method.upper(),
+                                        os.path.basename(self.modbus.port),
+                                        self.unit)
         return 'Modbus'
 
     def read_info_regs(self, d):
