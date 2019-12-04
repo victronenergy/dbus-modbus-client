@@ -165,6 +165,7 @@ class ModbusDevice(object):
         return True
 
     def init(self, dbus):
+        self.device_init()
         self.read_info()
         self.init_device_settings(dbus)
 
@@ -201,6 +202,9 @@ class ModbusDevice(object):
         for r in self.data_regs:
             for rr in r if isinstance(r, list) else [r]:
                 self.dbus.add_path(rr.name, None)
+
+    def device_init(self):
+        pass
 
     def update(self):
         for r in self.data_regs:
