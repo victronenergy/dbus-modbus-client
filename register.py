@@ -46,7 +46,7 @@ class Reg_num(Reg, float):
 
     def __init__(self, base, count, name, scale=1, fmt=None):
         Reg.__init__(self, base, count, name)
-        self.scale = float(scale)
+        self.scale = float(scale) if scale != 1 else scale
         self.fmt = fmt
 
     def __str__(self):
