@@ -50,7 +50,7 @@ class EM24_Meter(device.EnergyMeter):
             Reg_int32(0x0040 + s, '/Ac/L%d/Energy/Forward' % n, 10, '%.1f kWh'),
         ]
 
-    def init(self, *args):
+    def device_init(self):
         self.read_info()
 
         phases = int(self.info['/Phases'])
@@ -67,8 +67,6 @@ class EM24_Meter(device.EnergyMeter):
 
         regs.sort(key=lambda r: r.base)
         self.data_regs = [regs]
-
-        device.ModbusDevice.init(self, *args)
 
     def get_ident(self):
         return 'cg_%s' % self.info['/Serial']
