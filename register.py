@@ -3,10 +3,10 @@ import struct
 AGE_LIMIT_DEFAULT = 4
 
 AGE_LIMITS = {
-    '/Ac/L1/Power': 0,
-    '/Ac/L2/Power': 0,
-    '/Ac/L3/Power': 0,
-    '/Ac/Power':    0,
+    '/Ac/L1/Power': 1,
+    '/Ac/L2/Power': 1,
+    '/Ac/L3/Power': 1,
+    '/Ac/Power':    1,
 }
 
 class Reg(object):
