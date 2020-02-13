@@ -62,12 +62,16 @@ class ModbusDevice(object):
                                         self.unit)
         return 'Modbus'
 
+    def read_register(self, reg):
+        with self.modbus.lock:
+            rr = self.modbus.read_holding_registers(reg.base, reg.count,
+                                                    unit=self.unit)
+        reg.decode(rr.registers)
+        return reg.value
+
     def read_info_regs(self, d):
         for reg in self.info_regs:
-            with self.modbus.lock:
-                rr = self.modbus.read_holding_registers(reg.base, reg.count,
-                                                        unit=self.unit)
-            reg.decode(rr.registers)
+            self.read_register(reg)
             d[reg.name] = reg
 
     def read_data_regs(self, regs, d):
