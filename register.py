@@ -67,6 +67,9 @@ class Reg_uint16(Reg_num):
 
         return self.set_raw_value(values[0])
 
+    def encode(self):
+        return int(self.value * self.scale)
+
 class Reg_int32(Reg_num):
     def __init__(self, base, *args):
         Reg_num.__init__(self, base, 2, *args)
@@ -77,6 +80,10 @@ class Reg_int32(Reg_num):
 
         v = struct.unpack('<i', struct.pack('<2H', *values))[0]
         return self.set_raw_value(v)
+
+    def encode(self):
+        v = int(self.value * self.scale)
+        return struct.unpack('<2H', struct.pack('<i', v))
 
 class Reg_float(Reg_num):
     def __init__(self, base, *args):
