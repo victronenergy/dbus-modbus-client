@@ -123,6 +123,21 @@ class PowerBox(device.EnergyMeter):
             Reg_int32(0x3002 + 4 * ct, '/Ac/L%d/Energy/Reverse' % n, 1000, '%.1f kWh')
         ]
 
+    def init_virtual(self):
+        mask = 0
+
+        for n in range(3):
+            if self.ct_phase[n]:
+                mask |= 1 << self.ct_phase[n][0]
+
+        self.write_register(Reg_int32(0x1400), mask)
+
+        self.data_regs += [
+            Reg_float(0x03c0, '/Ac/Power', 1, '%.1f W'),
+            Reg_int32(0x3100, '/Ac/Energy/Forward', 1000, '%.1f kWh'),
+            Reg_int32(0x3102, '/Ac/Energy/Reverse', 1000, '%.1f kWh'),
+        ]
+
     def device_init(self):
         self.num_slots = 0
 
@@ -152,6 +167,8 @@ class PowerBox(device.EnergyMeter):
             self.power_regs,
             self.energy_regs,
         ]
+
+        self.init_virtual()
 
     def get_ident(self):
         return 'smappee_%s' % self.info['/Serial']
