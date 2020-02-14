@@ -1,6 +1,28 @@
 import device
 from register import *
 
+CT_TYPES = [
+    'SCT01-50A/100A/200A',
+    'SCT01-400A/800A',
+    'Rogowski coil 600A-100mV',
+    'SCT02-50A',
+    'SCT02-100A',
+    'SCT02-200A',
+    'SCT02-400A',
+    'SCT02-800A',
+    'SCT03-50A',
+    'SCT03-100A',
+    'SCT03-200A',
+    'Rogowski coil 400A-100mV',
+    'Closed CT',
+]
+
+class Reg_cttype(Reg_uint16):
+    def __str__(self):
+        if self.value < len(CT_TYPES):
+            return CT_TYPES[self.value]
+        return str(self.value)
+
 class Reg_ser(Reg_text):
     def __init__(self, base, *args):
         Reg.__init__(self, base, 4, *args)
@@ -40,29 +62,6 @@ class PowerBox(device.EnergyMeter):
         ]
 
         self.data_regs = [
-            [
-                Reg_float(0x0000, '/Ac/L1/Voltage',           1, '%.1f V'),
-                Reg_float(0x0004, '/Ac/L2/Voltage',           1, '%.1f V'),
-                Reg_float(0x0008, '/Ac/L3/Voltage',           1, '%.1f V'),
-            ],
-            [
-                Reg_float(0x0080, '/Ac/L1/Current',           1, '%.1f A'),
-                Reg_float(0x0084, '/Ac/L2/Current',           1, '%.1f A'),
-                Reg_float(0x0088, '/Ac/L3/Current',           1, '%.1f A'),
-            ],
-            [
-                Reg_float(0x0100, '/Ac/L1/Power',             1, '%.1f W'),
-                Reg_float(0x0102, '/Ac/L2/Power',             1, '%.1f W'),
-                Reg_float(0x0104, '/Ac/L3/Power',             1, '%.1f W'),
-            ],
-            [
-                Reg_float(0x3000, '/Ac/L1/Energy/Forward', 1000, '%.1f kWh'),
-                Reg_float(0x3002, '/Ac/L1/Energy/Reverse', 1000, '%.1f kWh'),
-                Reg_float(0x3004, '/Ac/L2/Energy/Forward', 1000, '%.1f kWh'),
-                Reg_float(0x3006, '/Ac/L2/Energy/Reverse', 1000, '%.1f kWh'),
-                Reg_float(0x3008, '/Ac/L3/Energy/Forward', 1000, '%.1f kWh'),
-                Reg_float(0x300a, '/Ac/L3/Energy/Reverse', 1000, '%.1f kWh'),
-            ],
             Reg_float(    0x03f8, '/Ac/Frequency',            1, '%.1f Hz'),
         ]
 
@@ -83,11 +82,76 @@ class PowerBox(device.EnergyMeter):
 
         return self.read_register(regs[1])
 
+    def probe_ct(self, n):
+        regs = [
+            Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n),
+            Reg_cttype(0x1100 + n, '/CT/%d/Type' % n),
+            Reg_uint16(0x1140 + n, '/CT/%d/Slot' % n),
+        ]
+
+        if self.read_register(regs[2]) >= self.num_slots:
+            return
+
+        phase = self.read_register(regs[0])
+
+        if phase in [1, 16]:    # L1-N
+            self.ct_phase[0].append(n)
+        elif phase in [2, 32]:  # L2-N
+            self.ct_phase[1].append(n)
+        elif phase in [4, 64]:  # L3-N
+            self.ct_phase[2].append(n)
+
+        self.info_regs += regs
+
+    def add_phase(self, ph, ct):
+        n = ph + 1
+
+        self.voltage_regs += [
+            Reg_float(0x0000 + 4 * ph, '/Ac/L%d/Voltage' % n, 1, '%.1f V'),
+        ]
+
+        self.current_regs += [
+            Reg_float(0x0080 + 4 * ct, '/Ac/L%d/Current' % n, 1, '%.1f A'),
+        ]
+
+        self.power_regs += [
+            Reg_float(0x0380 + 2 * ct, '/Ac/L%d/Power' % n, 1, '%.1f W'),
+        ]
+
+        self.energy_regs += [
+            Reg_int32(0x3000 + 4 * ct, '/Ac/L%d/Energy/Forward' % n, 1000, '%.1f kWh'),
+            Reg_int32(0x3002 + 4 * ct, '/Ac/L%d/Energy/Reverse' % n, 1000, '%.1f kWh')
+        ]
+
     def device_init(self):
         self.num_slots = 0
 
         for n in range(10):
             self.num_slots += self.probe_device(n)
+
+        self.ct_phase = [[], [], []]
+        self.voltage_regs = []
+        self.current_regs = []
+        self.power_regs = []
+        self.energy_regs = []
+
+        for n in range(28):
+            self.probe_ct(n)
+
+        for n in range(3):
+            if self.ct_phase[n]:
+                self.add_phase(n, self.ct_phase[n][0])
+
+        self.current_regs.sort(key=lambda r: r.base)
+        self.power_regs.sort(key=lambda r: r.base)
+        self.energy_regs.sort(key=lambda r: r.base)
+
+        self.data_regs += [
+            self.voltage_regs,
+            self.current_regs,
+            self.power_regs,
+            self.energy_regs,
+        ]
 
     def get_ident(self):
         return 'smappee_%s' % self.info['/Serial']
