@@ -66,6 +66,29 @@ class PowerBox(device.EnergyMeter):
             Reg_float(    0x03f8, '/Ac/Frequency',            1, '%.1f Hz'),
         ]
 
+    def probe_device(self, n):
+        base = 0x1480 + 0x20 * n
+
+        regs = [
+            Reg_uint16(base + 0x00, '/Device/%d/Type' % n),
+            Reg_uint16(base + 0x01, '/Device/%d/Slots' % n),
+            Reg_ser(   base + 0x00, '/Device/%d/Serial' % n),
+            Reg_ver(   base + 0x04, '/Device/%d/FirmwareVersion' % n),
+        ]
+
+        if self.read_register(regs[0]) == 0:
+            return 0
+
+        self.info_regs += regs
+
+        return self.read_register(regs[1])
+
+    def device_init(self):
+        self.num_slots = 0
+
+        for n in range(10):
+            self.num_slots += self.probe_device(n)
+
     def get_ident(self):
         return 'smappee_%s' % self.info['/Serial']
 
