@@ -19,6 +19,12 @@ CT_TYPES = [
     'Closed CT',
 ]
 
+CT_PHASE = {
+    1: 0, 16: 0,
+    2: 1, 32: 1,
+    4: 2, 64: 2,
+};
+
 class Reg_cttype(Reg_uint16):
     def __str__(self):
         if self.value < len(CT_TYPES):
@@ -81,14 +87,8 @@ class PowerBox(device.EnergyMeter):
         if self.read_register(regs[2]) >= self.num_slots:
             return
 
-        phase = self.read_register(regs[0])
-
-        if phase in [1, 16]:    # L1-N
-            self.ct_phase[0].append(n)
-        elif phase in [2, 32]:  # L2-N
-            self.ct_phase[1].append(n)
-        elif phase in [4, 64]:  # L3-N
-            self.ct_phase[2].append(n)
+        phase = CT_PHASE.get(self.read_register(regs[0]), 3)
+        self.ct_phase[phase].append(n)
 
         self.info_regs += regs
 
@@ -143,7 +143,7 @@ class PowerBox(device.EnergyMeter):
         for n in range(10):
             self.num_slots += self.probe_device(n)
 
-        self.ct_phase = [[], [], []]
+        self.ct_phase = [[], [], [], []]
         self.voltage_regs = []
         self.current_regs = []
         self.power_regs = []
