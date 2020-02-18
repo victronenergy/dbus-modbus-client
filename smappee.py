@@ -1,3 +1,5 @@
+from functools import partial
+
 import device
 from register import *
 
@@ -169,6 +171,17 @@ class PowerBox(device.EnergyMeter):
         ]
 
         self.init_virtual()
+
+    def ct_identify(self, ct, path, val):
+        self.write_register(Reg_uint16(0x0900 + ct), val)
+        return False
+
+    def device_init_late(self):
+        for ct in self.ct_phase:
+            for n in ct:
+                cb = partial(self.ct_identify, n)
+                self.dbus.add_path('/CT/%d/Identify' % n, None,
+                                   writeable=True, onchangecallback=cb)
 
     def get_ident(self):
         return 'smappee_%s' % self.info['/Serial']
