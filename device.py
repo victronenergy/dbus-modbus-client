@@ -1,5 +1,6 @@
 from copy import copy
 import dbus
+from functools import partial
 from pymodbus.client.sync import *
 import logging
 import os
@@ -174,6 +175,10 @@ class ModbusDevice(object):
         self.settings['position'] = val
         return True
 
+    def dbus_write_register(self, reg, path, val):
+        self.write_register(reg, val)
+        return True
+
     def init(self, dbus):
         self.device_init()
         self.read_info()
@@ -207,7 +212,12 @@ class ModbusDevice(object):
                                onchangecallback=self.position_changed)
 
         for p in self.info:
-            self.dbus.add_path(p, self.info[p])
+            r = self.info[p]
+            if r.writable:
+                cb = partial(self.dbus_write_register, r)
+                self.dbus.add_path(p, r, writeable=True, onchangecallback=cb)
+            else:
+                self.dbus.add_path(p, r)
 
         for r in self.data_regs:
             for rr in r if isinstance(r, list) else [r]:
