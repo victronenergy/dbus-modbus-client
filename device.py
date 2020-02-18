@@ -131,7 +131,7 @@ class ModbusDevice(object):
             role, inst = self.get_role_instance()
 
             if role != self.role:
-                self.update_role()
+                self.reinit()
                 return
 
             self.dbus['/DeviceInstance'] = inst
@@ -146,7 +146,7 @@ class ModbusDevice(object):
         val = self.settings['instance'].split(':')
         return val[0], int(val[1])
 
-    def update_role(self):
+    def reinit(self):
         self.dbus.__del__()
         self.init(None)
 
