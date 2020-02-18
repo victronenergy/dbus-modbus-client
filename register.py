@@ -10,11 +10,12 @@ AGE_LIMITS = {
 }
 
 class Reg(object):
-    def __init__(self, base, count, name=None):
+    def __init__(self, base, count, name=None, writable=False):
         self.base = base
         self.count = count
         self.name = name
         self.value = None
+        self.writable = writable
         self.time = 0
         self.max_age = AGE_LIMITS.get(name, AGE_LIMIT_DEFAULT)
 
@@ -41,11 +42,11 @@ class Reg(object):
         return newval != old
 
 class Reg_num(Reg, float):
-    def __new__(cls, *args):
+    def __new__(cls, *args, **kwargs):
         return float.__new__(cls)
 
-    def __init__(self, base, count, name=None, scale=1, fmt=None):
-        Reg.__init__(self, base, count, name)
+    def __init__(self, base, count, name=None, scale=1, fmt=None, writable=False):
+        Reg.__init__(self, base, count, name, writable)
         self.scale = float(scale) if scale != 1 else scale
         self.fmt = fmt
 
@@ -58,8 +59,8 @@ class Reg_num(Reg, float):
         return self.update(val / self.scale)
 
 class Reg_uint16(Reg_num):
-    def __init__(self, base, *args):
-        Reg_num.__init__(self, base, 1, *args)
+    def __init__(self, base, *args, **kwargs):
+        Reg_num.__init__(self, base, 1, *args, **kwargs)
 
     def decode(self, values):
         if values[0] == 0x7ffff:
@@ -71,8 +72,8 @@ class Reg_uint16(Reg_num):
         return int(self.value * self.scale)
 
 class Reg_int32(Reg_num):
-    def __init__(self, base, *args):
-        Reg_num.__init__(self, base, 2, *args)
+    def __init__(self, base, *args, **kwargs):
+        Reg_num.__init__(self, base, 2, *args, **kwargs)
 
     def decode(self, values):
         if values[1] == 0x7ffff:
