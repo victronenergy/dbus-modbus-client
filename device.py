@@ -213,7 +213,12 @@ class ModbusDevice(object):
             for rr in r if isinstance(r, list) else [r]:
                 self.dbus.add_path(rr.name, None)
 
+        self.device_init_late()
+
     def device_init(self):
+        pass
+
+    def device_init_late(self):
         pass
 
     def update(self):
