@@ -54,19 +54,6 @@ class PowerBox(device.EnergyMeter):
     productid = 0xbfff
     productname = 'Smappee Power Box'
 
-    def __init__(self, *args):
-        device.ModbusDevice.__init__(self, *args)
-
-        self.info_regs = [
-            Reg_ser(  0x1620, '/Serial'),
-            Reg_ver(  0x1624, '/FirmwareVersion'),
-            Reg_float(0x03f6, '/Ac/FrequencyNominal',  1, '%.0f Hz'),
-        ]
-
-        self.data_regs = [
-            Reg_float(    0x03f8, '/Ac/Frequency',            1, '%.1f Hz'),
-        ]
-
     def probe_device(self, n):
         base = 0x1480 + 0x20 * n
 
@@ -86,7 +73,7 @@ class PowerBox(device.EnergyMeter):
 
     def probe_ct(self, n):
         regs = [
-            Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n),
+            Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n, writable=True),
             Reg_cttype(0x1100 + n, '/CT/%d/Type' % n),
             Reg_uint16(0x1140 + n, '/CT/%d/Slot' % n),
         ]
@@ -141,6 +128,16 @@ class PowerBox(device.EnergyMeter):
         ]
 
     def device_init(self):
+        self.info_regs = [
+            Reg_ser(  0x1620, '/Serial'),
+            Reg_ver(  0x1624, '/FirmwareVersion'),
+            Reg_float(0x03f6, '/Ac/FrequencyNominal', 1, '%.0f Hz'),
+        ]
+
+        self.data_regs = [
+            Reg_float(0x03f8, '/Ac/Frequency', 1, '%.1f Hz'),
+        ]
+
         self.num_slots = 0
 
         for n in range(10):
@@ -182,6 +179,10 @@ class PowerBox(device.EnergyMeter):
                 cb = partial(self.ct_identify, n)
                 self.dbus.add_path('/CT/%d/Identify' % n, None,
                                    writeable=True, onchangecallback=cb)
+
+    def dbus_write_register(self, reg, path, val):
+        super(PowerBox, self).dbus_write_register(reg, path, val)
+        self.reinit()
 
     def get_ident(self):
         return 'smappee_%s' % self.info['/Serial']
