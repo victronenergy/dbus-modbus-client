@@ -50,6 +50,7 @@ class Client(object):
         self.scanner = None
         self.scan_time = time.time()
         self.auto_scan = False
+        self.err_exit = False
 
     def start_scan(self):
         if self.scanner:
@@ -82,6 +83,10 @@ class Client(object):
 
         self.save_devices()
 
+        if not self.devices and self.err_exit:
+            os._exit(1)
+
+
     def set_scan(self, path, val):
         if val:
             self.start_scan()
@@ -95,6 +100,9 @@ class Client(object):
             dev.update()
             dev.err_count = 0
         except:
+            if self.err_exit:
+                os._exit(1)
+
             dev.err_count += 1
             if dev.err_count == MAX_ERRORS:
                 self.devices.remove(dev)
@@ -215,6 +223,8 @@ def main():
     parser.add_argument('-m', '--mode', choices=['ascii', 'rtu'], default='rtu')
     parser.add_argument('-r', '--rate', type=int, default=115200)
     parser.add_argument('-s', '--serial')
+    parser.add_argument('-x', '--exit', action='store_true',
+                        help='exit on error')
 
     args = parser.parse_args()
 
@@ -234,6 +244,7 @@ def main():
     else:
         client = NetClient('tcp')
 
+    client.err_exit = args.exit
     client.init(args.force_scan)
 
     gobject.timeout_add(UPDATE_INTERVAL, client.update)
