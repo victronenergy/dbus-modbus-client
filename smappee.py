@@ -57,7 +57,7 @@ class Reg_ver(Reg, int):
         return self.update((values[1], values[0]))
 
 class PowerBox(device.EnergyMeter):
-    productid = 0xbfff
+    productid = 0xb018
     productname = 'Smappee Power Box'
 
     def probe_device(self, n):
