@@ -132,6 +132,7 @@ class PowerBox(device.EnergyMeter):
             Reg_ser(  0x1620, '/Serial'),
             Reg_ver(  0x1624, '/FirmwareVersion'),
             Reg_float(0x03f6, '/Ac/FrequencyNominal', 1, '%.0f Hz'),
+            Reg_uint16(0x1180, '/Phantom', writable=True),
         ]
 
         self.data_regs = [
