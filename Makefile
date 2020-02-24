@@ -20,3 +20,5 @@ install:
 	install -m 0644 $(addprefix ext/velib_python/,$(VELIB)) \
 		$(DESTDIR)$(bindir)
 	chmod +x $(DESTDIR)$(bindir)/$(firstword $(FILES))
+
+clean:
