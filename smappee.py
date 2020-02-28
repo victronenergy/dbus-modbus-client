@@ -121,6 +121,9 @@ class PowerBox(device.EnergyMeter):
 
         self.write_register(Reg_int32(0x1400), mask)
 
+        if not mask:
+            return
+
         self.data_regs += [
             Reg_float(0x03c0, '/Ac/Power', 1, '%.1f W'),
             Reg_int32(0x3100, '/Ac/Energy/Forward', 1000, '%.1f kWh'),
