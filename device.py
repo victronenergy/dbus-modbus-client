@@ -2,6 +2,7 @@ from copy import copy
 import dbus
 from functools import partial
 from pymodbus.client.sync import *
+from pymodbus.pdu import ExceptionResponse
 import logging
 import os
 import time
@@ -93,6 +94,11 @@ class ModbusDevice(object):
         with self.modbus.lock:
             rr = self.modbus.read_holding_registers(start, count,
                                                     unit=self.unit)
+
+        if isinstance(rr, ExceptionResponse):
+            log.error('Error reading registers %#04x-%#04x: %s',
+                      regs[0].base, regs[-1].base, rr)
+            raise Exception(rr)
 
         for reg in regs:
             base = reg.base - start
