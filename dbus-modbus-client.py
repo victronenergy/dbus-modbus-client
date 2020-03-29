@@ -165,7 +165,8 @@ class Client(object):
         self.settings = SettingsDevice(self.svc.dbusconn, SETTINGS,
                                        self.setting_changed, timeout=10)
 
-        self.failed = self.init_devices(self.settings['devices'].split(','))
+        devices = filter(None, self.settings['devices'].split(','))
+        self.failed = self.init_devices(devices)
 
         if not self.devices or self.failed:
             if self.settings['autoscan']:
