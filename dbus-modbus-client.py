@@ -100,11 +100,10 @@ class Client(object):
             dev.update()
             dev.err_count = 0
         except:
-            if self.err_exit:
-                os._exit(1)
-
             dev.err_count += 1
             if dev.err_count == MAX_ERRORS:
+                if self.err_exit:
+                    os._exit(1)
                 self.devices.remove(dev)
                 self.failed.append(str(dev))
                 dev.__del__()
