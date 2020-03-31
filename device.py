@@ -289,6 +289,8 @@ def make_modbus(m):
 def probe_one(devtype, modbus, unit):
     try:
         return devtype.probe(modbus, unit)
+    except KeyboardInterrupt:
+        os._exit(1)
     except:
         pass
 
