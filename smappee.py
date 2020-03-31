@@ -1,7 +1,10 @@
 from functools import partial
+import logging
 
 import device
 from register import *
+
+log = logging.getLogger()
 
 CT_TYPES = [
     'SCT01-50A/100A/200A',
@@ -48,7 +51,7 @@ class Reg_ver(Reg, int):
 
     def __int__(self):
         v = self.value
-        return v[0] << 16 | v[1] << 8
+        return v[0] << 16 | v[1]
 
     def __str__(self):
         return '%d.%d' % self.value
@@ -59,6 +62,15 @@ class Reg_ver(Reg, int):
 class PowerBox(device.EnergyMeter):
     productid = 0xb018
     productname = 'Smappee Power Box'
+    min_fwver = (1, 44)
+
+    def __init__(self, *args):
+        super(PowerBox, self).__init__(*args)
+        fw = Reg_ver(0x1624)
+        self.read_register(fw)
+        if fw.value < self.min_fwver:
+            log.info('%s firmware %s is too old', self.productname, fw)
+            raise Exception()
 
     def probe_device(self, n):
         base = 0x1480 + 0x20 * n
