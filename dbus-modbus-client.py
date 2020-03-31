@@ -51,6 +51,7 @@ class Client(object):
         self.scan_time = time.time()
         self.auto_scan = False
         self.err_exit = False
+        self.keep_failed = True
 
     def start_scan(self):
         if self.scanner:
@@ -168,6 +169,9 @@ class Client(object):
         devices = filter(None, self.settings['devices'].split(','))
         self.failed = self.init_devices(devices)
 
+        if not self.keep_failed:
+            self.failed = []
+
         if not self.devices or self.failed:
             if self.settings['autoscan']:
                 scan = True
@@ -211,6 +215,7 @@ class SerialClient(Client):
         self.rate = rate
         self.mode = mode
         self.auto_scan = True
+        self.keep_failed = False
 
     def new_scanner(self):
         return SerialScanner(self.tty, self.rate, self.mode)
