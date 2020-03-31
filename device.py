@@ -253,8 +253,9 @@ class ModelRegister(object):
         self.timeout = timeout
 
     def probe(self, modbus, unit):
-        with timeout(modbus, self.timeout):
-            rr = modbus.read_holding_registers(self.reg, 1, unit=unit)
+        with modbus.lock:
+            with timeout(modbus, self.timeout):
+                rr = modbus.read_holding_registers(self.reg, 1, unit=unit)
         m = self.models[rr.registers[0]]
         return m['handler'](modbus, unit, m['model'])
 
@@ -287,8 +288,7 @@ def make_modbus(m):
 
 def probe_one(devtype, modbus, unit):
     try:
-        with modbus.lock:
-            return devtype.probe(modbus, unit)
+        return devtype.probe(modbus, unit)
     except:
         pass
 
