@@ -185,12 +185,11 @@ class PowerBox(device.EnergyMeter):
 
         self.init_virtual()
 
+        # save settings to Power Box flash
+        self.write_register(Reg_uint16(0xfde8), 1)
+
     def ct_identify(self, ct, path, val):
         self.write_register(Reg_uint16(0x0900 + ct), val)
-        return False
-
-    def save_settings(self, path, val):
-        self.write_register(Reg_uint16(0xfde8), 1)
         return False
 
     def device_init_late(self):
@@ -199,9 +198,6 @@ class PowerBox(device.EnergyMeter):
                 cb = partial(self.ct_identify, n)
                 self.dbus.add_path('/CT/%d/Identify' % n, None,
                                    writeable=True, onchangecallback=cb)
-
-        self.dbus.add_path('/SaveSettings', 0, writeable=True,
-                           onchangecallback=self.save_settings)
 
     def dbus_write_register(self, reg, path, val):
         super(PowerBox, self).dbus_write_register(reg, path, val)
