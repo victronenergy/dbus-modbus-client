@@ -6,6 +6,7 @@ from register import *
 
 log = logging.getLogger()
 
+# CT Type Identifier register to type name mapping
 CT_TYPES = [
     'SCT01-50A/100A/200A',
     'SCT01-400A/800A',
@@ -22,11 +23,18 @@ CT_TYPES = [
     'Closed CT',
 ]
 
+# CT Associated Voltage register to phase number mapping
 CT_PHASE = {
-    1: 0, 16: 0,
-    2: 1, 32: 1,
-    4: 2, 64: 2,
+    1:  0,                      # L1 forward
+    16: 0,                      # L1 reverse
+    2:  1,                      # L2 forward
+    32: 1,                      # L2 reverse
+    4:  2,                      # L3 forward
+    64: 2,                      # L3 reverse
 };
+
+MAX_BUS_DEVICES = 10
+MAX_CT_SLOTS    = 28
 
 class Reg_cttype(Reg_uint16):
     def __str__(self):
@@ -156,7 +164,7 @@ class PowerBox(device.EnergyMeter):
 
         self.num_slots = 0
 
-        for n in range(10):
+        for n in range(MAX_BUS_DEVICES):
             self.num_slots += self.probe_device(n)
 
         self.ct_phase = [[], [], [], []]
@@ -165,7 +173,7 @@ class PowerBox(device.EnergyMeter):
         self.power_regs = []
         self.energy_regs = []
 
-        for n in range(28):
+        for n in range(MAX_CT_SLOTS):
             self.probe_ct(n)
 
         for n in range(3):
