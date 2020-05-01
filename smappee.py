@@ -91,11 +91,18 @@ class PowerBox(device.EnergyMeter):
         ]
 
         if self.read_register(regs[0]) == 0:
-            return 0
+            return
+
+        slots = self.read_register(regs[1])
+
+        for s in range(slots):
+            addr = base + 0x0a + s + (s > 7)
+            chan = chr(ord('A') + s)
+            sreg = Reg_uint16(addr, '/Device/%d/Channel/%s/Slot' % (n, chan))
+            self.slots.append(self.read_register(sreg))
+            regs.append(sreg)
 
         self.info_regs += regs
-
-        return self.read_register(regs[1])
 
     def probe_ct(self, n):
         regs = [
@@ -104,7 +111,7 @@ class PowerBox(device.EnergyMeter):
             Reg_uint16(0x1140 + n, '/CT/%d/Slot' % n),
         ]
 
-        if self.read_register(regs[2]) >= self.num_slots:
+        if self.read_register(regs[2]) not in self.slots:
             return
 
         phase = CT_PHASE.get(self.read_register(regs[0]), 3)
@@ -162,10 +169,10 @@ class PowerBox(device.EnergyMeter):
             Reg_float(0x03f8, '/Ac/Frequency', 1, '%.1f Hz'),
         ]
 
-        self.num_slots = 0
+        self.slots = []
 
         for n in range(MAX_BUS_DEVICES):
-            self.num_slots += self.probe_device(n)
+            self.probe_device(n)
 
         self.ct_phase = [[], [], [], []]
         self.voltage_regs = []
