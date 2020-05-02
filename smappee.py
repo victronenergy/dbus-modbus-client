@@ -255,6 +255,8 @@ class PowerBox(device.EnergyMeter):
             self.dbus.add_path('/CT/%d/Identify' % ct.slot, None,
                                writeable=True, onchangecallback=cb)
 
+        self.dbus.add_path('/CTTypes', CT_TYPES)
+
     def dbus_write_register(self, reg, path, val):
         super(PowerBox, self).dbus_write_register(reg, path, val)
         self.reinit()
