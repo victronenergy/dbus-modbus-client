@@ -154,6 +154,7 @@ class ModbusDevice(object):
 
     def reinit(self):
         self.dbus.__del__()
+        self.info = {}
         self.init(None)
 
     def get_customname(self):
