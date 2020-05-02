@@ -25,6 +25,7 @@ CT_TYPES = [
 
 # CT Associated Voltage register to phase number mapping
 CT_PHASE = {
+    0: -1,                      # unassigned
     1:  0,                      # L1 forward
     16: 0,                      # L1 reverse
     2:  1,                      # L2 forward
@@ -67,6 +68,31 @@ class Reg_ver(Reg, int):
     def decode(self, values):
         return self.update((values[1], values[0]))
 
+class CurrentTransformer(object):
+    def __init__(self, dev, slot):
+        self.dev = dev
+        self.slot = slot
+
+    def probe(self):
+        n = self.slot
+
+        self.regs = [
+            Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n, write=True),
+            Reg_cttype(0x1100 + n, '/CT/%d/Type' % n),
+            Reg_uint16(0x1140 + n, '/CT/%d/Slot' % n),
+        ]
+
+        if self.dev.read_register(self.regs[2]) not in self.dev.slots:
+            return False
+
+        self.phase = CT_PHASE.get(self.dev.read_register(self.regs[0]), None)
+
+        if self.phase is None:
+            log.warn('CT %d configured outside Venus', n)
+            return False
+
+        return True
+
 class PowerBox(device.EnergyMeter):
     productid = 0xb018
     productname = 'Smappee Power Box'
@@ -105,38 +131,37 @@ class PowerBox(device.EnergyMeter):
         self.info_regs += regs
 
     def probe_ct(self, n):
-        regs = [
-            Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n, write=True),
-            Reg_cttype(0x1100 + n, '/CT/%d/Type' % n),
-            Reg_uint16(0x1140 + n, '/CT/%d/Slot' % n),
-        ]
+        ct = CurrentTransformer(self, n)
 
-        if self.read_register(regs[2]) not in self.slots:
+        if not ct.probe():
             return
 
-        phase = CT_PHASE.get(self.read_register(regs[0]), 3)
-        self.ct_phase[phase].append(n)
+        if ct.phase >= 0:
+            self.ct_phase[ct.phase].append(ct)
+        else:
+            self.ct_phase[3].append(ct)
 
-        self.info_regs += regs
+        self.info_regs += ct.regs
 
     def add_phase(self, ph, ct):
         n = ph + 1
+        s = ct.slot
 
         self.voltage_regs += [
             Reg_float(0x0000 + 4 * ph, '/Ac/L%d/Voltage' % n, 1, '%.1f V'),
         ]
 
         self.current_regs += [
-            Reg_float(0x0080 + 4 * ct, '/Ac/L%d/Current' % n, 1, '%.1f A'),
+            Reg_float(0x0080 + 4 * s, '/Ac/L%d/Current' % n, 1, '%.1f A'),
         ]
 
         self.power_regs += [
-            Reg_float(0x0380 + 2 * ct, '/Ac/L%d/Power' % n, 1, '%.1f W'),
+            Reg_float(0x0380 + 2 * s, '/Ac/L%d/Power' % n, 1, '%.1f W'),
         ]
 
         self.energy_regs += [
-            Reg_int32(0x3000 + 4 * ct, '/Ac/L%d/Energy/Forward' % n, 1000, '%.1f kWh'),
-            Reg_int32(0x3002 + 4 * ct, '/Ac/L%d/Energy/Reverse' % n, 1000, '%.1f kWh')
+            Reg_int32(0x3000 + 4 * s, '/Ac/L%d/Energy/Forward' % n, 1000, '%.1f kWh'),
+            Reg_int32(0x3002 + 4 * s, '/Ac/L%d/Energy/Reverse' % n, 1000, '%.1f kWh')
         ]
 
     def init_virtual(self):
@@ -144,7 +169,7 @@ class PowerBox(device.EnergyMeter):
 
         for n in range(3):
             if self.ct_phase[n]:
-                mask |= 1 << self.ct_phase[n][0]
+                mask |= 1 << self.ct_phase[n][0].slot
 
         self.write_register(Reg_int32(0x1400), mask)
 
@@ -185,7 +210,8 @@ class PowerBox(device.EnergyMeter):
 
         for n in range(3):
             if self.ct_phase[n]:
-                self.add_phase(n, self.ct_phase[n][0])
+                ct = self.ct_phase[n][0]
+                self.add_phase(n, ct)
 
         self.current_regs.sort(key=lambda r: r.base)
         self.power_regs.sort(key=lambda r: r.base)
@@ -208,8 +234,9 @@ class PowerBox(device.EnergyMeter):
         return False
 
     def device_init_late(self):
-        for ct in self.ct_phase:
-            for n in ct:
+        for p in self.ct_phase:
+            for ct in p:
+                n = ct.slot
                 cb = partial(self.ct_identify, n)
                 self.dbus.add_path('/CT/%d/Identify' % n, None,
                                    writeable=True, onchangecallback=cb)
