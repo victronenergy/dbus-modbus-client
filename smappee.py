@@ -78,7 +78,7 @@ class CurrentTransformer(object):
 
         self.regs = [
             Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n, write=True),
-            Reg_cttype(0x1100 + n, '/CT/%d/Type' % n),
+            Reg_cttype(0x1100 + n, '/CT/%d/Type' % n, write=True),
             Reg_uint16(0x1140 + n, '/CT/%d/Slot' % n),
         ]
 
