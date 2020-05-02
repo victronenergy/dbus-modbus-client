@@ -71,11 +71,13 @@ class ModbusDevice(object):
         reg.decode(rr.registers)
         return reg.value
 
+    def write_modbus(self, base, val):
+        with self.modbus.lock:
+            self.modbus.write_registers(base, val, unit=self.unit)
+
     def write_register(self, reg, val):
         reg.value = val
-
-        with self.modbus.lock:
-            self.modbus.write_registers(reg.base, reg.encode(), unit=self.unit)
+        self.write_modbus(reg.base, reg.encode())
 
     def read_info_regs(self, d):
         for reg in self.info_regs:
