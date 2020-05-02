@@ -79,11 +79,7 @@ class CurrentTransformer(object):
         self.regs = [
             Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n, write=True),
             Reg_cttype(0x1100 + n, '/CT/%d/Type' % n, write=True),
-            Reg_uint16(0x1140 + n, '/CT/%d/Slot' % n),
         ]
-
-        if self.dev.read_register(self.regs[2]) not in self.dev.slots:
-            return False
 
         self.phase = CT_PHASE.get(self.dev.read_register(self.regs[0]), None)
 
@@ -213,8 +209,12 @@ class PowerBox(device.EnergyMeter):
         self.power_regs = []
         self.energy_regs = []
 
+        # reset CT slot mapping
+        self.write_modbus(0x1140, range(MAX_CT_SLOTS))
+
         for n in range(MAX_CT_SLOTS):
-            self.probe_ct(n)
+            if n in self.slots:
+                self.probe_ct(n)
 
         if not any(self.ct_phase):
             log.info('No CTs configured, guessing')
