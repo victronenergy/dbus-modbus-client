@@ -138,9 +138,8 @@ class PowerBox(device.EnergyMeter):
 
         if ct.phase >= 0:
             self.ct_phase[ct.phase].append(ct)
-        else:
-            self.ct_phase[3].append(ct)
 
+        self.all_cts.append(ct)
         self.info_regs += ct.regs
 
     def add_phase(self, ph, ct):
@@ -199,7 +198,8 @@ class PowerBox(device.EnergyMeter):
         for n in range(MAX_BUS_DEVICES):
             self.probe_device(n)
 
-        self.ct_phase = [[], [], [], []]
+        self.all_cts = []
+        self.ct_phase = [[], [], []]
         self.voltage_regs = []
         self.current_regs = []
         self.power_regs = []
@@ -234,12 +234,11 @@ class PowerBox(device.EnergyMeter):
         return False
 
     def device_init_late(self):
-        for p in self.ct_phase:
-            for ct in p:
-                n = ct.slot
-                cb = partial(self.ct_identify, n)
-                self.dbus.add_path('/CT/%d/Identify' % n, None,
-                                   writeable=True, onchangecallback=cb)
+        for ct in self.all_cts:
+            n = ct.slot
+            cb = partial(self.ct_identify, n)
+            self.dbus.add_path('/CT/%d/Identify' % n, None,
+                               writeable=True, onchangecallback=cb)
 
     def dbus_write_register(self, reg, path, val):
         super(PowerBox, self).dbus_write_register(reg, path, val)
