@@ -93,6 +93,11 @@ class CurrentTransformer(object):
 
         return True
 
+    def set_phase(self, n):
+        v = 0 if n < 0 else 1 << n
+        self.phase = n
+        self.dev.write_register(self.regs[0], v)
+
 class PowerBox(device.EnergyMeter):
     productid = 0xb018
     productname = 'Smappee Power Box'
@@ -207,6 +212,14 @@ class PowerBox(device.EnergyMeter):
 
         for n in range(MAX_CT_SLOTS):
             self.probe_ct(n)
+
+        if not any(self.ct_phase):
+            log.info('No CTs configured, guessing')
+            for n in range(3):
+                if len(self.all_cts) > n:
+                    ct = self.all_cts[n]
+                    ct.set_phase(n)
+                    self.ct_phase[n].append(ct)
 
         for n in range(3):
             if self.ct_phase[n]:
