@@ -98,6 +98,9 @@ class CurrentTransformer(object):
         self.phase = n
         self.dev.write_register(self.regs[0], v)
 
+    def identify(self, v):
+        self.dev.write_register(Reg_uint16(0x0900 + self.slot), v)
+
 class PowerBox(device.EnergyMeter):
     productid = 0xb018
     productname = 'Smappee Power Box'
@@ -243,14 +246,13 @@ class PowerBox(device.EnergyMeter):
         self.write_register(Reg_uint16(0xfde8), 1)
 
     def ct_identify(self, ct, path, val):
-        self.write_register(Reg_uint16(0x0900 + ct), val)
+        ct.identify(val)
         return False
 
     def device_init_late(self):
         for ct in self.all_cts:
-            n = ct.slot
-            cb = partial(self.ct_identify, n)
-            self.dbus.add_path('/CT/%d/Identify' % n, None,
+            cb = partial(self.ct_identify, ct)
+            self.dbus.add_path('/CT/%d/Identify' % ct.slot, None,
                                writeable=True, onchangecallback=cb)
 
     def dbus_write_register(self, reg, path, val):
