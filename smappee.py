@@ -69,9 +69,11 @@ class Reg_ver(Reg, int):
         return self.update((values[1], values[0]))
 
 class CurrentTransformer(object):
-    def __init__(self, dev, slot):
+    def __init__(self, dev, slot, sdev, chan):
         self.dev = dev
         self.slot = slot
+        self.sdev = sdev
+        self.chan = chan
 
     def probe(self):
         n = self.slot
@@ -131,12 +133,12 @@ class PowerBox(device.EnergyMeter):
             sreg = Reg_uint16(addr, '/Device/%d/Channel/%s/Slot' % (n, chan))
             slot = self.read_register(sreg)
             regs.append(sreg)
-            self.probe_ct(slot)
+            self.probe_ct(slot, n, chan)
 
         self.info_regs += regs
 
-    def probe_ct(self, n):
-        ct = CurrentTransformer(self, n)
+    def probe_ct(self, n, sdev, chan):
+        ct = CurrentTransformer(self, n, sdev, chan)
 
         if not ct.probe():
             return
@@ -249,6 +251,8 @@ class PowerBox(device.EnergyMeter):
             cb = partial(self.ct_identify, ct)
             self.dbus.add_path('/CT/%d/Identify' % ct.slot, None,
                                writeable=True, onchangecallback=cb)
+            self.dbus.add_path('/CT/%d/Device' % ct.slot, ct.sdev)
+            self.dbus.add_path('/CT/%d/DeviceChannel' % ct.slot, ct.chan)
 
         self.dbus.add_path('/CTTypes', CT_TYPES)
 
