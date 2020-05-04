@@ -37,12 +37,6 @@ CT_PHASE = {
 MAX_BUS_DEVICES = 10
 MAX_CT_SLOTS    = 28
 
-class Reg_cttype(Reg_uint16):
-    def __str__(self):
-        if self.value < len(CT_TYPES):
-            return CT_TYPES[self.value]
-        return str(self.value)
-
 class Reg_ser(Reg_text):
     def __init__(self, base, *args):
         Reg.__init__(self, base, 4, *args)
@@ -78,7 +72,7 @@ class CurrentTransformer(object):
 
         self.regs = [
             Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n, write=True),
-            Reg_cttype(0x1100 + n, '/CT/%d/Type' % n, write=True),
+            Reg_uint16(0x1100 + n, '/CT/%d/Type' % n, fmt=CT_TYPES, write=True),
         ]
 
         self.phase = CT_PHASE.get(self.dev.read_register(self.regs[0]), None)
