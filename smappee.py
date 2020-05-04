@@ -129,8 +129,9 @@ class PowerBox(device.EnergyMeter):
             addr = base + 0x0a + s + (s > 7)
             chan = chr(ord('A') + s)
             sreg = Reg_uint16(addr, '/Device/%d/Channel/%s/Slot' % (n, chan))
-            self.slots.append(self.read_register(sreg))
+            slot = self.read_register(sreg)
             regs.append(sreg)
+            self.probe_ct(slot)
 
         self.info_regs += regs
 
@@ -197,10 +198,8 @@ class PowerBox(device.EnergyMeter):
             Reg_float(0x03f8, '/Ac/Frequency', 1, '%.1f Hz'),
         ]
 
-        self.slots = []
-
-        for n in range(MAX_BUS_DEVICES):
-            self.probe_device(n)
+        # reset CT slot mapping
+        self.write_modbus(0x1140, range(MAX_CT_SLOTS))
 
         self.all_cts = []
         self.ct_phase = [[], [], []]
@@ -209,12 +208,8 @@ class PowerBox(device.EnergyMeter):
         self.power_regs = []
         self.energy_regs = []
 
-        # reset CT slot mapping
-        self.write_modbus(0x1140, range(MAX_CT_SLOTS))
-
-        for n in range(MAX_CT_SLOTS):
-            if n in self.slots:
-                self.probe_ct(n)
+        for n in range(MAX_BUS_DEVICES):
+            self.probe_device(n)
 
         if not any(self.ct_phase):
             log.info('No CTs configured, guessing')
