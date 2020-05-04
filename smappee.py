@@ -34,6 +34,12 @@ CT_PHASE = {
     64: 2,                      # L3 reverse
 };
 
+DEV_TYPES = {
+    5400: 'Power Box',
+    5500: 'CT Hub',
+    5600: 'Solid Core 3-Phase CT',
+}
+
 MAX_BUS_DEVICES = 10
 MAX_CT_SLOTS    = 28
 
@@ -108,7 +114,7 @@ class PowerBox(device.EnergyMeter):
         base = 0x1480 + 0x20 * n
 
         regs = [
-            Reg_uint16(base + 0x00, '/Device/%d/Type' % n),
+            Reg_uint16(base + 0x00, '/Device/%d/Type' % n, fmt=DEV_TYPES),
             Reg_uint16(base + 0x01, '/Device/%d/Slots' % n),
             Reg_ser(   base + 0x00, '/Device/%d/Serial' % n),
             Reg_ver(   base + 0x04, '/Device/%d/FirmwareVersion' % n),
