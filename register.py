@@ -48,11 +48,16 @@ class Reg_num(Reg, float):
     def __init__(self, base, count, name=None, scale=1, fmt=None, write=False):
         Reg.__init__(self, base, count, name, write)
         self.scale = float(scale) if scale != 1 else scale
-        self.fmt = fmt
+        if isinstance(fmt, list):
+            self.fmt = { i : fmt[i] for i in range(len(fmt)) }
+        else:
+            self.fmt = fmt
 
     def __str__(self):
-        if self.fmt:
+        if isinstance(self.fmt, str):
             return self.fmt % self.value
+        if isinstance(self.fmt, dict) and self.value in self.fmt:
+            return self.fmt[self.value]
         return str(self.value)
 
     def set_raw_value(self, val):
