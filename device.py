@@ -185,7 +185,10 @@ class ModbusDevice(object):
         return True
 
     def dbus_write_register(self, reg, path, val):
-        self.write_register(reg, val)
+        if callable(reg.write):
+            reg.write(val)
+        else:
+            self.write_register(reg, val)
         return True
 
     def init(self, dbus):
