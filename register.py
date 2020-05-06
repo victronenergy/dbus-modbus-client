@@ -62,7 +62,7 @@ class Reg_num(Reg, float):
 
 class Reg_uint16(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        Reg_num.__init__(self, base, 1, *args, **kwargs)
+        super(Reg_uint16, self).__init__(base, 1, *args, **kwargs)
 
     def decode(self, values):
         if values[0] == 0x7ffff:
@@ -75,7 +75,7 @@ class Reg_uint16(Reg_num):
 
 class Reg_int32(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        Reg_num.__init__(self, base, 2, *args, **kwargs)
+        super(Reg_int32, self).__init__(base, 2, *args, **kwargs)
 
     def decode(self, values):
         if values[1] == 0x7ffff:
@@ -89,8 +89,8 @@ class Reg_int32(Reg_num):
         return struct.unpack('<2H', struct.pack('<i', v))
 
 class Reg_float(Reg_num):
-    def __init__(self, base, *args):
-        Reg_num.__init__(self, base, 2, *args)
+    def __init__(self, base, *args, **kwargs):
+        super(Reg_float, self).__init__(base, 2, *args, **kwargs)
 
     def decode(self, values):
         v = struct.unpack('<f', struct.pack('<2H', *values))[0]
@@ -105,8 +105,8 @@ class Reg_text(Reg, str):
         return self.update(newval)
 
 class Reg_map(Reg):
-    def __init__(self, base, name, tab):
-        Reg.__init__(self, base, 1, name)
+    def __init__(self, base, name, tab, *args, **kwargs):
+        super(Reg_map, self).__init__(base, name, *args, **kwargs)
         self.tab = tab
 
     def decode(self, values):
