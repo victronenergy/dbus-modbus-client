@@ -37,7 +37,7 @@ class EM24_Meter(device.EnergyMeter):
         self.info_regs = [
             Reg_ver(   0x0302,    '/HardwareVersion'),
             Reg_ver(   0x0304,    '/FirmwareVersion'),
-            Reg_mapint(0x1002,    '/Phases', nr_phase_map),
+            Reg_mapu16(0x1002,    '/Phases', nr_phase_map),
             Reg_text(  0x5000, 7, '/Serial'),
         ]
 
