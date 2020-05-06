@@ -34,6 +34,13 @@ CT_PHASE = {
     64: 2,                      # L3 reverse
 };
 
+CT_PHASE_TEXT = {
+    -1: 'None',
+     0: 'L1',
+     1: 'L2',
+     2: 'L3',
+}
+
 DEV_TYPES = {
     5400: 'Power Box',
     5500: 'CT Hub',
@@ -80,7 +87,7 @@ class CurrentTransformer(object):
 
         self.regs = [
             Reg_mapu16(0x1000 + n, '/CT/%d/Phase' % n, CT_PHASE,
-                       write=self.set_phase),
+                       fmt=CT_PHASE_TEXT, write=self.set_phase),
             Reg_uint16(0x1100 + n, '/CT/%d/Type' % n, fmt=CT_TYPES, write=True),
         ]
 
