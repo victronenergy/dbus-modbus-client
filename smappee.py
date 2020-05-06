@@ -91,7 +91,7 @@ class PowerBox(device.EnergyMeter):
 
     def probe_ct(self, n):
         regs = [
-            Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n, writable=True),
+            Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n, write=True),
             Reg_cttype(0x1100 + n, '/CT/%d/Type' % n),
             Reg_uint16(0x1140 + n, '/CT/%d/Slot' % n),
         ]
@@ -147,7 +147,7 @@ class PowerBox(device.EnergyMeter):
             Reg_ser(  0x1620, '/Serial'),
             Reg_ver(  0x1624, '/FirmwareVersion'),
             Reg_float(0x03f6, '/Ac/FrequencyNominal', 1, '%.0f Hz'),
-            Reg_uint16(0x1180, '/PhaseConfig', writable=True),
+            Reg_uint16(0x1180, '/PhaseConfig', write=True),
         ]
 
         self.data_regs = [
