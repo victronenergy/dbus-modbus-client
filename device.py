@@ -222,7 +222,7 @@ class ModbusDevice(object):
 
         for p in self.info:
             r = self.info[p]
-            if r.writable:
+            if r.write:
                 cb = partial(self.dbus_write_register, r)
                 self.dbus.add_path(p, r, writeable=True, onchangecallback=cb)
             else:

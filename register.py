@@ -10,12 +10,12 @@ AGE_LIMITS = {
 }
 
 class Reg(object):
-    def __init__(self, base, count, name=None, writable=False):
+    def __init__(self, base, count, name=None, write=False):
         self.base = base
         self.count = count
         self.name = name
         self.value = None
-        self.writable = writable
+        self.write = write
         self.time = 0
         self.max_age = AGE_LIMITS.get(name, AGE_LIMIT_DEFAULT)
 
@@ -45,8 +45,8 @@ class Reg_num(Reg, float):
     def __new__(cls, *args, **kwargs):
         return float.__new__(cls)
 
-    def __init__(self, base, count, name=None, scale=1, fmt=None, writable=False):
-        Reg.__init__(self, base, count, name, writable)
+    def __init__(self, base, count, name=None, scale=1, fmt=None, write=False):
+        Reg.__init__(self, base, count, name, write)
         self.scale = float(scale) if scale != 1 else scale
         self.fmt = fmt
 
