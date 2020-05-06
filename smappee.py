@@ -104,6 +104,11 @@ class CurrentTransformer(object):
         self.phase = n
         self.dev.write_register(self.regs[0], v)
 
+        if n >= 0:
+            for ct in self.dev.all_cts:
+                if ct is not self and ct.phase == n:
+                    ct.set_phase(-1)
+
     def identify(self, v):
         self.dev.write_register(Reg_uint16(0x0900 + self.slot), v)
 
