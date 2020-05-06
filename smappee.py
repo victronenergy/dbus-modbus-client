@@ -79,11 +79,12 @@ class CurrentTransformer(object):
         n = self.slot
 
         self.regs = [
-            Reg_uint16(0x1000 + n, '/CT/%d/Phase' % n, write=True),
+            Reg_mapu16(0x1000 + n, '/CT/%d/Phase' % n, CT_PHASE,
+                       write=self.set_phase),
             Reg_uint16(0x1100 + n, '/CT/%d/Type' % n, fmt=CT_TYPES, write=True),
         ]
 
-        self.phase = CT_PHASE.get(self.dev.read_register(self.regs[0]), None)
+        self.phase = self.dev.read_register(self.regs[0])
 
         if self.phase is None:
             log.warn('CT %d configured outside Venus', n)
