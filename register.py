@@ -10,7 +10,7 @@ AGE_LIMITS = {
 }
 
 class Reg(object):
-    def __init__(self, base, count, name=None, write=False):
+    def __init__(self, base, count, name=None, text=None, write=False):
         self.base = base
         self.count = count
         self.name = name
@@ -18,6 +18,10 @@ class Reg(object):
         self.write = write
         self.time = 0
         self.max_age = AGE_LIMITS.get(name, AGE_LIMIT_DEFAULT)
+        if isinstance(text, list):
+            self.text = { i : text[i] for i in range(len(text)) }
+        else:
+            self.text = text
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
@@ -31,6 +35,10 @@ class Reg(object):
         return int(self.value)
 
     def __str__(self):
+        if isinstance(self.text, str):
+            return self.text % self.value
+        if isinstance(self.text, dict) and self.value in self.text:
+            return self.text[self.value]
         return str(self.value)
 
     def isvalid(self):
@@ -46,19 +54,8 @@ class Reg_num(Reg, float):
         return float.__new__(cls)
 
     def __init__(self, base, count, name=None, scale=1, fmt=None, write=False):
-        Reg.__init__(self, base, count, name, write)
+        Reg.__init__(self, base, count, name, fmt, write)
         self.scale = float(scale) if scale != 1 else scale
-        if isinstance(fmt, list):
-            self.fmt = { i : fmt[i] for i in range(len(fmt)) }
-        else:
-            self.fmt = fmt
-
-    def __str__(self):
-        if isinstance(self.fmt, str):
-            return self.fmt % self.value
-        if isinstance(self.fmt, dict) and self.value in self.fmt:
-            return self.fmt[self.value]
-        return str(self.value)
 
     def set_raw_value(self, val):
         return self.update(val / self.scale)
