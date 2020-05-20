@@ -92,7 +92,7 @@ class SerialScanner(Scanner):
 
     def scan_units(self, units):
         mlist = [[self.mode, self.tty, self.rate, u] for u in units]
-        device.probe(mlist, self.progress, 4)
+        device.probe(mlist, self.progress, 4, 1)
 
     def scan(self):
         log.info('Scanning %s (quick)', self.tty)
