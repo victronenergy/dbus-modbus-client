@@ -85,11 +85,18 @@ class SerialScanner(Scanner):
         self.rate = rate
         self.mode = mode
 
-    def scan(self):
-        log.info('Scanning %s', self.tty)
-        units = range(MODBUS_UNIT_MIN, MODBUS_UNIT_MAX + 1)
+    def scan_units(self, units):
         mlist = [[self.mode, self.tty, self.rate, u] for u in units]
         self.devices += device.probe(mlist, self.progress, 4)
+
+    def scan(self):
+        log.info('Scanning %s (quick)', self.tty)
+        units = device.get_units(self.mode)
+        self.scan_units(units)
+
+        log.info('Scanning %s (full)', self.tty)
+        units = range(MODBUS_UNIT_MIN, MODBUS_UNIT_MAX + 1)
+        self.scan_units(units)
 
     def start(self):
         self.total = MODBUS_UNIT_MAX
