@@ -283,4 +283,4 @@ models = {
     },
 }
 
-device.add_handler(device.ModelRegister(0x1620, models))
+device.add_handler(device.ModelRegister(0x1620, models, methods=['rtu']))

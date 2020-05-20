@@ -98,4 +98,4 @@ models = {
     },
 }
 
-device.add_handler(device.ModelRegister(0x000b, models))
+device.add_handler(device.ModelRegister(0x000b, models, methods=['tcp']))

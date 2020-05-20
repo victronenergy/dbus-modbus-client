@@ -253,10 +253,11 @@ class EnergyMeter(ModbusDevice):
     default_instance = 40
 
 class ModelRegister(object):
-    def __init__(self, reg, models, timeout=0.1):
+    def __init__(self, reg, models, timeout=0.1, methods=None):
         self.reg = reg
         self.models = models
         self.timeout = timeout
+        self.methods = methods
 
     def probe(self, modbus, unit):
         with modbus.lock:
@@ -313,6 +314,9 @@ def probe(mlist, progress_cb=None, progress_interval=10):
         unit = int(m[-1])
 
         for t in device_types:
+            if t.methods and m[0] not in t.methods:
+                continue
+
             d = probe_one(t, modbus, unit)
             if d:
                 log.info('Found %s at %s', d.model, d)
