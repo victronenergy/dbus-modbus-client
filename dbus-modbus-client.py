@@ -69,10 +69,12 @@ class Client(object):
         if self.scanner:
             self.scanner.stop()
 
-    def scan_complete(self):
-        self.scan_time = time.time()
+    def scan_update(self):
+        with self.scanner.lock:
+            devices = self.scanner.devices
+            self.scanner.devices = []
 
-        for d in self.scanner.devices:
+        for d in devices:
             if d in self.devices:
                 continue
 
@@ -85,9 +87,11 @@ class Client(object):
 
         self.save_devices()
 
+    def scan_complete(self):
+        self.scan_time = time.time()
+
         if not self.devices and self.err_exit:
             os._exit(1)
-
 
     def set_scan(self, path, val):
         if val:
@@ -185,6 +189,8 @@ class Client(object):
             self.svc['/Scan'] = self.scanner.running
             self.svc['/ScanProgress'] = \
                 100 * self.scanner.done / self.scanner.total
+
+            self.scan_update()
 
             if not self.scanner.running:
                 self.scan_complete()
