@@ -313,6 +313,7 @@ def probe(mlist, progress_cb=None, progress_interval=10):
 
         modbus = make_modbus(m)
         unit = int(m[-1])
+        d = None
 
         for t in device_types:
             if t.methods and m[0] not in t.methods:
@@ -326,12 +327,13 @@ def probe(mlist, progress_cb=None, progress_interval=10):
 
         num_probed += 1
 
-        if progress_cb and num_probed == progress_interval:
-            progress_cb(num_probed)
-            num_probed = 0;
+        if progress_cb:
+            if d or num_probed == progress_interval:
+                progress_cb(num_probed, d)
+                num_probed = 0;
 
     if progress_cb and num_probed:
-        progress_cb(num_probed)
+        progress_cb(num_probed, None)
 
     return found
 

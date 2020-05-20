@@ -19,19 +19,24 @@ class Scanner(object):
         self.running = None
         self.total = None
         self.done = None
+        self.lock = threading.Lock()
 
-    def progress(self, n):
+    def progress(self, n, dev):
         if not self.running:
             raise ScanAborted()
 
         self.done += n
+
+        if dev:
+            with self.lock:
+                self.devices.append(dev)
 
     def run(self):
         self.devices = []
 
         try:
             self.scan()
-            log.info('Scan complete, %d device(s) found', len(self.devices))
+            log.info('Scan complete')
         except ScanAborted:
             log.info('Scan aborted')
         except:
@@ -66,7 +71,7 @@ class NetScanner(Scanner):
             log.info('Scanning %s', net)
             hosts = net.hosts()
             mlist = [[self.proto, str(h), self.port, self.unit] for h in hosts]
-            self.devices += device.probe(mlist, self.progress, 4)
+            device.probe(mlist, self.progress, 4)
 
     def start(self):
         self.nets = get_networks(self.blacklist)
@@ -87,7 +92,7 @@ class SerialScanner(Scanner):
 
     def scan_units(self, units):
         mlist = [[self.mode, self.tty, self.rate, u] for u in units]
-        self.devices += device.probe(mlist, self.progress, 4)
+        device.probe(mlist, self.progress, 4)
 
     def scan(self):
         log.info('Scanning %s (quick)', self.tty)
