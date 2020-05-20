@@ -253,11 +253,12 @@ class EnergyMeter(ModbusDevice):
     default_instance = 40
 
 class ModelRegister(object):
-    def __init__(self, reg, models, timeout=0.1, methods=None):
+    def __init__(self, reg, models, timeout=0.1, methods=None, units=None):
         self.reg = reg
         self.models = models
         self.timeout = timeout
         self.methods = methods
+        self.units = units
 
     def probe(self, modbus, unit):
         with modbus.lock:
@@ -337,6 +338,15 @@ def probe(mlist, progress_cb=None, progress_interval=10):
 def add_handler(devtype):
     if devtype not in device_types:
         device_types.append(devtype)
+
+def get_units(method):
+    u = []
+
+    for t in device_types:
+        if t.units:
+            u += t.units
+
+    return u
 
 __all__ = [
     'EnergyMeter',
