@@ -7,6 +7,7 @@ import gobject
 import os
 import pymodbus.constants
 from settingsdevice import SettingsDevice
+import signal
 import time
 import traceback
 from vedbus import VeDbusService
@@ -237,6 +238,8 @@ def main():
                         level=(logging.DEBUG if args.debug else logging.INFO))
 
     logging.getLogger('pymodbus.client.sync').setLevel(logging.CRITICAL)
+
+    signal.signal(signal.SIGINT, lambda s, f: os._exit(1))
 
     gobject.threads_init()
     dbus.mainloop.glib.threads_init()
