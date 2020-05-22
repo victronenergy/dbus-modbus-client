@@ -286,12 +286,16 @@ def make_modbus(m):
         return lockable(ModbusUdpClient(m[1], int(m[2])))
 
     tty = m[1]
+    rate = int(m[2])
 
     if tty in serial_ports:
-        return serial_ports[tty]
+        client = serial_ports[tty]
+        if client.baudrate == rate:
+            return client
+        client.close()
 
     dev = '/dev/%s' % tty
-    client = lockable(ModbusSerialClient(method, port=dev, baudrate=int(m[2])))
+    client = lockable(ModbusSerialClient(method, port=dev, baudrate=rate))
     serial_ports[tty] = client
 
     # send some harmless messages to the broadcast address to
