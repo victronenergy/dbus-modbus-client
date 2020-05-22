@@ -32,6 +32,8 @@ pymodbus.constants.Defaults.Timeout = 0.5
 MODBUS_TCP_PORT = 502
 MODBUS_TCP_UNIT = 1
 
+MODBUS_RTU_RATES = [19200, 38400, 115200]
+
 MAX_ERRORS = 5
 SCAN_INTERVAL = 600
 UPDATE_INTERVAL = 250
@@ -220,7 +222,7 @@ class SerialClient(Client):
     def __init__(self, tty, rate, mode):
         Client.__init__(self, tty)
         self.tty = tty
-        self.rate = rate
+        self.rate = rate or MODBUS_RTU_RATES
         self.mode = mode
         self.auto_scan = True
         self.keep_failed = False
@@ -234,7 +236,7 @@ def main():
                         action='store_true')
     parser.add_argument('-f', '--force-scan', action='store_true')
     parser.add_argument('-m', '--mode', choices=['ascii', 'rtu'], default='rtu')
-    parser.add_argument('-r', '--rate', type=int, default=115200)
+    parser.add_argument('-r', '--rate', type=int, default=None)
     parser.add_argument('-s', '--serial')
     parser.add_argument('-x', '--exit', action='store_true',
                         help='exit on error')
