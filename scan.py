@@ -84,26 +84,34 @@ class NetScanner(Scanner):
         return Scanner.start(self)
 
 class SerialScanner(Scanner):
-    def __init__(self, tty, rate, mode):
+    def __init__(self, tty, rates, mode):
         Scanner.__init__(self)
         self.tty = tty
-        self.rate = rate
+        self.rates = rates if isinstance(rates, list) else [rates]
         self.mode = mode
 
-    def scan_units(self, units):
-        mlist = [[self.mode, self.tty, self.rate, u] for u in units]
+    def scan_units(self, units, rate):
+        mlist = [[self.mode, self.tty, rate, u] for u in units]
         return device.probe(mlist, self.progress, 4, 1)
 
     def scan(self):
-        log.info('Scanning %s (quick)', self.tty)
         units = device.get_units(self.mode)
-        found = self.scan_units(units)
+        rates = self.rates
 
-        log.info('Scanning %s (full)', self.tty)
+        for r in rates:
+            log.info('Scanning %s @ %d bps (quick)', self.tty, r)
+            found = self.scan_units(units, r)
+            if found:
+                rates = [r]
+                break
+
         units = range(MODBUS_UNIT_MIN, MODBUS_UNIT_MAX + 1)
         for d in found:
             units.remove(d.unit)
-        self.scan_units(units)
+
+        for r in rates:
+            log.info('Scanning %s @ %d bps (full)', self.tty, r)
+            self.scan_units(units, r)
 
     def start(self):
         self.total = MODBUS_UNIT_MAX
