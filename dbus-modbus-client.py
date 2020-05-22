@@ -29,8 +29,8 @@ __all__ = ['NAME', 'VERSION']
 
 pymodbus.constants.Defaults.Timeout = 0.5
 
-MODBUS_PORT = 502
-MODBUS_UNIT = 1
+MODBUS_TCP_PORT = 502
+MODBUS_TCP_UNIT = 1
 
 MAX_ERRORS = 5
 SCAN_INTERVAL = 600
@@ -207,7 +207,8 @@ class NetClient(Client):
         self.proto = proto
 
     def new_scanner(self):
-        return NetScanner(self.proto, MODBUS_PORT, MODBUS_UNIT, if_blacklist)
+        return NetScanner(self.proto, MODBUS_TCP_PORT, MODBUS_TCP_UNIT,
+                          if_blacklist)
 
 class SerialClient(Client):
     def __init__(self, tty, rate, mode):
