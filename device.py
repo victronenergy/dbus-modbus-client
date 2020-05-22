@@ -2,9 +2,11 @@ from copy import copy
 import dbus
 from functools import partial
 from pymodbus.client.sync import *
+from pymodbus.utilities import computeCRC
 from pymodbus.pdu import ExceptionResponse
 import logging
 import os
+import struct
 import time
 import threading
 
@@ -291,6 +293,17 @@ def make_modbus(m):
     dev = '/dev/%s' % tty
     client = lockable(ModbusSerialClient(method, port=dev, baudrate=int(m[2])))
     serial_ports[tty] = client
+
+    # send some harmless messages to the broadcast address to
+    # let rate detection in devices adapt
+    packet = bytes([0x00, 0x08, 0x00, 0x00, 0x55, 0x55])
+    packet += struct.pack('>H', computeCRC(packet))
+
+    client.connect()
+
+    for i in range(12):
+        client.socket.write(packet)
+        time.sleep(0.1)
 
     return client
 
