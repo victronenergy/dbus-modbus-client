@@ -213,6 +213,14 @@ class ModbusDevice(object):
 
         return False
 
+    def dbus_add_register(self, r):
+        v = r if r.isvalid() else None
+        if r.write:
+            cb = partial(self.dbus_write_register, r)
+            self.dbus.add_path(r.name, v, writeable=True, onchangecallback=cb)
+        else:
+            self.dbus.add_path(r.name, v)
+
     def pack_regs(self, regs):
         rr = []
         for r in regs:
@@ -279,16 +287,11 @@ class ModbusDevice(object):
                                onchangecallback=self.position_changed)
 
         for p in self.info:
-            r = self.info[p]
-            if r.write:
-                cb = partial(self.dbus_write_register, r)
-                self.dbus.add_path(p, r, writeable=True, onchangecallback=cb)
-            else:
-                self.dbus.add_path(p, r)
+            self.dbus_add_register(self.info[p])
 
         for r in self.data_regs:
             for rr in r:
-                self.dbus.add_path(rr.name, None)
+                self.dbus_add_register(rr)
 
         self.device_init_late()
 
