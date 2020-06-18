@@ -1,4 +1,5 @@
 import struct
+from utils import get_enum
 
 AGE_LIMIT_DEFAULT = 4
 
@@ -102,6 +103,19 @@ class Reg_f32l(Reg_num):
     def __init__(self, base, *args, **kwargs):
         super(Reg_f32l, self).__init__(base, 2, *args, **kwargs)
         self.coding = ('<f', '<2H')
+
+class Reg_e16(Reg, int):
+    def __init__(self, base, name, enum, *args, **kwargs):
+        super(Reg_e16, self).__init__(base, 1, name, *args, **kwargs)
+        self.enum = enum
+        if self.write == True:
+            self.write = [m.value for m in enum]
+
+    def decode(self, values):
+        return self.update(get_enum(self.enum, values[0]))
+
+    def encode(self):
+        return self.value
 
 class Reg_text(Reg, str):
     def decode(self, values):
