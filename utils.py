@@ -64,3 +64,20 @@ def get_networks(blacklist):
         pass
 
     return nets
+
+def get_enum(enum, val, default=None):
+    '''Get enum for value
+
+    Return the enum matching a given value or a default.
+
+    :param enum: the enum class
+    :param val: the value to match
+    :param default: default value
+    :returns: enum value matching supplied value, if any, else default
+    '''
+
+    if any(val == m.value for m in enum):
+        return enum(val)
+    elif default != None:
+        return default
+    return val
