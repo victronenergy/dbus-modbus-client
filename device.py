@@ -256,13 +256,16 @@ class ModbusDevice(object):
         self.dbus.add_path('/ProductName', self.productname)
         self.dbus.add_path('/Model', self.model)
         self.dbus.add_path('/Connected', 1)
-        self.dbus.add_path('/AllowedRoles', self.allowed_roles)
-
         self.dbus.add_path('/CustomName', self.get_customname(),
                            writeable=True,
                            onchangecallback=self.customname_changed)
-        self.dbus.add_path('/Role', self.role, writeable=True,
-                           onchangecallback=self.role_changed);
+
+        if self.allowed_roles:
+            self.dbus.add_path('/AllowedRoles', self.allowed_roles)
+            self.dbus.add_path('/Role', self.role, writeable=True,
+                               onchangecallback=self.role_changed)
+        else:
+            self.dbus.add_path('/Role', self.role)
 
         if self.role == 'pvinverter':
             self.dbus.add_path('/Position', self.settings['position'],
