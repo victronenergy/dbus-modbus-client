@@ -68,15 +68,35 @@ class Reg_num(Reg, float):
         v = int(self.value * self.scale)
         return struct.unpack(self.coding[1], struct.pack(self.coding[0], v))
 
+class Reg_s16(Reg_num):
+    def __init__(self, base, *args, **kwargs):
+        super(Reg_s16, self).__init__(base, 1, *args, **kwargs)
+        self.coding = ('h', 'H')
+
 class Reg_u16(Reg_num):
     def __init__(self, base, *args, **kwargs):
         super(Reg_u16, self).__init__(base, 1, *args, **kwargs)
         self.coding = ('H', 'H')
 
+class Reg_s32b(Reg_num):
+    def __init__(self, base, *args, **kwargs):
+        super(Reg_s32b, self).__init__(base, 2, *args, **kwargs)
+        self.coding = ('>i', '>2H')
+
+class Reg_u32b(Reg_num):
+    def __init__(self, base, *args, **kwargs):
+        super(Reg_u32b, self).__init__(base, 2, *args, **kwargs)
+        self.coding = ('>I', '>2H')
+
 class Reg_s32l(Reg_num):
     def __init__(self, base, *args, **kwargs):
         super(Reg_s32l, self).__init__(base, 2, *args, **kwargs)
         self.coding = ('<i', '<2H')
+
+class Reg_u32l(Reg_num):
+    def __init__(self, base, *args, **kwargs):
+        super(Reg_u32l, self).__init__(base, 2, *args, **kwargs)
+        self.coding = ('<I', '<2H')
 
 class Reg_f32l(Reg_num):
     def __init__(self, base, *args, **kwargs):
