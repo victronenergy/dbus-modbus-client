@@ -118,8 +118,12 @@ class Reg_e16(Reg, int):
         return self.value
 
 class Reg_text(Reg, str):
+    def __init__(self, base, count, name, little=False, *args, **kwargs):
+        super(Reg_text, self).__init__(base, count, name, *args, **kwargs)
+        self.pfmt = '%c%dH' % (['>', '<'][little], count)
+
     def decode(self, values):
-        newval = struct.pack('>%dH' % len(values), *values).rstrip('\0')
+        newval = struct.pack(self.pfmt, *values).rstrip('\0')
         return self.update(newval)
 
 class Reg_map(Reg):
