@@ -19,6 +19,7 @@ from scan import *
 from utils import *
 
 import carlo_gavazzi
+import ev_charger
 import smappee
 
 import logging
