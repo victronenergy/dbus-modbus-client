@@ -60,41 +60,28 @@ class Reg_num(Reg, float):
     def set_raw_value(self, val):
         return self.update(val / self.scale)
 
-class Reg_uint16(Reg_num):
-    def __init__(self, base, *args, **kwargs):
-        super(Reg_uint16, self).__init__(base, 1, *args, **kwargs)
-
     def decode(self, values):
-        if values[0] == 0x7ffff:
-            return self.update(None)
-
-        return self.set_raw_value(values[0])
-
-    def encode(self):
-        return int(self.value * self.scale)
-
-class Reg_int32(Reg_num):
-    def __init__(self, base, *args, **kwargs):
-        super(Reg_int32, self).__init__(base, 2, *args, **kwargs)
-
-    def decode(self, values):
-        if values[1] == 0x7ffff:
-            return self.update(None)
-
-        v = struct.unpack('<i', struct.pack('<2H', *values))[0]
-        return self.set_raw_value(v)
+        v = struct.unpack(self.coding[0], struct.pack(self.coding[1], *values))
+        return self.set_raw_value(v[0])
 
     def encode(self):
         v = int(self.value * self.scale)
-        return struct.unpack('<2H', struct.pack('<i', v))
+        return struct.unpack(self.coding[1], struct.pack(self.coding[0], v))
 
-class Reg_float(Reg_num):
+class Reg_u16(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_float, self).__init__(base, 2, *args, **kwargs)
+        super(Reg_u16, self).__init__(base, 1, *args, **kwargs)
+        self.coding = ('H', 'H')
 
-    def decode(self, values):
-        v = struct.unpack('<f', struct.pack('<2H', *values))[0]
-        return self.set_raw_value(v)
+class Reg_s32l(Reg_num):
+    def __init__(self, base, *args, **kwargs):
+        super(Reg_s32l, self).__init__(base, 2, *args, **kwargs)
+        self.coding = ('<i', '<2H')
+
+class Reg_f32l(Reg_num):
+    def __init__(self, base, *args, **kwargs):
+        super(Reg_f32l, self).__init__(base, 2, *args, **kwargs)
+        self.coding = ('<f', '<2H')
 
 class Reg_text(Reg, str):
     def decode(self, values):
@@ -116,5 +103,5 @@ class Reg_map(Reg):
 class Reg_mapstr(Reg_map, Reg_text):
     pass
 
-class Reg_mapu16(Reg_map, Reg_uint16):
+class Reg_mapu16(Reg_map, Reg_u16):
     pass

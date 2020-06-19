@@ -42,10 +42,10 @@ class EM24_Meter(device.EnergyMeter):
     def phase_regs(self, n):
         s = 2 * (n - 1)
         return [
-            Reg_int32(0x0000 + s, '/Ac/L%d/Voltage' % n,        10, '%.1f V'),
-            Reg_int32(0x000c + s, '/Ac/L%d/Current' % n,      1000, '%.1f A'),
-            Reg_int32(0x0012 + s, '/Ac/L%d/Power' % n,          10, '%.1f W'),
-            Reg_int32(0x0040 + s, '/Ac/L%d/Energy/Forward' % n, 10, '%.1f kWh'),
+            Reg_s32l(0x0000 + s, '/Ac/L%d/Voltage' % n,        10, '%.1f V'),
+            Reg_s32l(0x000c + s, '/Ac/L%d/Current' % n,      1000, '%.1f A'),
+            Reg_s32l(0x0012 + s, '/Ac/L%d/Power' % n,          10, '%.1f W'),
+            Reg_s32l(0x0040 + s, '/Ac/L%d/Energy/Forward' % n, 10, '%.1f kWh'),
         ]
 
     def device_init(self):
@@ -54,10 +54,10 @@ class EM24_Meter(device.EnergyMeter):
         phases = int(self.info['/Phases'])
 
         regs = [
-            Reg_int32( 0x0028, '/Ac/Power',          10, '%.1f W'),
-            Reg_uint16(0x0033, '/Ac/Frequency',      10, '%.1f Hz'),
-            Reg_int32( 0x0034, '/Ac/Energy/Forward', 10, '%.1f kWh'),
-            Reg_int32( 0x004e, '/Ac/Energy/Reverse', 10, '%.1f kWh'),
+            Reg_s32l(0x0028, '/Ac/Power',          10, '%.1f W'),
+            Reg_u16( 0x0033, '/Ac/Frequency',      10, '%.1f Hz'),
+            Reg_s32l(0x0034, '/Ac/Energy/Forward', 10, '%.1f kWh'),
+            Reg_s32l(0x004e, '/Ac/Energy/Reverse', 10, '%.1f kWh'),
         ]
 
         for n in range(1, phases + 1):
