@@ -60,9 +60,6 @@ class Reg_ser(Reg_text):
         return self.update(v)
 
 class Reg_ver(Reg, int):
-    def __new__(cls, *args):
-        return int.__new__(cls)
-
     def __init__(self, base, *args):
         Reg.__init__(self, base, 2, *args)
 

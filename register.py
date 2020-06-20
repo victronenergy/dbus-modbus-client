@@ -10,6 +10,9 @@ AGE_LIMITS = {
 }
 
 class Reg(object):
+    def __new__(cls, *args, **kwargs):
+        return super(Reg, cls).__new__(cls)
+
     def __init__(self, base, count, name=None, text=None, write=False):
         self.base = base
         self.count = count
@@ -50,9 +53,6 @@ class Reg(object):
         return newval != old
 
 class Reg_num(Reg, float):
-    def __new__(cls, *args, **kwargs):
-        return float.__new__(cls)
-
     def __init__(self, base, count, name=None, scale=1, fmt=None, write=False):
         Reg.__init__(self, base, count, name, fmt, write)
         self.scale = float(scale) if scale != 1 else scale
@@ -97,9 +97,6 @@ class Reg_float(Reg_num):
         return self.set_raw_value(v)
 
 class Reg_text(Reg, str):
-    def __new__(cls, *args):
-        return str.__new__(cls)
-
     def decode(self, values):
         newval = struct.pack('>%dH' % len(values), *values).rstrip('\0')
         return self.update(newval)

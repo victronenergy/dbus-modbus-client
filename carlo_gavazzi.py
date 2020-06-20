@@ -3,9 +3,6 @@ import probe
 from register import *
 
 class Reg_ver(Reg, int):
-    def __new__(cls, *args):
-        return int.__new__(cls)
-
     def __init__(self, base, name):
         Reg.__init__(self, base, 1, name)
 
