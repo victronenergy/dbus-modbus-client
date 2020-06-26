@@ -120,9 +120,8 @@ class SerialScanner(Scanner):
         if not self.full:
             return
 
-        units = range(MODBUS_UNIT_MIN, MODBUS_UNIT_MAX + 1)
-        for d in found:
-            units.remove(d.unit)
+        units = set(range(MODBUS_UNIT_MIN, MODBUS_UNIT_MAX + 1)) - \
+            set(d.unit for d in found)
 
         for r in rates:
             log.info('Scanning %s @ %d bps (full)', self.tty, r)
