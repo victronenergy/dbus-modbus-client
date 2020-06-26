@@ -188,7 +188,7 @@ class ModbusDevice(object):
         return True
 
     def position_changed(self, path, val):
-        if val not in range(3):
+        if not 0 <= val <= 2:
             return False
 
         self.settings['position'] = val
