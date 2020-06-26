@@ -215,7 +215,7 @@ class PowerBox(device.EnergyMeter):
         ]
 
         # reset CT slot mapping
-        self.write_modbus(0x1140, range(MAX_CT_SLOTS))
+        self.write_modbus(0x1140, list(range(MAX_CT_SLOTS)))
 
         self.all_cts = []
         self.ct_phase = [[], [], []]
