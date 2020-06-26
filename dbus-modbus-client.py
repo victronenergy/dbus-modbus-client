@@ -1,9 +1,8 @@
-#! /usr/bin/python -u
+#! /usr/bin/python3 -u
 
 from argparse import ArgumentParser
 import dbus
 import dbus.mainloop.glib
-import gobject
 import os
 import pymodbus.constants
 from settingsdevice import SettingsDevice
@@ -11,6 +10,7 @@ import signal
 import time
 import traceback
 from vedbus import VeDbusService
+from gi.repository import GLib
 
 import device
 import mdns
@@ -303,10 +303,9 @@ def main():
 
     signal.signal(signal.SIGINT, lambda s, f: os._exit(1))
 
-    gobject.threads_init()
     dbus.mainloop.glib.threads_init()
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-    mainloop = gobject.MainLoop()
+    mainloop = GLib.MainLoop()
 
     if args.serial:
         tty = os.path.basename(args.serial)
@@ -317,7 +316,7 @@ def main():
     client.err_exit = args.exit
     client.init(args.force_scan)
 
-    gobject.timeout_add(UPDATE_INTERVAL, client.update_timer)
+    GLib.timeout_add(UPDATE_INTERVAL, client.update_timer)
     mainloop.run()
 
 if __name__ == '__main__':
