@@ -70,7 +70,7 @@ class NetScanner(Scanner):
     def scan(self):
         for net in self.nets:
             log.info('Scanning %s', net)
-            hosts = net.hosts()
+            hosts = filter(net.ip.__ne__, net.network.hosts())
             mlist = [[self.proto, str(h), self.port, self.unit] for h in hosts]
             probe.probe(mlist, self.progress, 4)
 
@@ -80,7 +80,7 @@ class NetScanner(Scanner):
             log.warn('Unable to get network addresses')
             return False
 
-        self.total = sum([n.num_addresses - 2 for n in self.nets])
+        self.total = sum([n.network.num_addresses - 3 for n in self.nets])
 
         return Scanner.start(self)
 

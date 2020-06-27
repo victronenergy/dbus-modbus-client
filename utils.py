@@ -42,12 +42,11 @@ class timeout(object):
 def get_networks(blacklist):
     '''Get IPv4 networks of host
 
-    Return a list of IPv4Network objects corresponding to active
+    Return a list of IPv4Interface objects corresponding to active
     network interfaces with a global scope address.
 
     :param blacklist: list of interface names to ignore
-    :returns: list of IPv4Network objects
-
+    :returns: list of IPv4Interface objects
     '''
 
     nets = []
@@ -59,7 +58,7 @@ def get_networks(blacklist):
                 if v[0] in blacklist:
                     continue
 
-                net = ipaddress.IPv4Network(u'' + v[2], strict=False)
+                net = ipaddress.IPv4Interface(u'' + v[2])
                 nets.append(net)
     except:
         pass
