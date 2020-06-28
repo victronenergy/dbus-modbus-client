@@ -209,6 +209,14 @@ class ModbusDevice(object):
             if callable(reg.write):
                 return reg.write(val)
 
+            if isinstance(reg.write, list):
+                if val not in reg.write:
+                    return False
+
+            if isinstance(reg.write, tuple):
+                if not reg.write[0] <= val <= reg.write[1]:
+                    return False
+
             self.write_register(reg, val)
             return True
         except:
