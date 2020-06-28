@@ -81,3 +81,9 @@ def get_enum(enum, val, default=None):
     elif default != None:
         return default
     return val
+
+def get_super(base, t):
+    if not isinstance(t, type):
+        t = type(t)
+
+    return t.__mro__[t.__mro__.index(base) + 1]
