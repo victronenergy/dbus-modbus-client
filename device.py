@@ -12,6 +12,7 @@ from settingsdevice import SettingsDevice
 from vedbus import VeDbusService
 
 import __main__
+from register import Reg
 from utils import *
 
 log = logging.getLogger()
@@ -203,6 +204,8 @@ class ModbusDevice(object):
 
     def dbus_write_register(self, reg, path, val):
         try:
+            val = get_super(Reg, reg)(val)
+
             if callable(reg.write):
                 return reg.write(val)
 
