@@ -36,6 +36,7 @@ MODBUS_TCP_UNIT = 1
 MODBUS_RTU_RATES = [19200, 38400, 115200]
 
 MAX_ERRORS = 5
+FAILED_INTERVAL = 10
 SCAN_INTERVAL = 600
 UPDATE_INTERVAL = 250
 
@@ -51,6 +52,7 @@ class Client(object):
         self.name = name
         self.devices = []
         self.failed = []
+        self.failed_time = 0
         self.scanner = None
         self.scan_time = time.time()
         self.auto_scan = False
@@ -203,11 +205,16 @@ class Client(object):
         for d in self.devices:
             self.update_device(d)
 
-        self.init_devices(self.failed)
+        if self.failed:
+            now = time.time()
 
-        if self.failed and self.settings['autoscan']:
-            if time.time() - self.scan_time > SCAN_INTERVAL:
-                self.start_scan()
+            if now - self.failed_time > FAILED_INTERVAL:
+                self.init_devices(self.failed)
+                self.failed_time = now
+
+            if self.settings['autoscan']:
+                if now - self.scan_time > SCAN_INTERVAL:
+                    self.start_scan()
 
         return True
 
