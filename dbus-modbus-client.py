@@ -168,7 +168,7 @@ class Client(object):
         self.svc = VeDbusService(svcname, private_bus())
         self.svc.add_path('/Scan', False, writeable=True,
                           onchangecallback=self.set_scan)
-        self.svc.add_path('/ScanProgress', 0, gettextcallback=percent)
+        self.svc.add_path('/ScanProgress', None, gettextcallback=percent)
 
         log.info('Waiting for localsettings')
         self.settings = SettingsDevice(self.svc.dbusconn, SETTINGS,
@@ -198,6 +198,7 @@ class Client(object):
             if not self.scanner.running:
                 self.scan_complete()
                 self.scanner = None
+                self.svc['/ScanProgress'] = None
 
         for d in self.devices:
             self.update_device(d)
