@@ -73,6 +73,11 @@ class ModbusDevice(object):
         with self.modbus.lock:
             rr = self.modbus.read_holding_registers(reg.base, reg.count,
                                                     unit=self.unit)
+
+        if not isinstance(rr, ReadHoldingRegistersResponse):
+            log.error('Error reading register %#04x: %s', reg.base, rr)
+            raise Exception(rr)
+
         reg.decode(rr.registers)
         return reg.value
 
@@ -104,7 +109,7 @@ class ModbusDevice(object):
 
         if isinstance(rr, ExceptionResponse):
             log.error('Error reading registers %#04x-%#04x: %s',
-                      regs[0].base, regs[-1].base, rr)
+                      start, start + count - 1, rr)
             raise Exception(rr)
 
         for reg in regs:
