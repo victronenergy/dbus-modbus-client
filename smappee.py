@@ -239,10 +239,6 @@ class PowerBox(device.EnergyMeter):
                 ct = self.ct_phase[n][0]
                 self.add_phase(n, ct)
 
-        self.current_regs.sort(key=lambda r: r.base)
-        self.power_regs.sort(key=lambda r: r.base)
-        self.energy_regs.sort(key=lambda r: r.base)
-
         self.data_regs += [
             self.voltage_regs,
             self.current_regs,

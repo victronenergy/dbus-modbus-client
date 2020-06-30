@@ -206,11 +206,41 @@ class ModbusDevice(object):
 
         return False
 
+    def pack_regs(self, regs):
+        rr = []
+        for r in regs:
+            rr += r if isinstance(r, list) else [r]
+        rr.sort(key=lambda r: r.base)
+
+        overhead = 5 + 2                # request + response
+        if self.method == 'tcp':
+            overhead += 2 * (20 + 7)    # TCP + MBAP
+        elif self.method == 'rtu':
+            overhead += 2 * (1 + 2)     # address + crc
+
+        regs = []
+        rg = [rr.pop(0)]
+
+        for r in rr:
+            end = rg[-1].base + rg[-1].count
+            nr = r.base + r.count - rg[0].base
+            if nr > 125 or 2 * (r.base - end) > overhead:
+                regs.append(rg)
+                rg = []
+
+            rg.append(r)
+
+        if rg:
+            regs.append(rg)
+
+        return regs
+
     def init(self, dbus):
         self.device_init()
         self.read_info()
         self.init_device_settings(dbus)
 
+        self.data_regs = self.pack_regs(self.data_regs)
         self.role, devinstance = self.get_role_instance()
         ident = self.get_ident()
 
@@ -247,7 +277,7 @@ class ModbusDevice(object):
                 self.dbus.add_path(p, r)
 
         for r in self.data_regs:
-            for rr in r if isinstance(r, list) else [r]:
+            for rr in r:
                 self.dbus.add_path(rr.name, None)
 
         self.device_init_late()
@@ -260,7 +290,7 @@ class ModbusDevice(object):
 
     def update(self):
         for r in self.data_regs:
-            self.read_data_regs(r if isinstance(r, list) else [r], self.dbus)
+            self.read_data_regs(r, self.dbus)
 
 class EnergyMeter(ModbusDevice):
     allowed_roles = ['grid', 'pvinverter', 'genset']

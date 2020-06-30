@@ -65,8 +65,7 @@ class EM24_Meter(device.EnergyMeter):
         for n in range(1, phases + 1):
             regs += self.phase_regs(n)
 
-        regs.sort(key=lambda r: r.base)
-        self.data_regs = [regs]
+        self.data_regs = regs
 
     def get_ident(self):
         return 'cg_%s' % self.info['/Serial']
