@@ -33,7 +33,7 @@ class EM24_Meter(device.EnergyMeter):
     productname = 'Carlo Gavazzi EM24 Ethernet Energy Meter'
 
     def __init__(self, *args):
-        device.ModbusDevice.__init__(self, *args)
+        super(EM24_Meter, self).__init__(*args)
 
         self.info_regs = [
             Reg_ver(   0x0302,    '/HardwareVersion'),
