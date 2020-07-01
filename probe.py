@@ -62,7 +62,7 @@ def probe_one(devtype, modbus, unit):
     except:
         pass
 
-def probe(mlist, pr_cb=None, pr_interval=10, delay=0):
+def probe(mlist, pr_cb=None, pr_interval=10):
     num_probed = 0
     found = []
 
@@ -94,8 +94,6 @@ def probe(mlist, pr_cb=None, pr_interval=10, delay=0):
             if d or num_probed == pr_interval:
                 pr_cb(num_probed, d)
                 num_probed = 0
-
-        time.sleep(delay)
 
     if pr_cb and num_probed:
         pr_cb(num_probed, None)
