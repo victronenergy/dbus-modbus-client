@@ -2,6 +2,7 @@ from functools import partial
 import logging
 
 import device
+import probe
 from register import *
 
 log = logging.getLogger()
@@ -279,7 +280,6 @@ models = {
     },
 }
 
-device.add_handler(device.ModelRegister(0x1620,
-                                        models,
-                                        methods=['rtu'],
-                                        units=[61]))
+probe.add_handler(probe.ModelRegister(0x1620, models,
+                                      methods=['rtu'],
+                                      units=[61]))

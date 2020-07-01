@@ -13,6 +13,7 @@ import traceback
 from vedbus import VeDbusService
 
 import device
+import probe
 from scan import *
 from utils import *
 
@@ -117,7 +118,7 @@ class Client(object):
                 dev.__del__()
 
     def init_devices(self, devlist):
-        devs = device.probe(devlist)
+        devs = probe.probe(devlist)
 
         for d in devs:
             try:

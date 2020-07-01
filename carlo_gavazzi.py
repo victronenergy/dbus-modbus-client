@@ -1,4 +1,5 @@
 import device
+import probe
 from register import *
 
 class Reg_ver(Reg, int):
@@ -97,4 +98,4 @@ models = {
     },
 }
 
-device.add_handler(device.ModelRegister(0x000b, models, methods=['tcp']))
+probe.add_handler(probe.ModelRegister(0x000b, models, methods=['tcp']))

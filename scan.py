@@ -4,6 +4,7 @@ import traceback
 
 from utils import *
 import device
+import probe
 
 log = logging.getLogger()
 
@@ -71,7 +72,7 @@ class NetScanner(Scanner):
             log.info('Scanning %s', net)
             hosts = net.hosts()
             mlist = [[self.proto, str(h), self.port, self.unit] for h in hosts]
-            device.probe(mlist, self.progress, 4)
+            probe.probe(mlist, self.progress, 4)
 
     def start(self):
         self.nets = get_networks(self.blacklist)
@@ -92,10 +93,10 @@ class SerialScanner(Scanner):
 
     def scan_units(self, units, rate):
         mlist = [[self.mode, self.tty, rate, u] for u in units]
-        return device.probe(mlist, self.progress, 4, 1)
+        return probe.probe(mlist, self.progress, 4, 1)
 
     def scan(self):
-        units = device.get_units(self.mode)
+        units = probe.get_units(self.mode)
         rates = self.rates
 
         for r in rates:
