@@ -1,5 +1,6 @@
 import threading
 import logging
+import time
 import traceback
 
 from utils import *
@@ -21,6 +22,7 @@ class Scanner(object):
         self.total = None
         self.done = None
         self.lock = threading.Lock()
+        self.num_found = 0
 
     def progress(self, n, dev):
         if not self.running:
@@ -29,6 +31,7 @@ class Scanner(object):
         self.done += n
 
         if dev:
+            self.num_found += 1
             with self.lock:
                 self.devices.append(dev)
 
@@ -91,9 +94,14 @@ class SerialScanner(Scanner):
         self.rates = rates if isinstance(rates, list) else [rates]
         self.mode = mode
 
+    def progress(self, n, dev):
+        super(SerialScanner, self).progress(n, dev)
+        if self.num_found:
+            time.sleep(1)
+
     def scan_units(self, units, rate):
         mlist = [[self.mode, self.tty, rate, u] for u in units]
-        return probe.probe(mlist, self.progress, 4, 1)
+        return probe.probe(mlist, self.progress, 1)
 
     def scan(self):
         units = probe.get_units(self.mode)
