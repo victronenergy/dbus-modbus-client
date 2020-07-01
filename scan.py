@@ -63,19 +63,20 @@ class Scanner(object):
         self.running = False
 
 class NetScanner(Scanner):
-    def __init__(self, proto, port, unit, blacklist):
+    def __init__(self, proto, port, unit, blacklist, timeout=0.25):
         Scanner.__init__(self)
         self.proto = proto
         self.port = port
         self.unit = unit
         self.blacklist = blacklist
+        self.timeout = timeout
 
     def scan(self):
         for net in self.nets:
             log.info('Scanning %s', net)
             hosts = filter(net.ip.__ne__, net.network.hosts())
             mlist = [[self.proto, str(h), self.port, self.unit] for h in hosts]
-            probe.probe(mlist, self.progress, 4)
+            probe.probe(mlist, self.progress, 4, timeout=self.timeout)
 
     def start(self):
         self.nets = get_networks(self.blacklist)
@@ -88,11 +89,12 @@ class NetScanner(Scanner):
         return Scanner.start(self)
 
 class SerialScanner(Scanner):
-    def __init__(self, tty, rates, mode):
+    def __init__(self, tty, rates, mode, timeout=0.1):
         Scanner.__init__(self)
         self.tty = tty
         self.rates = rates if isinstance(rates, list) else [rates]
         self.mode = mode
+        self.timeout = timeout
 
     def progress(self, n, dev):
         super(SerialScanner, self).progress(n, dev)
@@ -101,7 +103,7 @@ class SerialScanner(Scanner):
 
     def scan_units(self, units, rate):
         mlist = [[self.mode, self.tty, rate, u] for u in units]
-        return probe.probe(mlist, self.progress, 1)
+        return probe.probe(mlist, self.progress, 1, timeout=self.timeout)
 
     def scan(self):
         units = probe.get_units(self.mode)
