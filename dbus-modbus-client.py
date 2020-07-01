@@ -245,7 +245,7 @@ def main():
                         action='store_true')
     parser.add_argument('-f', '--force-scan', action='store_true')
     parser.add_argument('-m', '--mode', choices=['ascii', 'rtu'], default='rtu')
-    parser.add_argument('-r', '--rate', type=int, default=None)
+    parser.add_argument('-r', '--rate', type=int, action='append')
     parser.add_argument('-s', '--serial')
     parser.add_argument('-x', '--exit', action='store_true',
                         help='exit on error')
