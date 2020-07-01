@@ -104,22 +104,29 @@ def add_handler(devtype):
     if devtype not in device_types:
         device_types.append(devtype)
 
-def get_units(method):
-    u = []
+def get_attrs(attr, method):
+    a = []
 
     for t in device_types:
-        if method in t.methods and t.units:
-            u += t.units
+        if method in t.methods:
+            a += getattr(t, attr, [])
 
-    return set(u)
+    return set(a)
+
+def get_units(method):
+    return get_attrs('units', method)
+
+def get_rates(method):
+    return get_attrs('rates', method)
 
 class ModelRegister(object):
-    def __init__(self, reg, models, timeout=0.1, methods=None, units=None):
+    def __init__(self, reg, models, **args):
         self.reg = reg
         self.models = models
-        self.timeout = timeout
-        self.methods = methods
-        self.units = units
+        self.timeout = args.get('timeout', 1)
+        self.methods = args.get('methods', [])
+        self.units = args.get('units', [])
+        self.rates = args.get('rates', [])
 
     def probe(self, modbus, unit, timeout=None):
         with modbus.lock:
