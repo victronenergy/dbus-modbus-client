@@ -27,6 +27,7 @@ class ModbusDevice(object):
         self.dbus = None
         self.settings = None
         self.err_count = 0
+        self.latency = modbus.timeout
 
     def destroy(self):
         self.info = {}
@@ -111,6 +112,8 @@ class ModbusDevice(object):
             rr = self.modbus.read_holding_registers(start, count,
                                                     unit=self.unit)
 
+        latency = time.time() - now
+
         if not isinstance(rr, ReadHoldingRegistersResponse):
             log.error('Error reading registers %#04x-%#04x: %s',
                       start, start + count - 1, rr)
@@ -124,6 +127,8 @@ class ModbusDevice(object):
                 if reg.decode(rr.registers[base:end]):
                     d[reg.name] = copy(reg) if reg.isvalid() else None
                 reg.time = now
+
+        return latency
 
     def read_info(self):
         if not self.info:
@@ -284,6 +289,7 @@ class ModbusDevice(object):
         self.dbus.add_path('/CustomName', self.get_customname(),
                            writeable=True,
                            onchangecallback=self.customname_changed)
+        self.dbus.add_path('/Latency', None)
 
         if self.allowed_roles:
             self.dbus.add_path('/AllowedRoles', self.allowed_roles)
@@ -313,8 +319,18 @@ class ModbusDevice(object):
         pass
 
     def update(self):
+        latency = []
+
         for r in self.data_regs:
-            self.read_data_regs(r, self.dbus)
+            t = self.read_data_regs(r, self.dbus)
+            if t:
+                latency.append(t)
+
+        if latency:
+            latency = sum(latency) / len(latency)
+            self.latency = 0.875 * self.latency + 0.125 * latency
+            self.modbus.timeout = self.latency * 4
+            self.dbus['/Latency'] = round(self.latency * 1000)
 
 class EnergyMeter(ModbusDevice):
     allowed_roles = ['grid', 'pvinverter', 'genset']

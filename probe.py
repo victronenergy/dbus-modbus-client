@@ -81,10 +81,14 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
             if t.methods and m[0] not in t.methods:
                 continue
 
+            t0 = time.time()
             d = probe_one(t, modbus, unit, timeout)
+            t1 = time.time()
+
             if d:
                 log.info('Found %s at %s', d.model, d)
                 d.method = m[0]
+                d.latency = t1 - t0
                 found.append(d)
                 break
 
