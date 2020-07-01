@@ -31,6 +31,9 @@ class ModbusDevice(object):
     def __del__(self):
         if self.dbus:
             self.dbus.__del__()
+            self.dbus = None
+            self.settings._settings = None
+            self.settings = None
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
