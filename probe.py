@@ -8,7 +8,7 @@ from pymodbus.client.sync import *
 from pymodbus.register_read_message import ReadHoldingRegistersResponse
 from pymodbus.utilities import computeCRC
 
-from utils import *
+import utils
 
 log = logging.getLogger()
 
@@ -56,13 +56,13 @@ def make_modbus(m):
 
     return client
 
-def probe_one(devtype, modbus, unit):
+def probe_one(devtype, modbus, unit, timeout):
     try:
-        return devtype.probe(modbus, unit)
+        return devtype.probe(modbus, unit, timeout)
     except:
         pass
 
-def probe(mlist, pr_cb=None, pr_interval=10):
+def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
     num_probed = 0
     found = []
 
@@ -81,7 +81,7 @@ def probe(mlist, pr_cb=None, pr_interval=10):
             if t.methods and m[0] not in t.methods:
                 continue
 
-            d = probe_one(t, modbus, unit)
+            d = probe_one(t, modbus, unit, timeout)
             if d:
                 log.info('Found %s at %s', d.model, d)
                 d.method = m[0]
@@ -121,9 +121,9 @@ class ModelRegister(object):
         self.methods = methods
         self.units = units
 
-    def probe(self, modbus, unit):
+    def probe(self, modbus, unit, timeout=None):
         with modbus.lock:
-            with timeout(modbus, self.timeout):
+            with utils.timeout(modbus, timeout or self.timeout):
                 rr = modbus.read_holding_registers(self.reg, 1, unit=unit)
 
         if not isinstance(rr, ReadHoldingRegistersResponse):
