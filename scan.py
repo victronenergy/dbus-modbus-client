@@ -92,7 +92,7 @@ class SerialScanner(Scanner):
     def __init__(self, tty, rates, mode, timeout=0.1):
         Scanner.__init__(self)
         self.tty = tty
-        self.rates = rates if isinstance(rates, list) else [rates]
+        self.rates = rates
         self.mode = mode
         self.timeout = timeout
 
@@ -107,7 +107,7 @@ class SerialScanner(Scanner):
 
     def scan(self):
         units = probe.get_units(self.mode)
-        rates = self.rates
+        rates = self.rates or probe.get_rates(self.mode)
 
         for r in rates:
             log.info('Scanning %s @ %d bps (quick)', self.tty, r)
