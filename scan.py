@@ -89,12 +89,13 @@ class NetScanner(Scanner):
         return Scanner.start(self)
 
 class SerialScanner(Scanner):
-    def __init__(self, tty, rates, mode, timeout=0.1):
+    def __init__(self, tty, rates, mode, timeout=0.1, full=False):
         Scanner.__init__(self)
         self.tty = tty
         self.rates = rates
         self.mode = mode
         self.timeout = timeout
+        self.full = full
 
     def progress(self, n, dev):
         super(SerialScanner, self).progress(n, dev)
@@ -115,6 +116,9 @@ class SerialScanner(Scanner):
             if found:
                 rates = [r]
                 break
+
+        if not self.full:
+            return
 
         units = range(MODBUS_UNIT_MIN, MODBUS_UNIT_MAX + 1)
         for d in found:
