@@ -57,6 +57,9 @@ def make_modbus(m):
 
     dev = '/dev/%s' % tty
     client = SerialClient(method, port=dev, baudrate=rate)
+    if not client.connect():
+        return None
+
     serial_ports[tty] = client
 
     # send some harmless messages to the broadcast address to
@@ -64,13 +67,9 @@ def make_modbus(m):
     packet = bytes([0x00, 0x08, 0x00, 0x00, 0x55, 0x55])
     packet += struct.pack('>H', computeCRC(packet))
 
-    client.connect()
-
     for i in range(12):
         client.socket.write(packet)
         time.sleep(0.1)
-
-    client.close()
 
     return client
 
@@ -92,6 +91,9 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
             continue
 
         modbus = make_modbus(m)
+        if not modbus:
+            continue
+
         unit = int(m[-1])
         d = None
 
