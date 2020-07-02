@@ -75,9 +75,8 @@ class ModbusDevice(object):
         return 'Modbus'
 
     def read_register(self, reg):
-        with self.modbus.lock:
-            rr = self.modbus.read_holding_registers(reg.base, reg.count,
-                                                    unit=self.unit)
+        rr = self.modbus.read_holding_registers(reg.base, reg.count,
+                                                unit=self.unit)
 
         if not isinstance(rr, ReadHoldingRegistersResponse):
             log.error('Error reading register %#04x: %s', reg.base, rr)
@@ -87,8 +86,7 @@ class ModbusDevice(object):
         return reg.value
 
     def write_modbus(self, base, val):
-        with self.modbus.lock:
-            self.modbus.write_registers(base, val, unit=self.unit)
+        self.modbus.write_registers(base, val, unit=self.unit)
 
     def write_register(self, reg, val):
         reg.value = val
@@ -108,9 +106,7 @@ class ModbusDevice(object):
         start = regs[0].base
         count = regs[-1].base + regs[-1].count - start
 
-        with self.modbus.lock:
-            rr = self.modbus.read_holding_registers(start, count,
-                                                    unit=self.unit)
+        rr = self.modbus.read_holding_registers(start, count, unit=self.unit)
 
         latency = time.time() - now
 

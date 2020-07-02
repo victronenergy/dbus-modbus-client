@@ -15,18 +15,31 @@ log = logging.getLogger()
 device_types = []
 serial_ports = {}
 
-def lockable(obj):
-    obj.lock = threading.Lock()
-    return obj
+class SerialClient(ModbusSerialClient):
+    def __init__(self, *args, **kwargs):
+        super(SerialClient, self).__init__(*args, **kwargs)
+        self.lock = threading.RLock()
+
+    def execute(self, request=None):
+        with self.lock:
+            return super(SerialClient, self).execute(request)
+
+    def __enter__(self):
+        self.lock.acquire()
+        return super(SerialClient, self).__enter__()
+
+    def __exit__(self, *args):
+        super(SerialClient, self).__exit__(*args)
+        self.lock.release()
 
 def make_modbus(m):
     method = m[0]
 
     if method == 'tcp':
-        return lockable(ModbusTcpClient(m[1], int(m[2])))
+        return ModbusTcpClient(m[1], int(m[2]))
 
     if method == 'udp':
-        return lockable(ModbusUdpClient(m[1], int(m[2])))
+        return ModbusUdpClient(m[1], int(m[2]))
 
     tty = m[1]
     rate = int(m[2])
@@ -38,7 +51,7 @@ def make_modbus(m):
         client.close()
 
     dev = '/dev/%s' % tty
-    client = lockable(ModbusSerialClient(method, port=dev, baudrate=rate))
+    client = SerialClient(method, port=dev, baudrate=rate)
     serial_ports[tty] = client
 
     # send some harmless messages to the broadcast address to
@@ -133,9 +146,8 @@ class ModelRegister(object):
         self.rates = args.get('rates', [])
 
     def probe(self, modbus, unit, timeout=None):
-        with modbus.lock:
-            with utils.timeout(modbus, timeout or self.timeout):
-                rr = modbus.read_holding_registers(self.reg, 1, unit=unit)
+        with modbus, utils.timeout(modbus, timeout or self.timeout):
+            rr = modbus.read_holding_registers(self.reg, 1, unit=unit)
 
         if not isinstance(rr, ReadHoldingRegistersResponse):
             log.debug('%s: %s', modbus, rr)
