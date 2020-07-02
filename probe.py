@@ -20,6 +20,11 @@ class SerialClient(ModbusSerialClient):
         super(SerialClient, self).__init__(*args, **kwargs)
         self.lock = threading.RLock()
 
+    def __setattr__(self, name, value):
+        super(SerialClient, self).__setattr__(name, value)
+        if name == 'timeout' and self.socket:
+            self.socket.timeout = value
+
     def execute(self, request=None):
         with self.lock:
             return super(SerialClient, self).execute(request)
