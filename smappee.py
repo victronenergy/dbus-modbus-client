@@ -120,11 +120,6 @@ class PowerBox(device.EnergyMeter):
 
     def __init__(self, *args):
         super(PowerBox, self).__init__(*args)
-        fw = Reg_ver(0x1624)
-        self.read_register(fw)
-        if fw.value < self.min_fwver:
-            log.info('%s firmware %s is too old', self.productname, fw)
-            raise Exception()
 
     def probe_device(self, n):
         base = 0x1480 + 0x20 * n
@@ -213,6 +208,11 @@ class PowerBox(device.EnergyMeter):
         self.data_regs = [
             Reg_float(0x03f8, '/Ac/Frequency', 1, '%.1f Hz'),
         ]
+
+        fw = self.read_register(self.info_regs[1])
+        if fw < self.min_fwver:
+            log.info('%s firmware %s is too old', self.productname, fw)
+            raise Exception()
 
         # reset CT slot mapping
         self.write_modbus(0x1140, list(range(MAX_CT_SLOTS)))
