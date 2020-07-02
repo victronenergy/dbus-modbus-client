@@ -57,13 +57,13 @@ class Client(object):
         self.err_exit = False
         self.keep_failed = True
 
-    def start_scan(self):
+    def start_scan(self, full=False):
         if self.scanner:
             return
 
         log.info('Starting background scan')
 
-        s = self.new_scanner()
+        s = self.new_scanner(full)
 
         if s.start():
             self.scanner = s
@@ -157,7 +157,7 @@ class Client(object):
             self.update_devlist(new.split(','))
             return
 
-    def init(self, scan):
+    def init(self, force_scan):
         settings_path = '/Settings/ModbusClient/' + self.name
         SETTINGS = {
             'devices':  [settings_path + '/Devices', '', 0, 0],
@@ -180,12 +180,14 @@ class Client(object):
         if not self.keep_failed:
             self.failed = []
 
+        scan = force_scan
+
         if not self.devices or self.failed:
             if self.settings['autoscan']:
                 scan = True
 
         if scan:
-            self.start_scan()
+            self.start_scan(force_scan)
 
     def update(self):
         if self.scanner:
@@ -221,7 +223,7 @@ class NetClient(Client):
         Client.__init__(self, proto)
         self.proto = proto
 
-    def new_scanner(self):
+    def new_scanner(self, full):
         return NetScanner(self.proto, MODBUS_TCP_PORT, MODBUS_TCP_UNIT,
                           if_blacklist)
 
@@ -234,8 +236,8 @@ class SerialClient(Client):
         self.auto_scan = True
         self.keep_failed = False
 
-    def new_scanner(self):
-        return SerialScanner(self.tty, self.rate, self.mode)
+    def new_scanner(self, full):
+        return SerialScanner(self.tty, self.rate, self.mode, full=full)
 
 def main():
     parser = ArgumentParser(add_help=True)
