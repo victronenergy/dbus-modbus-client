@@ -113,7 +113,7 @@ class Client(object):
                     os._exit(1)
                 self.devices.remove(dev)
                 self.failed.append(str(dev))
-                dev.__del__()
+                dev.destroy()
 
     def init_devices(self, devlist):
         devs = probe.probe(devlist)
@@ -140,7 +140,7 @@ class Client(object):
                     cb(d)
 
     def update_devlist(self, devlist):
-        self.filter_devices(self.devices, devlist, lambda d: d.__del__())
+        self.filter_devices(self.devices, devlist, lambda d: d.destroy())
         self.filter_devices(self.failed, devlist)
 
         for d in devlist:

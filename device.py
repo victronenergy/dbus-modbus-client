@@ -26,7 +26,7 @@ class ModbusDevice(object):
         self.settings = None
         self.err_count = 0
 
-    def __del__(self):
+    def destroy(self):
         if self.dbus:
             self.dbus.__del__()
             self.dbus = None
