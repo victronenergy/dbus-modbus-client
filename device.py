@@ -19,7 +19,7 @@ log = logging.getLogger()
 
 class ModbusDevice(object):
     def __init__(self, modbus, unit, model):
-        self.modbus = modbus
+        self.modbus = modbus.get()
         self.unit = unit
         self.model = model
         self.role = None
@@ -34,8 +34,10 @@ class ModbusDevice(object):
         if self.dbus:
             self.dbus.__del__()
             self.dbus = None
+        if self.settings:
             self.settings._settings = None
             self.settings = None
+        self.modbus.put()
 
     def __eq__(self, other):
         if isinstance(other, type(self)):

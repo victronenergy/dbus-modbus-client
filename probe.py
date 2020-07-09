@@ -1,4 +1,5 @@
 import logging
+import os
 import struct
 import threading
 import time
@@ -15,7 +16,32 @@ log = logging.getLogger()
 device_types = []
 serial_ports = {}
 
-class SerialClient(ModbusSerialClient):
+class RefCount(object):
+    def __init__(self, *args, **kwargs):
+        super(RefCount, self).__init__(*args, **kwargs)
+        self.refcount = 1
+
+    def get(self):
+        self.refcount += 1
+        return self
+
+    def put(self):
+        if self.refcount > 0:
+            self.refcount -= 1
+        if self.refcount == 0:
+            self.close()
+
+    def close(self):
+        if self.refcount == 0:
+            super(RefCount, self).close()
+
+class TcpClient(RefCount, ModbusTcpClient):
+    pass
+
+class UdpClient(RefCount, ModbusUdpClient):
+    pass
+
+class SerialClient(RefCount, ModbusSerialClient):
     def __init__(self, *args, **kwargs):
         super(SerialClient, self).__init__(*args, **kwargs)
         self.lock = threading.RLock()
@@ -24,6 +50,11 @@ class SerialClient(ModbusSerialClient):
         super(SerialClient, self).__setattr__(name, value)
         if name == 'timeout' and self.socket:
             self.socket.timeout = value
+
+    def put(self):
+        super(SerialClient, self).put()
+        if self.refcount == 0:
+            del serial_ports[os.path.basename(self.port)]
 
     def execute(self, request=None):
         with self.lock:
@@ -41,23 +72,24 @@ def make_modbus(m):
     method = m[0]
 
     if method == 'tcp':
-        return ModbusTcpClient(m[1], int(m[2]))
+        return TcpClient(m[1], int(m[2]))
 
     if method == 'udp':
-        return ModbusUdpClient(m[1], int(m[2]))
+        return UdpClient(m[1], int(m[2]))
 
     tty = m[1]
     rate = int(m[2])
 
     if tty in serial_ports:
         client = serial_ports[tty]
-        if client.baudrate == rate:
-            return client
-        client.close()
+        if client.baudrate != rate:
+            raise Exception('rate mismatch on %s' % tty)
+        return client.get()
 
     dev = '/dev/%s' % tty
     client = SerialClient(method, port=dev, baudrate=rate)
     if not client.connect():
+        client.put()
         return None
 
     serial_ports[tty] = client
@@ -112,6 +144,7 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
                 found.append(d)
                 break
 
+        modbus.put()
         num_probed += 1
 
         if pr_cb:
