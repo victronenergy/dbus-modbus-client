@@ -77,6 +77,7 @@ class Client(object):
 
         for d in devices:
             if d in self.devices:
+                d.destroy()
                 continue
 
             try:
