@@ -21,12 +21,14 @@ class ModbusDevice(object):
         self.modbus = modbus
         self.unit = unit
         self.model = model
+        self.role = None
         self.info = {}
         self.dbus = None
         self.settings = None
         self.err_count = 0
 
     def destroy(self):
+        self.info = {}
         if self.dbus:
             self.dbus.__del__()
             self.dbus = None
@@ -130,14 +132,19 @@ class ModbusDevice(object):
         if self.settings:
             return
 
+        self.settings_dbus = dbus
+
         path = '/Settings/Devices/' + self.get_ident()
+        role = self.role or self.default_role
         def_inst = '%s:%s' % (self.default_role, self.default_instance)
 
         SETTINGS = {
             'instance':   [path + '/ClassAndVrmInstance', def_inst, 0, 0],
             'customname': [path + '/CustomName', '', 0, 0],
-            'position':   [path + '/Position', 0, 0, 2],
         }
+
+        if role == 'pvinverter':
+            SETTINGS['position'] = [path + '/Position', 0, 0, 2]
 
         self.settings = SettingsDevice(dbus, SETTINGS, self.setting_changed)
 
@@ -166,9 +173,8 @@ class ModbusDevice(object):
         return val[0], int(val[1])
 
     def reinit(self):
-        self.dbus.__del__()
-        self.info = {}
-        self.init(None)
+        self.destroy()
+        self.init(self.settings_dbus)
 
     def get_customname(self):
         return self.settings['customname']
