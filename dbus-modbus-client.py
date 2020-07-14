@@ -13,6 +13,7 @@ import traceback
 from vedbus import VeDbusService
 
 import device
+import mdns
 import probe
 from scan import *
 from utils import *
@@ -35,6 +36,8 @@ MODBUS_TCP_UNIT = 1
 
 MAX_ERRORS = 5
 FAILED_INTERVAL = 10
+MDNS_CHECK_INTERVAL = 5
+MDNS_QUERY_INTERVAL = 60
 SCAN_INTERVAL = 600
 UPDATE_INTERVAL = 250
 
@@ -225,6 +228,34 @@ class NetClient(Client):
     def new_scanner(self, full):
         return NetScanner(self.proto, MODBUS_TCP_PORT, MODBUS_TCP_UNIT,
                           if_blacklist)
+
+    def init(self, *args):
+        super(NetClient, self).init(*args)
+        self.mdns = mdns.MDNS()
+        self.mdns.start()
+        self.mdns_check_time = 0
+        self.mdns_query_time = 0
+
+    def update(self):
+        super(NetClient, self).update()
+
+        now = time.time()
+
+        if now - self.mdns_query_time > MDNS_QUERY_INTERVAL:
+            self.mdns_query_time = now
+            self.mdns.req()
+
+        if now - self.mdns_check_time > MDNS_CHECK_INTERVAL:
+            self.mdns_check_time = now
+            maddr = self.mdns.get_devices()
+            if maddr:
+                units = probe.get_units('tcp')
+                d = []
+                for a in maddr:
+                    d += ['tcp:%s:%s:%d' % (a[0], a[1], u) for u in units]
+                self.probe_devices(d, nosave=True)
+
+        return True
 
 class SerialClient(Client):
     def __init__(self, tty, rate, mode):
