@@ -2,6 +2,7 @@ FILES =									\
 	dbus-modbus-client.py						\
 	carlo_gavazzi.py						\
 	device.py							\
+	mdns.py								\
 	probe.py							\
 	register.py							\
 	scan.py								\
