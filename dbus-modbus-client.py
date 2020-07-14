@@ -119,7 +119,8 @@ class Client(object):
                 dev.destroy()
 
     def probe_devices(self, devlist, nosave=False):
-        devs = probe.probe(devlist)
+        devs = set(devlist) - set(self.devices)
+        devs = probe.probe(devs)
 
         for d in devs:
             try:
