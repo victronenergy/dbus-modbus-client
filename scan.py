@@ -62,6 +62,12 @@ class Scanner(object):
     def stop(self):
         self.running = False
 
+    def get_devices(self):
+        with self.lock:
+            d = self.devices
+            self.devices = []
+            return d
+
 class NetScanner(Scanner):
     def __init__(self, proto, port, unit, blacklist, timeout=0.25):
         Scanner.__init__(self)
