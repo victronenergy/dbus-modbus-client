@@ -132,27 +132,23 @@ class Client(object):
         devs = [str(d) for d in self.devices + self.failed]
         self.settings['devices'] = ','.join(devs)
 
-    def filter_devices(self, devices, keep, cb=None):
-        for d in devices:
-            if d not in keep:
-                devices.remove(d)
-                if cb:
-                    cb(d)
+    def update_devlist(self, old, new):
+        old = set(old.split(','))
+        new = set(new.split(','))
+        cur = set(self.devices)
+        add = new - old - cur
+        rem = old - new
 
-    def update_devlist(self, devlist):
-        self.filter_devices(self.devices, devlist, lambda d: d.destroy())
-        self.filter_devices(self.failed, devlist)
+        for d in rem & cur:
+            self.devices.remove(d)
+            d.destroy()
 
-        for d in devlist:
-            if d in self.devices:
-                devlist.remove(d)
-
-        self.failed = self.probe_devices(devlist)
+        self.failed = self.probe_devices(list(add));
         self.save_devices()
 
     def setting_changed(self, name, old, new):
         if name == 'devices':
-            self.update_devlist(new.split(','))
+            self.update_devlist(old, new)
             return
 
     def init(self, force_scan):
