@@ -73,9 +73,7 @@ class Client(object):
             self.scanner.stop()
 
     def scan_update(self):
-        with self.scanner.lock:
-            devices = self.scanner.devices
-            self.scanner.devices = []
+        devices = self.scanner.get_devices()
 
         for d in devices:
             if d in self.devices:
