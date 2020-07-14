@@ -82,6 +82,7 @@ class Client(object):
 
             try:
                 d.init(self.svc.dbusconn)
+                d.nosave = False
                 self.devices.append(d)
             except:
                 log.info('Error initialising %s, skipping', d)
@@ -113,15 +114,17 @@ class Client(object):
                 if self.err_exit:
                     os._exit(1)
                 self.devices.remove(dev)
-                self.failed.append(str(dev))
+                if not dev.nosave:
+                    self.failed.append(str(dev))
                 dev.destroy()
 
-    def probe_devices(self, devlist):
+    def probe_devices(self, devlist, nosave=False):
         devs = probe.probe(devlist)
 
         for d in devs:
             try:
                 d.init(self.svc.dbusconn)
+                d.nosave = nosave
                 self.devices.append(d)
                 devlist.remove(str(d))
             except:
@@ -130,8 +133,8 @@ class Client(object):
         return devlist
 
     def save_devices(self):
-        devs = [str(d) for d in self.devices + self.failed]
-        self.settings['devices'] = ','.join(devs)
+        devs = filter(lambda d: not d.nosave, self.devices) + self.failed
+        self.settings['devices'] = ','.join(map(str, devs))
 
     def update_devlist(self, old, new):
         old = set(old.split(','))
