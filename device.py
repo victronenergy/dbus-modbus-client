@@ -40,6 +40,9 @@ class ModbusDevice(object):
             return str(self) == other
         return False
 
+    def __hash__(self):
+        return hash(str(self))
+
     def __str__(self):
         if isinstance(self.modbus, ModbusTcpClient):
             return 'tcp:%s:%d:%d' % (self.modbus.host,
