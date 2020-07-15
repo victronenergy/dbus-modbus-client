@@ -98,4 +98,6 @@ models = {
     },
 }
 
-probe.add_handler(probe.ModelRegister(0x000b, models, methods=['tcp']))
+probe.add_handler(probe.ModelRegister(0x000b, models,
+                                      methods=['tcp'],
+                                      units=[1]))
