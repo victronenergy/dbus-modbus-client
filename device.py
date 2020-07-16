@@ -66,10 +66,9 @@ class ModbusDevice(object):
         return str(self.modbus)
 
     def connection(self):
-        if isinstance(self.modbus, ModbusTcpClient):
-            return 'Modbus TCP %s' % self.modbus.host
-        elif isinstance(self.modbus, ModbusUdpClient):
-            return 'Modbus UDP % ' % self.modbus.host
+        if isinstance(self.modbus, (ModbusTcpClient, ModbusUdpClient)):
+            return 'Modbus %s %s' % (self.method.upper(),
+                                     self.modbus.socket.getpeername()[0])
         elif isinstance(self.modbus, ModbusSerialClient):
             return 'Modbus %s %s:%d' % (self.modbus.method.upper(),
                                         os.path.basename(self.modbus.port),
