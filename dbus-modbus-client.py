@@ -115,7 +115,7 @@ class Client(object):
                 self.failed.append(str(dev))
                 dev.destroy()
 
-    def init_devices(self, devlist):
+    def probe_devices(self, devlist):
         devs = probe.probe(devlist)
 
         for d in devs:
@@ -147,7 +147,7 @@ class Client(object):
             if d in self.devices:
                 devlist.remove(d)
 
-        self.failed = self.init_devices(devlist)
+        self.failed = self.probe_devices(devlist)
         self.save_devices()
 
     def setting_changed(self, name, old, new):
@@ -173,7 +173,7 @@ class Client(object):
                                        self.setting_changed, timeout=10)
 
         devices = filter(None, self.settings['devices'].split(','))
-        self.failed = self.init_devices(devices)
+        self.failed = self.probe_devices(devices)
 
         if not self.keep_failed:
             self.failed = []
@@ -207,7 +207,7 @@ class Client(object):
             now = time.time()
 
             if now - self.failed_time > FAILED_INTERVAL:
-                self.init_devices(self.failed)
+                self.probe_devices(self.failed)
                 self.failed_time = now
 
             if self.settings['autoscan']:
