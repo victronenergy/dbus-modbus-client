@@ -105,12 +105,6 @@ def make_modbus(m):
 
     return client
 
-def probe_one(devtype, modbus, unit, timeout):
-    try:
-        return devtype.probe(modbus, unit, timeout)
-    except:
-        pass
-
 def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
     num_probed = 0
     found = []
@@ -133,9 +127,12 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
             if t.methods and m[0] not in t.methods:
                 continue
 
-            t0 = time.time()
-            d = probe_one(t, modbus, unit, timeout)
-            t1 = time.time()
+            try:
+                t0 = time.time()
+                d = t.probe(modbus, unit, timeout)
+                t1 = time.time()
+            except:
+                break
 
             if d:
                 log.info('Found %s at %s', d.model, d)
@@ -187,11 +184,15 @@ class ModelRegister(object):
 
     def probe(self, modbus, unit, timeout=None):
         with modbus, utils.timeout(modbus, timeout or self.timeout):
+            if not modbus.connect():
+                raise Exception('connection error')
             rr = modbus.read_holding_registers(self.reg, 1, unit=unit)
 
         if not isinstance(rr, ReadHoldingRegistersResponse):
             log.debug('%s: %s', modbus, rr)
-            raise Exception(rr)
+            return None
 
-        m = self.models[rr.registers[0]]
-        return m['handler'](modbus, unit, m['model'])
+        v = rr.registers[0]
+        if v in self.models:
+            m = self.models[v]
+            return m['handler'](modbus, unit, m['model'])
