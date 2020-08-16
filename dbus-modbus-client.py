@@ -219,6 +219,13 @@ class Client(object):
                 if now - self.scan_time > SCAN_INTERVAL:
                     self.start_scan()
 
+    def update_timer(self):
+        try:
+            self.update()
+        except:
+            log.error('Uncaught exception in update')
+            traceback.print_exc()
+
         return True
 
 class NetClient(Client):
@@ -304,7 +311,7 @@ def main():
     client.err_exit = args.exit
     client.init(args.force_scan)
 
-    gobject.timeout_add(UPDATE_INTERVAL, client.update)
+    gobject.timeout_add(UPDATE_INTERVAL, client.update_timer)
     mainloop.run()
 
 if __name__ == '__main__':
