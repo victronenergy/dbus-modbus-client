@@ -44,10 +44,13 @@ class MDNS(object):
         if not services:
             return
 
-        q = DNSRecord()
-        for svc in services:
-            q.add_question(DNSQuestion(svc, QTYPE.PTR))
-        self.send(q.pack())
+        try:
+            q = DNSRecord()
+            for svc in services:
+                q.add_question(DNSQuestion(svc, QTYPE.PTR))
+            self.send(q.pack())
+        except Exception as e:
+            log.error('Error sending MDNS request: %s', e)
 
     def get_devices(self):
         with self.lock:
