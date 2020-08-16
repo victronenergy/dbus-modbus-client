@@ -17,7 +17,7 @@ class ScanAborted(Exception):
 
 class Scanner(object):
     def __init__(self):
-        self.devices = None
+        self.devices = []
         self.running = None
         self.total = None
         self.done = None
@@ -36,8 +36,6 @@ class Scanner(object):
                 self.devices.append(dev)
 
     def run(self):
-        self.devices = []
-
         try:
             self.scan()
             log.info('Scan complete')
