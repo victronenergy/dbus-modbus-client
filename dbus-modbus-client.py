@@ -124,18 +124,18 @@ class Client(object):
 
     def probe_devices(self, devlist, nosave=False):
         devs = set(devlist) - set(self.devices)
-        devs = probe.probe(devs)
+        devs, failed = probe.probe(devs)
 
         for d in devs:
             try:
                 d.init(self.svc.dbusconn)
                 d.nosave = nosave
                 self.devices.append(d)
-                devlist.remove(str(d))
             except:
-                pass
+                failed.append(str(d))
+                d.destroy()
 
-        return devlist
+        return failed
 
     def save_devices(self):
         devs = filter(lambda d: not d.nosave, self.devices) + self.failed
@@ -145,14 +145,13 @@ class Client(object):
         old = set(old.split(','))
         new = set(new.split(','))
         cur = set(self.devices)
-        add = new - old - cur
         rem = old - new
 
         for d in rem & cur:
             self.devices.remove(d)
             d.destroy()
 
-        self.failed = self.probe_devices(list(add));
+        self.failed = self.probe_devices(new);
         self.save_devices()
 
     def setting_changed(self, name, old, new):
@@ -212,7 +211,7 @@ class Client(object):
             now = time.time()
 
             if now - self.failed_time > FAILED_INTERVAL:
-                self.probe_devices(self.failed)
+                self.failed = self.probe_devices(self.failed)
                 self.failed_time = now
 
             if self.settings['autoscan']:

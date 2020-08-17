@@ -108,7 +108,8 @@ class SerialScanner(Scanner):
 
     def scan_units(self, units, rate):
         mlist = [[self.mode, self.tty, rate, u] for u in units]
-        return probe.probe(mlist, self.progress, 1, timeout=self.timeout)
+        d = probe.probe(mlist, self.progress, 1, timeout=self.timeout)
+        return d[0]
 
     def scan(self):
         units = probe.get_units(self.mode)

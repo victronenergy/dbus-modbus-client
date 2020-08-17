@@ -108,6 +108,7 @@ def make_modbus(m):
 def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
     num_probed = 0
     found = []
+    failed = []
 
     for m in mlist:
         if isinstance(m, (str, type(u''))):
@@ -145,6 +146,9 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
                 found.append(d)
                 break
 
+        if not d:
+            failed.append(':'.join(map(str, m)))
+
         modbus.put()
         num_probed += 1
 
@@ -156,7 +160,7 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
     if pr_cb and num_probed:
         pr_cb(num_probed, None)
 
-    return found
+    return found, failed
 
 def add_handler(devtype):
     if devtype not in device_types:
