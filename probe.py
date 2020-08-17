@@ -116,11 +116,15 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
         if len(m) < 4:
             continue
 
-        modbus = make_modbus(m)
+        try:
+            modbus = make_modbus(m)
+            unit = int(m[-1])
+        except:
+            continue
+
         if not modbus:
             continue
 
-        unit = int(m[-1])
         d = None
 
         for t in device_types:
