@@ -176,8 +176,8 @@ class Client(object):
         self.settings = SettingsDevice(self.svc.dbusconn, SETTINGS,
                                        self.setting_changed, timeout=10)
 
-        devices = filter(None, self.settings['devices'].split(','))
-        self.failed = self.probe_devices(devices)
+        devices = filter(None, self.settings['devices'])
+        self.update_devlist('', devices)
 
         if not self.keep_failed:
             self.failed = []
