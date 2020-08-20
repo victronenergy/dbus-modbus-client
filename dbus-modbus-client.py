@@ -138,8 +138,10 @@ class Client(object):
         return failed
 
     def save_devices(self):
-        devs = filter(lambda d: not d.nosave, self.devices) + self.failed
-        self.settings['devices'] = ','.join(map(str, devs))
+        devs = filter(lambda d: not d.nosave, self.devices)
+        devstr = ','.join(sorted(map(str, devs) + self.failed))
+        if devstr != self.settings['devices']:
+            self.settings['devices'] = devstr
 
     def update_devlist(self, old, new):
         old = set(old.split(','))
