@@ -150,8 +150,8 @@ class Client(object):
         rem = old - new
 
         for d in rem & cur:
-            self.devices.remove(d)
-            d.destroy()
+            dd = self.devices.pop(self.devices.index(d))
+            dd.destroy()
 
         self.failed = self.probe_devices(new);
         self.save_devices()
