@@ -146,10 +146,13 @@ class ModbusDevice(object):
             'customname': [path + '/CustomName', '', 0, 0],
         }
 
-        if role == 'pvinverter':
-            SETTINGS['position'] = [path + '/Position', 0, 0, 2]
-
         self.settings = SettingsDevice(dbus, SETTINGS, self.setting_changed)
+        self.role, self.devinst = self.get_role_instance()
+
+        if self.role == 'pvinverter':
+            self.settings.addSettings({
+                'position': [path + '/Position', 0, 0, 2]
+            })
 
     def setting_changed(self, name, old, new):
         if name == 'customname':
@@ -160,6 +163,7 @@ class ModbusDevice(object):
             role, inst = self.get_role_instance()
 
             if role != self.role:
+                self.role = role
                 self.reinit()
                 return
 
@@ -269,7 +273,6 @@ class ModbusDevice(object):
         self.init_device_settings(dbus)
 
         self.data_regs = self.pack_regs(self.data_regs)
-        self.role, devinstance = self.get_role_instance()
         ident = self.get_ident()
 
         svcname = 'com.victronenergy.%s.%s' % (self.role, ident)
@@ -278,7 +281,7 @@ class ModbusDevice(object):
         self.dbus.add_path('/Mgmt/ProcessName', __main__.NAME)
         self.dbus.add_path('/Mgmt/ProcessVersion', __main__.VERSION)
         self.dbus.add_path('/Mgmt/Connection', self.connection())
-        self.dbus.add_path('/DeviceInstance', devinstance)
+        self.dbus.add_path('/DeviceInstance', self.devinst)
         self.dbus.add_path('/ProductId', self.productid)
         self.dbus.add_path('/ProductName', self.productname)
         self.dbus.add_path('/Model', self.model)
