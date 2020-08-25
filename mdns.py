@@ -26,12 +26,12 @@ class MDNS(object):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind(('', MDNS_PORT))
-        self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
-                               mreqn(MDNS_IP))
+        self.mcast = False
 
     def close(self):
-        self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_DROP_MEMBERSHIP,
-                               mreqn(MDNS_IP))
+        if self.mcast:
+            self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_DROP_MEMBERSHIP,
+                                   mreqn(MDNS_IP))
         self.socket.close()
 
     def recv(self):
@@ -43,6 +43,15 @@ class MDNS(object):
     def req(self):
         if not services:
             return
+
+        if not self.mcast:
+            try:
+                self.socket.setsockopt(socket.IPPROTO_IP,
+                                       socket.IP_ADD_MEMBERSHIP,
+                                       mreqn(MDNS_IP))
+                self.mcast = True
+            except:
+                return
 
         try:
             q = DNSRecord()
