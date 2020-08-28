@@ -87,7 +87,10 @@ class ModbusDevice(object):
         return reg.value
 
     def write_modbus(self, base, val):
-        self.modbus.write_registers(base, val, unit=self.unit)
+        if len(val) == 1:
+            self.modbus.write_register(base, val[0], unit=self.unit)
+        else:
+            self.modbus.write_registers(base, val, unit=self.unit)
 
     def write_register(self, reg, val):
         reg.value = val
