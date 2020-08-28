@@ -85,8 +85,8 @@ class CurrentTransformer(object):
 
         self.regs = [
             Reg_mapu16(0x1000 + n, '/CT/%d/Phase' % n, CT_PHASE,
-                       fmt=CT_PHASE_TEXT, write=self.set_phase),
-            Reg_u16(0x1100 + n, '/CT/%d/Type' % n, fmt=CT_TYPES, write=True),
+                       text=CT_PHASE_TEXT, write=self.set_phase),
+            Reg_u16(0x1100 + n, '/CT/%d/Type' % n, text=CT_TYPES, write=True),
         ]
 
         self.phase = self.dev.read_register(self.regs[0])
@@ -122,7 +122,7 @@ class PowerBox(device.EnergyMeter):
         base = 0x1480 + 0x20 * n
 
         regs = [
-            Reg_u16(base + 0x00, '/Device/%d/Type' % n, fmt=DEV_TYPES),
+            Reg_u16(base + 0x00, '/Device/%d/Type' % n, text=DEV_TYPES),
             Reg_u16(base + 0x01, '/Device/%d/Slots' % n),
             Reg_ser(base + 0x00, '/Device/%d/Serial' % n),
             Reg_ver(base + 0x04, '/Device/%d/FirmwareVersion' % n),

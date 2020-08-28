@@ -56,8 +56,8 @@ class Reg(object):
         return newval != old
 
 class Reg_num(Reg, float):
-    def __init__(self, base, count, name=None, scale=1, fmt=None, write=False):
-        Reg.__init__(self, base, count, name, fmt, write)
+    def __init__(self, base, count, name=None, scale=1, text=None, write=False):
+        Reg.__init__(self, base, count, name, text, write)
         self.scale = float(scale) if scale != 1 else scale
 
     def set_raw_value(self, val):
