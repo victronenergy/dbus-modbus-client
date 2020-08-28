@@ -43,6 +43,8 @@ class Reg(object):
             return self.text % self.value
         if isinstance(self.text, dict) and self.value in self.text:
             return self.text[self.value]
+        if callable(self.text):
+            return self.text(self.value)
         return str(self.value)
 
     def isvalid(self):
