@@ -25,6 +25,13 @@ nr_phase_map = {
     4: 3, # 3P
 }
 
+switch_positions = [
+    'kVARh',
+    '2',
+    '1',
+    'Locked',
+]
+
 class EM24_Meter(device.EnergyMeter):
     productid = 0xb017
     productname = 'Carlo Gavazzi EM24 Ethernet Energy Meter'
@@ -58,6 +65,7 @@ class EM24_Meter(device.EnergyMeter):
             Reg_u16( 0x0033, '/Ac/Frequency',      10, '%.1f Hz'),
             Reg_s32l(0x0034, '/Ac/Energy/Forward', 10, '%.1f kWh'),
             Reg_s32l(0x004e, '/Ac/Energy/Reverse', 10, '%.1f kWh'),
+            Reg_u16( 0xa100, '/SwitchPos', text=switch_positions),
         ]
 
         for n in range(1, phases + 1):
