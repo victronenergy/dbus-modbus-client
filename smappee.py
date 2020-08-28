@@ -265,7 +265,7 @@ class PowerBox(device.EnergyMeter):
 
     def dbus_write_register(self, reg, path, val):
         super(PowerBox, self).dbus_write_register(reg, path, val)
-        self.reinit()
+        self.sched_reinit()
 
     def get_ident(self):
         return 'smappee_%s' % self.info['/Serial']
