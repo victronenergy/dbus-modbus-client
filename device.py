@@ -18,6 +18,8 @@ from utils import *
 log = logging.getLogger()
 
 class ModbusDevice(object):
+    min_timeout = 0.1
+
     def __init__(self, modbus, unit, model):
         self.modbus = modbus.get()
         self.unit = unit
@@ -318,6 +320,7 @@ class ModbusDevice(object):
             for rr in r:
                 self.dbus_add_register(rr)
 
+        self.latfilt = LatencyFilter(self.latency)
         self.device_init_late()
 
     def device_init(self):
@@ -338,10 +341,30 @@ class ModbusDevice(object):
                 latency.append(t)
 
         if latency:
-            latency = sum(latency) / len(latency)
-            self.latency = 0.875 * self.latency + 0.125 * latency
-            self.modbus.timeout = self.latency * 4
+            self.latency = self.latfilt.filter(latency)
+            self.modbus.timeout = min(self.min_timeout, self.latency * 4)
             self.dbus['/Latency'] = round(self.latency * 1000)
+
+class LatencyFilter(object):
+    def __init__(self, val):
+        self.length = 8
+        self.pos = 0
+        self.val = val
+        self.values = [val] * self.length
+
+    def filter(self, values):
+        self.values[self.pos] = max(values)
+        self.pos += 1
+        self.pos &= self.length - 1
+
+        val = max(self.values)
+
+        if val > self.val:
+            self.val = 0.25 * self.val + 0.75 * val
+        else:
+            self.val = 0.75 * self.val + 0.25 * val
+
+        return self.val
 
 class EnergyMeter(ModbusDevice):
     allowed_roles = ['grid', 'pvinverter', 'genset']
