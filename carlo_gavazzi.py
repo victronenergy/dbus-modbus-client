@@ -17,13 +17,15 @@ class Reg_ver(Reg, int):
         v = values[0]
         return self.update((v >> 12, v >> 8 & 0xf, v & 0xff))
 
-nr_phase_map = {
-    0: 3, # 3P.n
-    1: 3, # 3P.1
-    2: 2, # 2P
-    3: 1, # 1P
-    4: 3, # 3P
-}
+nr_phases = [ 3, 3, 2, 1, 3 ]
+
+phase_configs = [
+    '3P.n',
+    '3P.1',
+    '2P',
+    '1P',
+    '3P',
+]
 
 switch_positions = [
     'kVARh',
@@ -40,10 +42,10 @@ class EM24_Meter(device.EnergyMeter):
         super(EM24_Meter, self).__init__(*args)
 
         self.info_regs = [
-            Reg_ver(   0x0302,    '/HardwareVersion'),
-            Reg_ver(   0x0304,    '/FirmwareVersion'),
-            Reg_mapu16(0x1002,    '/Phases', nr_phase_map),
-            Reg_text(  0x5000, 7, '/Serial'),
+            Reg_ver( 0x0302, '/HardwareVersion'),
+            Reg_ver( 0x0304, '/FirmwareVersion'),
+            Reg_u16( 0x1002, '/PhaseConfig', text=phase_configs, write=(0, 4)),
+            Reg_text(0x5000, 7, '/Serial'),
         ]
 
     def phase_regs(self, n):
@@ -58,7 +60,7 @@ class EM24_Meter(device.EnergyMeter):
     def device_init(self):
         self.read_info()
 
-        phases = int(self.info['/Phases'])
+        phases = nr_phases[int(self.info['/PhaseConfig'])]
 
         regs = [
             Reg_s32l(0x0028, '/Ac/Power',          10, '%.1f W'),
@@ -72,6 +74,10 @@ class EM24_Meter(device.EnergyMeter):
             regs += self.phase_regs(n)
 
         self.data_regs = regs
+
+    def dbus_write_register(self, reg, path, val):
+        super(EM24_Meter, self).dbus_write_register(reg, path, val)
+        self.sched_reinit()
 
     def get_ident(self):
         return 'cg_%s' % self.info['/Serial']
