@@ -168,7 +168,7 @@ class ModbusDevice(object):
 
             if role != self.role:
                 self.role = role
-                self.reinit()
+                self.sched_reinit()
                 return
 
             self.dbus['/DeviceInstance'] = inst
