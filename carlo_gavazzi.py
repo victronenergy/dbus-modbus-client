@@ -1,6 +1,10 @@
+import logging
+
 import device
 import probe
 from register import *
+
+log = logging.getLogger()
 
 class Reg_ver(Reg, int):
     def __init__(self, base, name):
@@ -58,6 +62,17 @@ class EM24_Meter(device.EnergyMeter):
         ]
 
     def device_init(self):
+        # make sure application is set to H
+        appreg = Reg_u16(0xa000)
+        if self.read_register(appreg) != 7:
+            self.write_register(appreg, 7)
+
+            # read back the value in case the setting is not accepted
+            # for some reason
+            if self.read_register(appreg) != 7:
+                log.error('%s: failed to set application to H', self)
+                return
+
         self.read_info()
 
         phases = nr_phases[int(self.info['/PhaseConfig'])]
