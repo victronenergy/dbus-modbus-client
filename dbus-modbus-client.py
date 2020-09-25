@@ -60,6 +60,7 @@ class Client(object):
         self.auto_scan = False
         self.err_exit = False
         self.keep_failed = True
+        self.svc = None
 
     def start_scan(self, full=False):
         if self.scanner:
@@ -85,7 +86,7 @@ class Client(object):
                 continue
 
             try:
-                d.init(self.svc.dbusconn)
+                d.init(self.dbusconn)
                 d.nosave = False
                 self.devices.append(d)
             except:
@@ -128,7 +129,7 @@ class Client(object):
 
         for d in devs:
             try:
-                d.init(self.svc.dbusconn)
+                d.init(self.dbusconn)
                 d.nosave = nosave
                 self.devices.append(d)
             except:
@@ -168,14 +169,10 @@ class Client(object):
             'autoscan': [settings_path + '/AutoScan', self.auto_scan, 0, 1],
         }
 
-        svcname = 'com.victronenergy.modbusclient.%s' % self.name
-        self.svc = VeDbusService(svcname, private_bus())
-        self.svc.add_path('/Scan', False, writeable=True,
-                          onchangecallback=self.set_scan)
-        self.svc.add_path('/ScanProgress', None, gettextcallback=percent)
+        self.dbusconn = private_bus()
 
         log.info('Waiting for localsettings')
-        self.settings = SettingsDevice(self.svc.dbusconn, SETTINGS,
+        self.settings = SettingsDevice(self.dbusconn, SETTINGS,
                                        self.setting_changed, timeout=10)
 
         devices = filter(None, self.settings['devices'])
@@ -195,16 +192,18 @@ class Client(object):
 
     def update(self):
         if self.scanner:
-            self.svc['/Scan'] = self.scanner.running
-            self.svc['/ScanProgress'] = \
-                100 * self.scanner.done / self.scanner.total
+            if self.svc:
+                self.svc['/Scan'] = self.scanner.running
+                self.svc['/ScanProgress'] = \
+                    100 * self.scanner.done / self.scanner.total
 
             self.scan_update()
 
             if not self.scanner.running:
                 self.scan_complete()
                 self.scanner = None
-                self.svc['/ScanProgress'] = None
+                if self.svc:
+                    self.svc['/ScanProgress'] = None
 
         for d in self.devices:
             self.update_device(d)
@@ -240,6 +239,13 @@ class NetClient(Client):
 
     def init(self, *args):
         super(NetClient, self).init(*args)
+
+        svcname = 'com.victronenergy.modbusclient.%s' % self.name
+        self.svc = VeDbusService(svcname, self.dbusconn)
+        self.svc.add_path('/Scan', False, writeable=True,
+                          onchangecallback=self.set_scan)
+        self.svc.add_path('/ScanProgress', None, gettextcallback=percent)
+
         self.mdns = mdns.MDNS()
         self.mdns.start()
         self.mdns_check_time = 0
