@@ -42,6 +42,7 @@ class EV_Charger(device.ModbusDevice):
     default_instance = 40
     productid = 0xc024
     productname = 'EV Charging Station'
+    min_timeout = 0.5
 
     def __init__(self, *args):
         super(EV_Charger, self).__init__(*args)
