@@ -20,6 +20,7 @@ class RefCount(object):
     def __init__(self, *args, **kwargs):
         super(RefCount, self).__init__(*args, **kwargs)
         self.refcount = 1
+        self.in_transaction = False
 
     def get(self):
         self.refcount += 1
@@ -32,8 +33,15 @@ class RefCount(object):
             self.close()
 
     def close(self):
-        if self.refcount == 0:
+        if self.refcount == 0 or self.in_transaction:
             super(RefCount, self).close()
+
+    def execute(self, *args):
+        try:
+            self.in_transaction = True
+            return super(RefCount, self).execute(*args)
+        finally:
+            self.in_transaction = False
 
 class TcpClient(RefCount, ModbusTcpClient):
     pass
