@@ -21,6 +21,7 @@ class EVC_STATUS(IntEnum):
     LOW_SOC         = 7
     GND_ERROR       = 8
     WELD_CON        = 9
+    CP_SHORTED      = 10
 
 class Reg_ver(Reg, int):
     def __init__(self, base, name):
