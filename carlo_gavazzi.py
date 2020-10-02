@@ -85,6 +85,11 @@ class EM24_Meter(device.EnergyMeter):
             Reg_u16( 0xa100, '/SwitchPos', text=switch_positions),
         ]
 
+        if phases == 3:
+            regs += [
+                Reg_mapu16(0x0032, '/PhaseSequence', { 0: 0, 0xffff: 1 }),
+            ]
+
         for n in range(1, phases + 1):
             regs += self.phase_regs(n)
 
