@@ -41,6 +41,7 @@ switch_positions = [
 class EM24_Meter(device.EnergyMeter):
     productid = 0xb017
     productname = 'Carlo Gavazzi EM24 Ethernet Energy Meter'
+    min_timeout = 0.5
 
     def __init__(self, *args):
         super(EM24_Meter, self).__init__(*args)
