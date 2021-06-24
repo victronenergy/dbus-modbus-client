@@ -126,7 +126,8 @@ class Reg_text(Reg, str):
         self.pfmt = '%c%dH' % (['>', '<'][little], count)
 
     def decode(self, values):
-        newval = struct.pack(self.pfmt, *values).rstrip('\0')
+        newval = struct.pack(self.pfmt, *values).rstrip(b'\0')
+        newval = str(newval.decode('ascii'))
         return self.update(newval)
 
 class Reg_map(Reg):
