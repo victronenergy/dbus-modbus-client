@@ -61,7 +61,7 @@ class Reg_num(Reg, float):
         self.scale = float(scale) if scale != 1 else scale
 
     def set_raw_value(self, val):
-        return self.update(val / self.scale)
+        return self.update(type(self.scale)(val / self.scale))
 
     def decode(self, values):
         v = struct.unpack(self.coding[0], struct.pack(self.coding[1], *values))
@@ -105,6 +105,7 @@ class Reg_f32l(Reg_num):
     def __init__(self, base, *args, **kwargs):
         super(Reg_f32l, self).__init__(base, 2, *args, **kwargs)
         self.coding = ('<f', '<2H')
+        self.scale = float(self.scale)
 
 class Reg_e16(Reg, int):
     def __init__(self, base, name, enum, *args, **kwargs):
