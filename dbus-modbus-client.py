@@ -140,7 +140,7 @@ class Client(object):
 
     def save_devices(self):
         devs = filter(lambda d: not d.nosave, self.devices)
-        devstr = ','.join(sorted(map(str, devs) + self.failed))
+        devstr = ','.join(sorted(list(map(str, devs)) + self.failed))
         if devstr != self.settings['devices']:
             self.settings['devices'] = devstr
 
