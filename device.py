@@ -367,7 +367,7 @@ class LatencyFilter(object):
         return self.val
 
 class EnergyMeter(ModbusDevice):
-    allowed_roles = ['grid', 'pvinverter', 'genset']
+    allowed_roles = ['grid', 'pvinverter', 'genset', 'acmeter']
     default_role = 'grid'
     default_instance = 40
 
