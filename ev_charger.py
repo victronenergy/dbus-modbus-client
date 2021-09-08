@@ -29,10 +29,12 @@ class Reg_ver(Reg, int):
 
     def __int__(self):
         v = self.value
-        return v[0] << 24 | v[1] << 16 | v[2] << 8 | v[3]
+        return v[1] << 16 | v[2] << 8 | v[3]
 
     def __str__(self):
-        return '%d.%d.%d.%d' % self.value
+        if self.value[3] == 0xFF:
+            return '%x.%x' % self.value[1:3]
+        return '%x.%x~%x' % self.value[1:4]
 
     def decode(self, values):
         return self.update(struct.unpack('4B', struct.pack('>2H', *values)))
