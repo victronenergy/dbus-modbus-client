@@ -299,7 +299,6 @@ class ModbusDevice(object):
         self.dbus.add_path('/CustomName', self.get_customname(),
                            writeable=True,
                            onchangecallback=self.customname_changed)
-        self.dbus.add_path('/Latency', None)
 
         if self.allowed_roles:
             self.dbus.add_path('/AllowedRoles', self.allowed_roles)
@@ -343,7 +342,6 @@ class ModbusDevice(object):
         if latency:
             self.latency = self.latfilt.filter(latency)
             self.modbus.timeout = max(self.min_timeout, self.latency * 4)
-            self.dbus['/Latency'] = round(self.latency * 1000)
 
 class LatencyFilter(object):
     def __init__(self, val):
