@@ -116,6 +116,7 @@ class Client(object):
         except:
             dev.err_count += 1
             if dev.err_count == MAX_ERRORS:
+                log.info('Device %s failed', dev)
                 if self.err_exit:
                     os._exit(1)
                 self.devices.remove(dev)
