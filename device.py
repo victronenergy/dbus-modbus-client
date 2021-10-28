@@ -334,10 +334,11 @@ class ModbusDevice(object):
 
         latency = []
 
-        for r in self.data_regs:
-            t = self.read_data_regs(r, self.dbus)
-            if t:
-                latency.append(t)
+        with self.dbus as d:
+            for r in self.data_regs:
+                t = self.read_data_regs(r, d)
+                if t:
+                    latency.append(t)
 
         if latency:
             self.latency = self.latfilt.filter(latency)
