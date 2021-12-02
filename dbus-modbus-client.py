@@ -3,6 +3,7 @@
 from argparse import ArgumentParser
 import dbus
 import dbus.mainloop.glib
+import faulthandler
 import os
 import pymodbus.constants
 from settingsdevice import SettingsDevice
@@ -303,6 +304,7 @@ def main():
     logging.getLogger('pymodbus.client.sync').setLevel(logging.CRITICAL)
 
     signal.signal(signal.SIGINT, lambda s, f: os._exit(1))
+    faulthandler.register(signal.SIGUSR1)
 
     dbus.mainloop.glib.threads_init()
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
