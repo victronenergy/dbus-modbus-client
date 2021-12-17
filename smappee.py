@@ -98,7 +98,7 @@ class CurrentTransformer(object):
         return True
 
     def set_phase(self, n):
-        v = 0 if n < 0 else 1 << n
+        v = 0 if n < 0 else 1 << int(n)
         self.phase = n
         self.dev.write_register(self.regs[0], v)
 
