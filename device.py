@@ -186,6 +186,7 @@ class ModbusDevice(object):
         return val[0], int(val[1])
 
     def reinit(self):
+        self.modbus.get()
         self.destroy()
         self.init(self.settings_dbus)
         self.need_reinit = False
