@@ -18,6 +18,7 @@ import mdns
 import probe
 from scan import *
 from utils import *
+import watchdog
 
 import carlo_gavazzi
 import ev_charger
@@ -62,6 +63,7 @@ class Client(object):
         self.err_exit = False
         self.keep_failed = True
         self.svc = None
+        self.watchdog = watchdog.Watchdog()
 
     def start_scan(self, full=False):
         if self.scanner:
@@ -191,6 +193,8 @@ class Client(object):
         if scan:
             self.start_scan(force_scan)
 
+        self.watchdog.start()
+
     def update(self):
         if self.scanner:
             if self.svc:
@@ -219,6 +223,8 @@ class Client(object):
             if self.settings['autoscan']:
                 if now - self.scan_time > SCAN_INTERVAL:
                     self.start_scan()
+
+        self.watchdog.update()
 
     def update_timer(self):
         try:

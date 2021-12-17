@@ -9,6 +9,7 @@ FILES =									\
 	scan.py								\
 	smappee.py							\
 	utils.py							\
+	watchdog.py							\
 
 VELIB =									\
 	settingsdevice.py						\
