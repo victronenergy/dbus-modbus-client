@@ -270,6 +270,9 @@ class PowerBox(device.EnergyMeter):
     def get_ident(self):
         return 'smappee_%s' % self.info['/Serial']
 
+    def write_modbus(self, base, val):
+        self.modbus.write_registers(base, val, unit=self.unit)
+
 models = {
     5400: {
         'model':    'MOD-VAC-1',
