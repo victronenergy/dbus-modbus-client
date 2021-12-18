@@ -1,5 +1,6 @@
 from functools import partial
 import logging
+import time
 
 import device
 import probe
@@ -248,6 +249,7 @@ class PowerBox(device.EnergyMeter):
 
         # save settings to Power Box flash
         self.write_register(Reg_u16(0xfde8), 1)
+        time.sleep(0.25)
 
     def ct_identify(self, ct, path, val):
         ct.identify(val)
