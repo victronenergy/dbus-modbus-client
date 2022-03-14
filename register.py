@@ -121,13 +121,14 @@ class Reg_e16(Reg, int):
         return [self.value]
 
 class Reg_text(Reg, str):
-    def __init__(self, base, count, name, little=False, *args, **kwargs):
+    def __init__(self, base, count, name, little=False, encoding=None, *args, **kwargs):
         super(Reg_text, self).__init__(base, count, name, *args, **kwargs)
+        self.encoding = encoding or 'ascii'
         self.pfmt = '%c%dH' % (['>', '<'][little], count)
 
     def decode(self, values):
         newval = struct.pack(self.pfmt, *values).rstrip(b'\0')
-        newval = str(newval.decode('ascii'))
+        newval = str(newval.decode(self.encoding))
         return self.update(newval)
 
 class Reg_map(Reg):
