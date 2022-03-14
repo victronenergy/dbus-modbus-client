@@ -23,6 +23,11 @@ class EVC_STATUS(IntEnum):
     WELD_CON        = 9
     CP_SHORTED      = 10
 
+class EVC_POSITION(IntEnum):
+    INPUT1 = 0
+    OUTPUT = 1
+    INPUT2 = 2
+
 class Reg_ver(Reg, int):
     def __init__(self, base, name):
         Reg.__init__(self, base, 2, name)
@@ -68,6 +73,7 @@ class EV_Charger(device.ModbusDevice):
             Reg_u16(5018, '/Current',    10, '%.1f A'),
             Reg_u32b(5019, '/ChargingTime', 1, '%d s'),
             Reg_u16(5021, '/Ac/Energy/Forward', 100, '%.2f kWh'),
+            Reg_e16(5026, '/Position', EVC_POSITION, write=True),
         ]
 
     def get_ident(self):
