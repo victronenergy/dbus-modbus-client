@@ -131,6 +131,10 @@ class Reg_text(Reg, str):
         newval = str(newval.decode(self.encoding))
         return self.update(newval)
 
+    def encode(self):
+        return struct.unpack(self.pfmt,
+            self.value.encode(self.encoding).ljust(2 * self.count, b'\0'))
+
 class Reg_map(Reg):
     def __init__(self, base, name, tab, *args, **kwargs):
         super(Reg_map, self).__init__(base, name, *args, **kwargs)
