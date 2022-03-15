@@ -76,8 +76,16 @@ class EV_Charger(device.ModbusDevice):
             Reg_e16(5026, '/Position', EVC_POSITION, write=True),
         ]
 
+        self.cn_reg = Reg_text(5027, 22, None, little=True, encoding='utf-8')
+
     def get_ident(self):
         return 'evc_%s' % self.info['/Serial']
+
+    def get_customname(self):
+        return self.read_register(self.cn_reg)
+
+    def set_customname(self, val):
+        self.write_register(self.cn_reg, val)
 
 models = {
     0xc024: {
