@@ -149,22 +149,12 @@ class ModbusDevice(object):
 
         SETTINGS = {
             'instance':   [path + '/ClassAndVrmInstance', def_inst, 0, 0],
-            'customname': [path + '/CustomName', '', 0, 0],
         }
 
         self.settings = SettingsDevice(dbus, SETTINGS, self.setting_changed)
         self.role, self.devinst = self.get_role_instance()
 
-        if self.role == 'pvinverter':
-            self.settings.addSettings({
-                'position': [path + '/Position', 0, 0, 2]
-            })
-
     def setting_changed(self, name, old, new):
-        if name == 'customname':
-            self.dbus['/CustomName'] = new
-            return
-
         if name == 'instance':
             role, inst = self.get_role_instance()
 
@@ -194,29 +184,12 @@ class ModbusDevice(object):
     def sched_reinit(self):
         self.need_reinit = True
 
-    def get_customname(self):
-        return self.settings['customname']
-
-    def set_customname(self, val):
-        self.settings['customname'] = val
-
-    def customname_changed(self, path, val):
-        self.set_customname(val)
-        return True
-
     def role_changed(self, path, val):
         if val not in self.allowed_roles:
             return False
 
         old, inst = self.get_role_instance()
         self.settings['instance'] = '%s:%s' % (val, inst)
-        return True
-
-    def position_changed(self, path, val):
-        if not 0 <= val <= 2:
-            return False
-
-        self.settings['position'] = val
         return True
 
     def dbus_write_register(self, reg, path, val):
@@ -297,9 +270,6 @@ class ModbusDevice(object):
         self.dbus.add_path('/ProductName', self.productname)
         self.dbus.add_path('/Model', self.model)
         self.dbus.add_path('/Connected', 1)
-        self.dbus.add_path('/CustomName', self.get_customname(),
-                           writeable=True,
-                           onchangecallback=self.customname_changed)
 
         if self.allowed_roles:
             self.dbus.add_path('/AllowedRoles', self.allowed_roles)
@@ -307,11 +277,6 @@ class ModbusDevice(object):
                                onchangecallback=self.role_changed)
         else:
             self.dbus.add_path('/Role', self.role)
-
-        if self.role == 'pvinverter':
-            self.dbus.add_path('/Position', self.settings['position'],
-                               writeable=True,
-                               onchangecallback=self.position_changed)
 
         for p in self.info:
             self.dbus_add_register(self.info[p])
@@ -370,6 +335,45 @@ class EnergyMeter(ModbusDevice):
     allowed_roles = ['grid', 'pvinverter', 'genset', 'acload']
     default_role = 'grid'
     default_instance = 40
+
+    def customname_setting_changed(self, service, path, value):
+        self.dbus['/CustomName'] = value['Value']
+
+    def position_setting_changed(self, service, path, value):
+        self.dbus['/Position'] = value['Value']
+
+    def init_device_settings(self, dbus):
+        super(EnergyMeter, self).init_device_settings(dbus)
+        path = '/Settings/Devices/' + self.get_ident()
+        self.cn_item = self.settings.addSetting(path + '/CustomName', '', 0, 0,
+            callback=self.customname_setting_changed)
+
+        self.pos_item = None
+        if self.role == 'pvinverter':
+            self.pos_item = self.settings.addSetting(path + '/Position', 0, 0, 2,
+                callback=self.position_setting_changed)
+
+    def init(self, dbus):
+        super(EnergyMeter, self).init(dbus)
+
+        self.dbus.add_path('/CustomName', self.cn_item.get_value(),
+                           writeable=True,
+                           onchangecallback=self.customname_changed)
+
+        if self.pos_item is not None:
+            self.dbus.add_path('/Position', self.pos_item.get_value(),
+                               writeable=True,
+                               onchangecallback=self.position_changed)
+
+    def customname_changed(self, path, val):
+        self.cn_item.set_value(val)
+        return True
+
+    def position_changed(self, path, val):
+        if not 0 <= val <= 2:
+            return False
+        self.pos_item.set_value(val)
+        return True
 
 __all__ = [
     'EnergyMeter',
