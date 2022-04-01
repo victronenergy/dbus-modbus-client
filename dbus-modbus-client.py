@@ -27,7 +27,7 @@ import logging
 log = logging.getLogger()
 
 NAME = os.path.basename(__file__)
-VERSION = '1.16'
+VERSION = '1.17'
 
 __all__ = ['NAME', 'VERSION']
 
