@@ -85,6 +85,10 @@ models = {
         'model':    'AC22',
         'handler':  EV_Charger,
     },
+    0xc025: {
+        'model':    'AC22E',
+        'handler':  EV_Charger,
+    },
 }
 
 probe.add_handler(probe.ModelRegister(5000, models,
