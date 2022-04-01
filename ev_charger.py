@@ -80,15 +80,25 @@ class EV_Charger(device.ModbusDevice):
     def get_ident(self):
         return 'evc_%s' % self.info['/Serial']
 
+class EV_Charger_AC22E(EV_Charger):
+    productid = 0xc025
+
+class EV_Charger_AC22NS(EV_Charger):
+	productid = 0xc026
+
 models = {
-    0xc024: {
+    EV_Charger.productid: {
         'model':    'AC22',
         'handler':  EV_Charger,
     },
-    0xc025: {
+    EV_Charger_AC22E.productid: {
         'model':    'AC22E',
-        'handler':  EV_Charger,
+        'handler':  EV_Charger_AC22E,
     },
+	EV_Charger_AC22NS.productid: {
+        'model':    'AC22NS',
+        'handler':  EV_Charger_AC22NS,
+	},
 }
 
 probe.add_handler(probe.ModelRegister(5000, models,
