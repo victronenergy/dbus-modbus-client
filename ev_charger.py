@@ -84,7 +84,7 @@ class EV_Charger_AC22E(EV_Charger):
     productid = 0xc025
 
 class EV_Charger_AC22NS(EV_Charger):
-	productid = 0xc026
+    productid = 0xc026
 
 models = {
     EV_Charger.productid: {
@@ -95,10 +95,10 @@ models = {
         'model':    'AC22E',
         'handler':  EV_Charger_AC22E,
     },
-	EV_Charger_AC22NS.productid: {
+    EV_Charger_AC22NS.productid: {
         'model':    'AC22NS',
         'handler':  EV_Charger_AC22NS,
-	},
+    },
 }
 
 probe.add_handler(probe.ModelRegister(5000, models,
