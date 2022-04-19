@@ -74,7 +74,9 @@ class EV_Charger(device.ModbusDevice):
             Reg_u32b(5019, '/ChargingTime', 1, '%d s'),
             Reg_u16(5021, '/Ac/Energy/Forward', 100, '%.2f kWh'),
             Reg_e16(5026, '/Position', EVC_POSITION, write=True),
-            Reg_text(5027, 22, '/CustomName', little=True, encoding='utf-8', write=True)
+            Reg_text(5027, 22, '/CustomName', little=True, encoding='utf-8', write=True),
+            Reg_u16(5049, '/AutoStart', write=(0,1)),
+            Reg_u16(5050, '/EnableDisplay', write=(0, 1))
         ]
 
     def get_ident(self):
