@@ -10,6 +10,10 @@ class EVC_MODE(IntEnum):
     MANUAL          = 0
     AUTO            = 1
 
+class EVC_CHARGE(IntEnum):
+    DISABLED = 0
+    ENABLED  = 1
+
 class EVC_STATUS(IntEnum):
     DISCONNECTED    = 0
     CONNECTED       = 1
@@ -62,7 +66,7 @@ class EV_Charger(device.ModbusDevice):
 
         self.data_regs = [
             Reg_e16(5009, '/Mode', EVC_MODE, write=True),
-            Reg_u16(5010, '/StartStop', write=[0, 1]),
+            Reg_e16(5010, '/StartStop', EVC_CHARGE, write=True),
             Reg_u16(5011, '/Ac/L1/Power', 1, '%d W'),
             Reg_u16(5012, '/Ac/L2/Power', 1, '%d W'),
             Reg_u16(5013, '/Ac/L3/Power', 1, '%d W'),
