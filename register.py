@@ -1,5 +1,5 @@
 import struct
-from utils import get_enum
+from utils import get_enum, get_super
 
 AGE_LIMIT_DEFAULT = 4
 
@@ -54,6 +54,10 @@ class Reg(object):
         old = self.value
         self.value = newval
         return newval != old
+
+    @property
+    def datatype(self):
+        return get_super(Reg, self)
 
 class Reg_num(Reg, float):
     def __init__(self, base, count, name=None, scale=1, text=None, write=False):

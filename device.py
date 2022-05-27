@@ -194,7 +194,7 @@ class ModbusDevice(object):
 
     def dbus_write_register(self, reg, path, val):
         try:
-            val = get_super(Reg, reg)(val)
+            val = reg.datatype(val)
 
             if callable(reg.write):
                 return reg.write(val)
