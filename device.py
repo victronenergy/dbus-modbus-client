@@ -218,9 +218,9 @@ class ModbusDevice(object):
         v = r if r.isvalid() else None
         if r.write:
             cb = partial(self.dbus_write_register, r)
-            self.dbus.add_path(r.name, v, writeable=True, onchangecallback=cb)
+            self.dbus.add_path(r.name, v, writeable=True, onchangecallback=cb, valuetype=r.datatype)
         else:
-            self.dbus.add_path(r.name, v)
+            self.dbus.add_path(r.name, v, valuetype=r.datatype)
 
     def pack_regs(self, regs):
         rr = []
