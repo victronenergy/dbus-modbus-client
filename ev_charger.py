@@ -75,9 +75,14 @@ class EV_Charger(device.ModbusDevice):
             Reg_u16(5021, '/Ac/Energy/Forward', 100, '%.2f kWh'),
             Reg_e16(5026, '/Position', EVC_POSITION, write=True),
             Reg_text(5027, 22, '/CustomName', little=True, encoding='utf-8', write=True),
-            Reg_u16(5049, '/AutoStart', write=(0,1)),
-            Reg_u16(5050, '/EnableDisplay', write=(0, 1))
+            Reg_u16(5049, '/AutoStart', write=(0,1))
         ]
+
+    def device_init(self):
+        # Firmware check, before 1.21~1 we could only fetch 50 registers
+        if self.read_register(self.info_regs[1]) >= (0, 0x01, 0x21, 0x01):
+            self.data_regs.append(
+                Reg_u16(5050, '/EnableDisplay', write=(0, 1)))
 
     def get_ident(self):
         return 'evc_%s' % self.info['/Serial']
