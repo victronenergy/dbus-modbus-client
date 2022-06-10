@@ -106,6 +106,12 @@ class Reg_f32l(Reg_num):
         super(Reg_f32l, self).__init__(base, 2, *args, **kwargs)
         self.coding = ('<f', '<2H')
         self.scale = float(self.scale)
+        
+class Reg_f32b(Reg_num):
+    def __init__(self, base, *args, **kwargs):
+        super(Reg_f32b, self).__init__(base, 2, *args, **kwargs)
+        self.coding = ('>f', '>2H')
+        self.scale = float(self.scale)          
 
 class Reg_e16(Reg, int):
     def __init__(self, base, name, enum, *args, **kwargs):
