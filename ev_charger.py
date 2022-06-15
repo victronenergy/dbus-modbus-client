@@ -28,9 +28,8 @@ class EVC_STATUS(IntEnum):
     CP_SHORTED      = 10
 
 class EVC_POSITION(IntEnum):
-    INPUT1 = 0
-    OUTPUT = 1
-    INPUT2 = 2
+    OUTPUT = 0
+    INPUT = 1
 
 class Reg_ver(Reg, int):
     def __init__(self, base, name):
