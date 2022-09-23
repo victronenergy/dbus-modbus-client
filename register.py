@@ -91,6 +91,11 @@ class Reg_u32b(Reg_num):
         super(Reg_u32b, self).__init__(base, 2, *args, **kwargs)
         self.coding = ('>I', '>2H')
 
+class Reg_u64b(Reg_num):
+    def __init__(self, base, *args, **kwargs):
+        super(Reg_u64b, self).__init__(base, 4, *args, **kwargs)
+        self.coding = ('>Q', '>4H')
+
 class Reg_s32l(Reg_num):
     def __init__(self, base, *args, **kwargs):
         super(Reg_s32l, self).__init__(base, 2, *args, **kwargs)
