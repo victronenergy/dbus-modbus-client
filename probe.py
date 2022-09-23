@@ -202,13 +202,14 @@ class ModelRegister(object):
         with modbus, utils.timeout(modbus, timeout or self.timeout):
             if not modbus.connect():
                 raise Exception('connection error')
-            rr = modbus.read_holding_registers(self.reg, 1, unit=unit)
+            rr = modbus.read_holding_registers(self.reg.base, self.reg.count,
+                unit=unit)
 
         if not isinstance(rr, ReadHoldingRegistersResponse):
             log.debug('%s: %s', modbus, rr)
             return None
 
-        v = rr.registers[0]
-        if v in self.models:
-            m = self.models[v]
+        self.reg.decode(rr.registers)
+        if self.reg.value in self.models:
+            m = self.models[self.reg.value]
             return m['handler'](modbus, unit, m['model'])

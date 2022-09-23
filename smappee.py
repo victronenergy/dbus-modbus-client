@@ -282,7 +282,7 @@ models = {
     },
 }
 
-probe.add_handler(probe.ModelRegister(0x1620, models,
+probe.add_handler(probe.ModelRegister(Reg_u16(0x1620), models,
                                       methods=['rtu', 'tcp'],
                                       rates=[38400],
                                       units=[61]))

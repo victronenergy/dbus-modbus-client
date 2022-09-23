@@ -111,7 +111,7 @@ models = {
     },
 }
 
-probe.add_handler(probe.ModelRegister(5000, models,
+probe.add_handler(probe.ModelRegister(Reg_u16(5000), models,
                                       methods=['tcp'],
                                       units=[1]))
 mdns.add_service('_victron-car-charger._tcp')
