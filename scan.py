@@ -37,13 +37,19 @@ class Scanner(object):
 
     def run(self):
         try:
+            t0 = time.time()
             self.scan()
-            log.info('Scan complete')
+            t1 = time.time()
         except ScanAborted:
-            log.info('Scan aborted')
+            pass
         except:
             log.warn('Exception during bus scan')
             traceback.print_exc()
+
+        if self.running:
+            log.info('Scan completed in %d seconds', t1 - t0)
+        else:
+            log.info('Scan aborted')
 
         self.running = False
 
