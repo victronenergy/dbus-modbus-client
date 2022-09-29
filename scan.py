@@ -73,9 +73,9 @@ class Scanner(object):
             return d
 
 class NetScanner(Scanner):
-    def __init__(self, proto, port, unit, blacklist, timeout=0.25):
+    def __init__(self, port, unit, blacklist, timeout=0.25):
         Scanner.__init__(self)
-        self.proto = proto
+        self.proto = 'tcp'
         self.port = port
         self.unit = unit
         self.blacklist = blacklist

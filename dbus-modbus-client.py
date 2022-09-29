@@ -241,13 +241,11 @@ class Client(object):
         return True
 
 class NetClient(Client):
-    def __init__(self, proto):
-        Client.__init__(self, proto)
-        self.proto = proto
+    def __init__(self):
+        Client.__init__(self, 'tcp')
 
     def new_scanner(self, full):
-        return NetScanner(self.proto, MODBUS_TCP_PORT, MODBUS_TCP_UNIT,
-                          if_blacklist)
+        return NetScanner(MODBUS_TCP_PORT, MODBUS_TCP_UNIT, if_blacklist)
 
     def init(self, *args):
         super(NetClient, self).init(*args)
@@ -326,7 +324,7 @@ def main():
         tty = os.path.basename(args.serial)
         client = SerialClient(tty, args.rate, args.mode)
     else:
-        client = NetClient('tcp')
+        client = NetClient()
 
     client.err_exit = args.exit
     client.init(args.force_scan)
