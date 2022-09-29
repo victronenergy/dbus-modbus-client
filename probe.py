@@ -59,6 +59,7 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None, filt=None):
                 log.info('Found %s at %s', d.model, d)
                 d.method = m[0]
                 d.latency = t1 - t0
+                d.timeout = max(d.min_timeout, d.latency * 4)
                 found.append(d)
                 break
 
