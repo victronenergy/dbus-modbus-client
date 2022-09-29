@@ -38,6 +38,16 @@ class TcpClient(RefCount, ModbusTcpClient):
 class UdpClient(RefCount, ModbusUdpClient):
     method = 'udp'
 
+    @property
+    def timeout(self):
+        return self._timeout
+
+    @timeout.setter
+    def timeout(self, t):
+        self._timeout = t
+        if self.socket:
+            self.socket.settimeout(t)
+
 class SerialClient(RefCount, ModbusSerialClient):
     def __init__(self, *args, **kwargs):
         super(SerialClient, self).__init__(*args, **kwargs)
