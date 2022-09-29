@@ -2,6 +2,7 @@ FILES =									\
 	dbus-modbus-client.py						\
 	abb.py								\
 	carlo_gavazzi.py						\
+	client.py							\
 	comap.py							\
 	device.py							\
 	ev_charger.py							\
