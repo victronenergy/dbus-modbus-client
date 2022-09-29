@@ -66,9 +66,12 @@ class ModbusDevice(object):
         return str(self.modbus)
 
     def connection(self):
-        if self.method in ['tcp', 'udp']:
+        if self.method == 'tcp':
             return 'Modbus %s %s' % (self.method.upper(),
                                      self.modbus.socket.getpeername()[0])
+        elif self.method == 'udp':
+            return 'Modbus %s %s' % (self.method.upper(),
+                                     self.modbus.host)
         elif self.method in ['rtu', 'ascii']:
             return 'Modbus %s %s:%d' % (self.method.upper(),
                                         os.path.basename(self.modbus.port),
@@ -228,6 +231,8 @@ class ModbusDevice(object):
         overhead = 5 + 2                # request + response
         if self.method == 'tcp':
             overhead += 2 * (20 + 7)    # TCP + MBAP
+        elif self.method == 'udp':
+            overhead += 2 * (8 + 7)     # UDP + MBAP
         elif self.method == 'rtu':
             overhead += 2 * (1 + 2)     # address + crc
 
