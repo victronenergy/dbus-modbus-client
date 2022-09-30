@@ -1,7 +1,6 @@
 from copy import copy
 import dbus
 from functools import partial
-from pymodbus.client.sync import *
 from pymodbus.register_read_message import ReadHoldingRegistersResponse
 import logging
 import os
@@ -54,27 +53,24 @@ class ModbusDevice(object):
         return hash(str(self))
 
     def __str__(self):
-        if isinstance(self.modbus, ModbusTcpClient):
-            return 'tcp:%s:%d:%d' % (self.modbus.host,
-                                     self.modbus.port,
-                                     self.unit)
-        elif isinstance(self.modbus, ModbusUdpClient):
-            return 'udp:%s:%d:%d' % (self.modbus.host,
-                                     self.modbus.port,
-                                     self.unit)
-        elif isinstance(self.modbus, ModbusSerialClient):
-            return '%s:%s:%d:%d' % (self.modbus.method,
+        if self.method in ['tcp', 'udp']:
+            return '%s:%s:%d:%d' % (self.method,
+                                    self.modbus.host,
+                                    self.modbus.port,
+                                    self.unit)
+        elif self.method in ['rtu', 'ascii']:
+            return '%s:%s:%d:%d' % (self.method,
                                     os.path.basename(self.modbus.port),
                                     self.modbus.baudrate,
                                     self.unit)
         return str(self.modbus)
 
     def connection(self):
-        if isinstance(self.modbus, (ModbusTcpClient, ModbusUdpClient)):
+        if self.method in ['tcp', 'udp']:
             return 'Modbus %s %s' % (self.method.upper(),
                                      self.modbus.socket.getpeername()[0])
-        elif isinstance(self.modbus, ModbusSerialClient):
-            return 'Modbus %s %s:%d' % (self.modbus.method.upper(),
+        elif self.method in ['rtu', 'ascii']:
+            return 'Modbus %s %s:%d' % (self.method.upper(),
                                         os.path.basename(self.modbus.port),
                                         self.unit)
         return 'Modbus'
