@@ -13,6 +13,7 @@ FILES =									\
 	scan.py								\
 	smappee.py							\
 	utils.py							\
+	victron_em.py							\
 	victron_regs.py							\
 	vreglink.py							\
 	watchdog.py							\
