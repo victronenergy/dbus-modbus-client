@@ -1,3 +1,5 @@
+from itertools import chain
+import queue
 import threading
 import logging
 import time
@@ -75,17 +77,54 @@ class Scanner(object):
 class NetScanner(Scanner):
     def __init__(self, port, blacklist, timeout=0.25):
         Scanner.__init__(self)
-        self.proto = 'tcp'
+        self.protos = ['tcp']
         self.port = port
         self.blacklist = blacklist
         self.timeout = timeout
 
+    def do_probe(self):
+        while True:
+            host = self.hosts.get()
+            if not host or not self.running:
+                break
+
+            m = [[p, str(host), self.port, 0] for p in self.protos]
+
+            try:
+                probe.probe(m, self.progress, timeout=self.timeout)
+            except:
+                pass
+
+            self.hosts.task_done()
+
     def scan(self):
-        for net in self.nets:
-            log.info('Scanning %s', net)
-            hosts = filter(net.ip.__ne__, net.network.hosts())
-            mlist = [[self.proto, str(h), self.port, 0] for h in hosts]
-            probe.probe(mlist, self.progress, 4, timeout=self.timeout)
+        self.hosts = queue.Queue(maxsize=8)
+        tasks = []
+
+        log.info('Scanning %s', ', '.join(map(str, self.nets)))
+
+        for i in range(8):
+            t = threading.Thread(target=self.do_probe)
+            t.start()
+            tasks.append(t)
+
+        for h in chain(*map(lambda n: filter(n.ip.__ne__, n.network.hosts()), self.nets)):
+            if not self.running:
+                break
+
+            self.hosts.put(h)
+
+        if self.running:
+            self.hosts.join()
+
+        for t in tasks:
+            if not self.hosts.full():
+                self.hosts.put(None)
+
+        for t in tasks:
+            t.join()
+
+        self.hosts = None
 
     def start(self):
         self.nets = get_networks(self.blacklist)
@@ -93,7 +132,8 @@ class NetScanner(Scanner):
             log.warn('Unable to get network addresses')
             return False
 
-        self.total = sum([n.network.num_addresses - 3 for n in self.nets])
+        num_hosts = sum([n.network.num_addresses - 3 for n in self.nets])
+        self.total = len(self.protos) * num_hosts
 
         return Scanner.start(self)
 
