@@ -33,10 +33,10 @@ class RefCount(object):
             self.in_transaction = False
 
 class TcpClient(RefCount, ModbusTcpClient):
-    pass
+    method = 'tcp'
 
 class UdpClient(RefCount, ModbusUdpClient):
-    pass
+    method = 'udp'
 
 class SerialClient(RefCount, ModbusSerialClient):
     def __init__(self, *args, **kwargs):
