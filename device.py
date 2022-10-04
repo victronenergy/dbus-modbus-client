@@ -22,6 +22,7 @@ class ModbusDevice(object):
 
     def __init__(self, modbus, unit, model):
         self.modbus = modbus.get()
+        self.method = modbus.method
         self.unit = unit
         self.model = model
         self.role = None
