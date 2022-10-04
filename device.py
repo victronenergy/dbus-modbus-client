@@ -298,6 +298,7 @@ class ModbusDevice(object):
         if self.need_reinit:
             self.reinit()
 
+        self.modbus.timeout = self.timeout
         latency = []
 
         with self.dbus as d:
@@ -308,7 +309,7 @@ class ModbusDevice(object):
 
         if latency:
             self.latency = self.latfilt.filter(latency)
-            self.modbus.timeout = max(self.min_timeout, self.latency * 4)
+            self.timeout = max(self.min_timeout, self.latency * 4)
 
 class LatencyFilter(object):
     def __init__(self, val):
