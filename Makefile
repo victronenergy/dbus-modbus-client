@@ -10,6 +10,7 @@ FILES =									\
 	smappee.py							\
 	utils.py							\
 	watchdog.py							\
+	abb.py								\
 
 VELIB =									\
 	settingsdevice.py						\
