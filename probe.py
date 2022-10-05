@@ -140,10 +140,15 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
             if t.methods and m[0] not in t.methods:
                 continue
 
+            units = [unit] if unit > 0 else t.units
+
             try:
-                t0 = time.time()
-                d = t.probe(modbus, unit, timeout)
-                t1 = time.time()
+                for u in units:
+                    t0 = time.time()
+                    d = t.probe(modbus, u, timeout)
+                    t1 = time.time()
+                    if d:
+                        break
             except:
                 break
 
