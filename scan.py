@@ -73,11 +73,10 @@ class Scanner(object):
             return d
 
 class NetScanner(Scanner):
-    def __init__(self, port, unit, blacklist, timeout=0.25):
+    def __init__(self, port, blacklist, timeout=0.25):
         Scanner.__init__(self)
         self.proto = 'tcp'
         self.port = port
-        self.unit = unit
         self.blacklist = blacklist
         self.timeout = timeout
 
@@ -85,7 +84,7 @@ class NetScanner(Scanner):
         for net in self.nets:
             log.info('Scanning %s', net)
             hosts = filter(net.ip.__ne__, net.network.hosts())
-            mlist = [[self.proto, str(h), self.port, self.unit] for h in hosts]
+            mlist = [[self.proto, str(h), self.port, 0] for h in hosts]
             probe.probe(mlist, self.progress, 4, timeout=self.timeout)
 
     def start(self):

@@ -37,7 +37,6 @@ __all__ = ['NAME', 'VERSION']
 pymodbus.constants.Defaults.Timeout = 0.5
 
 MODBUS_TCP_PORT = 502
-MODBUS_TCP_UNIT = 1
 
 MAX_ERRORS = 5
 FAILED_INTERVAL = 10
@@ -245,7 +244,7 @@ class NetClient(Client):
         Client.__init__(self, 'tcp')
 
     def new_scanner(self, full):
-        return NetScanner(MODBUS_TCP_PORT, MODBUS_TCP_UNIT, if_blacklist)
+        return NetScanner(MODBUS_TCP_PORT, if_blacklist)
 
     def init(self, *args):
         super(NetClient, self).init(*args)
