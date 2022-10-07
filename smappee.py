@@ -169,7 +169,7 @@ class PowerBox(device.EnergyMeter):
         ]
 
         self.power_regs += [
-            Reg_f32l(0x0380 + 2 * s, '/Ac/L%d/Power' % n, 1, '%.1f W'),
+            Reg_f32l(0x0380 + 2 * s, '/Ac/L%d/Power' % n, 1, '%.1f W', max_age=0),
         ]
 
         self.energy_regs += [
@@ -190,7 +190,7 @@ class PowerBox(device.EnergyMeter):
             return
 
         self.data_regs += [
-            Reg_f32l(0x03c0, '/Ac/Power', 1, '%.1f W'),
+            Reg_f32l(0x03c0, '/Ac/Power', 1, '%.1f W', max_age=0),
             Reg_s32l(0x3100, '/Ac/Energy/Forward', 1000, '%.1f kWh'),
             Reg_s32l(0x3102, '/Ac/Energy/Reverse', 1000, '%.1f kWh'),
         ]
