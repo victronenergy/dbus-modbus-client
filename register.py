@@ -14,14 +14,14 @@ class Reg(object):
     def __new__(cls, *args, **kwargs):
         return super(Reg, cls).__new__(cls)
 
-    def __init__(self, base, count, name=None, text=None, write=False):
+    def __init__(self, base, count, name=None, text=None, write=False, max_age=None):
         self.base = base
         self.count = count
         self.name = name
         self.value = None
         self.write = write
         self.time = 0
-        self.max_age = AGE_LIMITS.get(name, AGE_LIMIT_DEFAULT)
+        self.max_age = max_age if max_age is not None else AGE_LIMITS.get(name, AGE_LIMIT_DEFAULT)
         if isinstance(text, list):
             self.text = { i : text[i] for i in range(len(text)) }
         else:
@@ -56,8 +56,8 @@ class Reg(object):
         return newval != old
 
 class Reg_num(Reg, float):
-    def __init__(self, base, count, name=None, scale=1, text=None, write=False):
-        Reg.__init__(self, base, count, name, text, write)
+    def __init__(self, base, count, name=None, scale=1, text=None, write=False, **kwargs):
+        Reg.__init__(self, base, count, name, text, write, **kwargs)
         self.scale = float(scale) if scale != 1 else scale
 
     def set_raw_value(self, val):
