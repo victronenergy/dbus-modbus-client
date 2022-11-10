@@ -81,5 +81,5 @@ models = {
 }
 
 probe.add_handler(probe.ModelRegister(Reg_u32b(0x8960), models,
-                                      methods=['rtu'],
+                                      methods=['rtu', 'tcp'],
                                       units=[1, 2]))
