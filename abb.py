@@ -1,6 +1,17 @@
+import struct
 import device
 import probe
-from register import Reg_s32b, Reg_u16, Reg_u32b, Reg_u64b, Reg_text
+from register import Reg, Reg_s32b, Reg_u16, Reg_u32b, Reg_u64b, Reg_text
+
+class Reg_serial(Reg, str):
+    """ ABB meters use a 32-bit integer as serial number. Make it a string
+        because that is what dbus (and modbus-tcp) expects. """
+    def __init__(self, base, name):
+        Reg.__init__(self, base, 2, name)
+
+    def decode(self, values):
+        v = struct.unpack('>i', struct.pack('>2H', *values))
+        return self.update(str(v[0]))
 
 class ABB_Meter(device.EnergyMeter):
     productid = 0xb033
@@ -10,7 +21,7 @@ class ABB_Meter(device.EnergyMeter):
         super(ABB_Meter, self).__init__(*args)
 
         self.info_regs = [
-            Reg_s32b(0x8900, '/Serial'),
+            Reg_serial(0x8900, '/Serial'),
             Reg_text(0x8908, 8, '/FirmwareVersion'),
         ]
 
