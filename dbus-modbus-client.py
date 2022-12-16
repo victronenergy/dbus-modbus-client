@@ -313,6 +313,7 @@ def main():
 
     signal.signal(signal.SIGINT, lambda s, f: os._exit(1))
     faulthandler.register(signal.SIGUSR1)
+    faulthandler.enable()
 
     dbus.mainloop.glib.threads_init()
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
