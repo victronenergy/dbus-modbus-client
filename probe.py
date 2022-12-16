@@ -113,7 +113,7 @@ def make_modbus(m):
 
     return client
 
-def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
+def probe(mlist, pr_cb=None, pr_interval=10, timeout=None, filt=None):
     num_probed = 0
     found = []
     failed = []
@@ -144,6 +144,11 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None):
 
             try:
                 for u in units:
+                    m[-1] = str(u)
+
+                    if filt and not filt(m):
+                        continue
+
                     t0 = time.time()
                     d = t.probe(modbus, u, timeout)
                     t1 = time.time()

@@ -129,9 +129,12 @@ class Client(object):
                     self.failed.append(str(dev))
                 dev.destroy()
 
+    def probe_filter(self, dev):
+        return ':'.join(dev) not in self.devices
+
     def probe_devices(self, devlist, nosave=False):
         devs = set(devlist) - set(self.devices)
-        devs, failed = probe.probe(devs)
+        devs, failed = probe.probe(devs, filt=self.probe_filter)
 
         for d in devs:
             try:
