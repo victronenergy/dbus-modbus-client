@@ -9,6 +9,7 @@ from register import *
 class EVC_MODE(IntEnum):
     MANUAL          = 0
     AUTO            = 1
+    SCHEDULED       = 2
 
 class EVC_CHARGE(IntEnum):
     DISABLED = 0
@@ -26,6 +27,13 @@ class EVC_STATUS(IntEnum):
     GND_ERROR       = 8
     WELD_CON        = 9
     CP_SHORTED      = 10
+    EARTH_LEAKAGE   = 11
+    UNDERVOLTAGE    = 12
+    OVERVOLTAGE     = 13
+    OVERTEMPERATURE = 14
+    STARTCHARGE     = 21
+    SWITCH_TO_3P    = 22
+    SWITCH_TO_1P    = 23
 
 class EVC_POSITION(IntEnum):
     OUTPUT = 0
