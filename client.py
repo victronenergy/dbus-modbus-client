@@ -83,25 +83,22 @@ class SerialClient(RefCount, ModbusSerialClient):
 serial_ports = {}
 
 def make_client(m):
-    method = m[0]
+    if m.method == 'tcp':
+        return TcpClient(m.target, m.port)
 
-    if method == 'tcp':
-        return TcpClient(m[1], int(m[2]))
+    if m.method == 'udp':
+        return UdpClient(m.target, m.port)
 
-    if method == 'udp':
-        return UdpClient(m[1], int(m[2]))
-
-    tty = m[1]
-    rate = int(m[2])
+    tty = m.target
 
     if tty in serial_ports:
         client = serial_ports[tty]
-        if client.baudrate != rate:
+        if client.baudrate != m.rate:
             raise Exception('rate mismatch on %s' % tty)
         return client.get()
 
     dev = '/dev/%s' % tty
-    client = SerialClient(method, port=dev, baudrate=rate)
+    client = SerialClient(m.method, port=dev, baudrate=m.rate)
     if not client.connect():
         client.put()
         return None

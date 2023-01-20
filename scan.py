@@ -7,6 +7,7 @@ import traceback
 
 from utils import *
 import device
+import devspec
 import probe
 
 log = logging.getLogger()
@@ -88,7 +89,7 @@ class NetScanner(Scanner):
             if not host or not self.running:
                 break
 
-            m = [[p, str(host), self.port, 0] for p in self.protos]
+            m = [devspec.create(p, str(host), self.port) for p in self.protos]
 
             try:
                 probe.probe(m, self.progress, timeout=self.timeout)
@@ -152,7 +153,7 @@ class SerialScanner(Scanner):
             time.sleep(1)
 
     def scan_units(self, units, rate):
-        mlist = [[self.mode, self.tty, rate, u] for u in units]
+        mlist = [devspec.create(self.mode, self.tty, rate, u) for u in units]
         d = probe.probe(mlist, self.progress, 1, timeout=self.timeout)
         return d[0]
 

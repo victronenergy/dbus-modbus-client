@@ -19,10 +19,11 @@ log = logging.getLogger()
 class ModbusDevice(object):
     min_timeout = 0.1
 
-    def __init__(self, modbus, unit, model):
+    def __init__(self, spec, modbus, model):
+        self.spec = spec
         self.modbus = modbus.get()
         self.method = modbus.method
-        self.unit = unit
+        self.unit = spec.unit
         self.model = model
         self.role = None
         self.info = {}
@@ -43,27 +44,13 @@ class ModbusDevice(object):
         self.modbus.put()
 
     def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return str(self) == str(other)
-        if isinstance(other, (str, type(u''))):
-            return str(self) == other
-        return False
+        return str(self) == str(other)
 
     def __hash__(self):
-        return hash(str(self))
+        return hash(self.spec)
 
     def __str__(self):
-        if self.method in ['tcp', 'udp']:
-            return '%s:%s:%d:%d' % (self.method,
-                                    self.modbus.host,
-                                    self.modbus.port,
-                                    self.unit)
-        elif self.method in ['rtu', 'ascii']:
-            return '%s:%s:%d:%d' % (self.method,
-                                    os.path.basename(self.modbus.port),
-                                    self.modbus.baudrate,
-                                    self.unit)
-        return str(self.modbus)
+        return str(self.spec)
 
     def connection(self):
         if self.method == 'tcp':

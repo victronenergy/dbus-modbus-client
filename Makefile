@@ -5,6 +5,7 @@ FILES =									\
 	client.py							\
 	comap.py							\
 	device.py							\
+	devspec.py							\
 	ev_charger.py							\
 	mdns.py								\
 	probe.py							\

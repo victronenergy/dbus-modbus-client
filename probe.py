@@ -17,15 +17,9 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None, filt=None):
     failed = []
 
     for m in mlist:
-        if isinstance(m, (str, type(u''))):
-            m = m.split(':')
-
-        if len(m) < 4:
-            continue
-
         try:
             modbus = client.make_client(m)
-            unit = int(m[-1])
+            unit = m.unit
         except:
             continue
 
@@ -35,20 +29,20 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None, filt=None):
         d = None
 
         for t in device_types:
-            if t.methods and m[0] not in t.methods:
+            if t.methods and m.method not in t.methods:
                 continue
 
             units = [unit] if unit > 0 else t.units
 
             try:
                 for u in units:
-                    m[-1] = str(u)
+                    mm = m._replace(unit=u)
 
-                    if filt and not filt(m):
+                    if filt and not filt(mm):
                         continue
 
                     t0 = time.time()
-                    d = t.probe(modbus, u, timeout)
+                    d = t.probe(mm, modbus, timeout)
                     t1 = time.time()
                     if d:
                         break
@@ -63,7 +57,7 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None, filt=None):
                 break
 
         if not d:
-            failed.append(':'.join(map(str, m)))
+            failed.append(m)
 
         modbus.put()
         num_probed += 1
@@ -106,12 +100,12 @@ class ModelRegister(object):
         self.units = args.get('units', [])
         self.rates = args.get('rates', [])
 
-    def probe(self, modbus, unit, timeout=None):
+    def probe(self, spec, modbus, timeout=None):
         with modbus, utils.timeout(modbus, timeout or self.timeout):
             if not modbus.connect():
                 raise Exception('connection error')
             rr = modbus.read_holding_registers(self.reg.base, self.reg.count,
-                unit=unit)
+                unit=spec.unit)
 
         if not isinstance(rr, ReadHoldingRegistersResponse):
             log.debug('%s: %s', modbus, rr)
@@ -120,4 +114,4 @@ class ModelRegister(object):
         self.reg.decode(rr.registers)
         if self.reg.value in self.models:
             m = self.models[self.reg.value]
-            return m['handler'](modbus, unit, m['model'])
+            return m['handler'](spec, modbus, m['model'])

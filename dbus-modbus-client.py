@@ -14,6 +14,7 @@ from vedbus import VeDbusService
 from gi.repository import GLib
 
 import device
+import devspec
 import mdns
 import probe
 from scan import *
@@ -125,11 +126,11 @@ class Client(object):
                     os._exit(1)
                 self.devices.remove(dev)
                 if not dev.nosave:
-                    self.failed.append(str(dev))
+                    self.failed.append(dev.spec)
                 dev.destroy()
 
     def probe_filter(self, dev):
-        return ':'.join(dev) not in self.devices
+        return dev not in self.devices
 
     def probe_devices(self, devlist, nosave=False):
         devs = set(devlist) - set(self.devices)
@@ -141,20 +142,20 @@ class Client(object):
                 d.nosave = nosave
                 self.devices.append(d)
             except:
-                failed.append(str(d))
+                failed.append(d.spec)
                 d.destroy()
 
         return failed
 
     def save_devices(self):
-        devs = filter(lambda d: not d.nosave, self.devices)
-        devstr = ','.join(sorted(list(map(str, devs)) + self.failed))
+        devs = list(filter(lambda d: not d.nosave, self.devices))
+        devstr = ','.join(sorted(map(str, devs + self.failed)))
         if devstr != self.settings['devices']:
             self.settings['devices'] = devstr
 
     def update_devlist(self, old, new):
-        old = set(filter(None, old.split(',')))
-        new = set(filter(None, new.split(',')))
+        old = devspec.fromstrings(filter(None, old.split(',')))
+        new = devspec.fromstrings(filter(None, new.split(',')))
         cur = set(self.devices)
         rem = old - new
 
@@ -273,11 +274,7 @@ class NetClient(Client):
             self.mdns_check_time = now
             maddr = self.mdns.get_devices()
             if maddr:
-                units = probe.get_units('tcp')
-                d = []
-                for a in maddr:
-                    d += ['tcp:%s:%s:%d' % (a[0], a[1], u) for u in units]
-                self.probe_devices(d, nosave=True)
+                self.probe_devices(maddr, nosave=True)
 
         return True
 

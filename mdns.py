@@ -6,6 +6,8 @@ import traceback
 
 from dnslib.dns import *
 
+import devspec
+
 log = logging.getLogger()
 
 MDNS_IP = '224.0.0.251'
@@ -79,7 +81,19 @@ class MDNS(object):
                     ptr.append(str(rr.rdata.label))
 
             if rr.rtype == QTYPE.SRV:
-                srv[rname] = (str(rr.rdata.target), rr.rdata.port)
+                if len(rr.rname.label) < 3:
+                    continue
+
+                proto = str(rr.rname.label[-2], encoding='ascii').lstrip('_')
+
+                if proto not in ['tcp', 'udp']:
+                    continue
+
+                srv[rname] = devspec.create(
+                    method=proto,
+                    target=str(rr.rdata.target),
+                    port=rr.rdata.port
+                )
 
         with self.lock:
             for p in ptr:
@@ -129,5 +143,5 @@ if __name__ == '__main__':
     while True:
         devices = mdns.get_devices()
         for d in devices:
-            log.info('%s %d', d[0], d[1])
+            log.info('%s %d', d.target, d.port)
         time.sleep(1)
