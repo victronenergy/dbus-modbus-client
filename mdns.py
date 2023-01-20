@@ -72,6 +72,7 @@ class MDNS(object):
     def parse_record(self, rec):
         ptr = set()
         srv = {}
+        ips = {}
 
         for rr in rec.auth + rec.rr + rec.ar:
             rname = str(rr.rname)
@@ -94,6 +95,14 @@ class MDNS(object):
                     target=str(rr.rdata.target),
                     port=rr.rdata.port
                 )
+
+            if rr.rtype == QTYPE.A:
+                ips[rname] = rr.rdata
+
+        for k, v in srv.items():
+            t = v.target
+            if t in ips:
+                srv[k] = v._replace(target=str(ips[t]))
 
         with self.lock:
             for p in ptr & srv.keys():
