@@ -70,7 +70,7 @@ class MDNS(object):
             return ret
 
     def parse_record(self, rec):
-        ptr = []
+        ptr = set()
         srv = {}
 
         for rr in rec.auth + rec.rr + rec.ar:
@@ -78,7 +78,7 @@ class MDNS(object):
 
             if rr.rtype == QTYPE.PTR:
                 if rname in services:
-                    ptr.append(str(rr.rdata.label))
+                    ptr.add(str(rr.rdata.label))
 
             if rr.rtype == QTYPE.SRV:
                 if len(rr.rname.label) < 3:
@@ -96,9 +96,8 @@ class MDNS(object):
                 )
 
         with self.lock:
-            for p in ptr:
-                if p in srv:
-                    self.found.add(srv[p])
+            for p in ptr & srv.keys():
+                self.found.add(srv[p])
 
     def run(self):
         while True:
