@@ -151,8 +151,8 @@ class Client(object):
             self.settings['devices'] = devstr
 
     def update_devlist(self, old, new):
-        old = set(old.split(','))
-        new = set(new.split(','))
+        old = set(filter(None, old.split(',')))
+        new = set(filter(None, new.split(',')))
         cur = set(self.devices)
         rem = old - new
 
