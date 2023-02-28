@@ -13,6 +13,7 @@ FILES =									\
 	scan.py								\
 	smappee.py							\
 	utils.py							\
+	victron_regs.py							\
 	watchdog.py							\
 
 VELIB =									\

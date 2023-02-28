@@ -5,6 +5,7 @@ import device
 import mdns
 import probe
 from register import *
+from victron_regs import *
 
 class EVC_MODE(IntEnum):
     MANUAL          = 0
@@ -39,22 +40,6 @@ class EVC_POSITION(IntEnum):
     OUTPUT = 0
     INPUT = 1
 
-class Reg_ver(Reg, int):
-    def __init__(self, base, name):
-        Reg.__init__(self, base, 2, name)
-
-    def __int__(self):
-        v = self.value
-        return v[1] << 16 | v[2] << 8 | v[3]
-
-    def __str__(self):
-        if self.value[3] == 0xFF:
-            return '%x.%x' % self.value[1:3]
-        return '%x.%x~%x' % self.value[1:4]
-
-    def decode(self, values):
-        return self.update(struct.unpack('4B', struct.pack('>2H', *values)))
-
 class EV_Charger(device.ModbusDevice):
     allowed_roles = None
     default_role = 'evcharger'
@@ -68,7 +53,7 @@ class EV_Charger(device.ModbusDevice):
 
         self.info_regs = [
             Reg_text(5001, 6, '/Serial', little=True),
-            Reg_ver(5007, '/FirmwareVersion'),
+            VEReg_ver(5007, '/FirmwareVersion'),
         ]
 
         self.data_regs = [
