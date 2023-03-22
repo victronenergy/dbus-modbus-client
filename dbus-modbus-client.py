@@ -24,6 +24,7 @@ import carlo_gavazzi
 import ev_charger
 import smappee
 import abb
+import comap
 
 import logging
 log = logging.getLogger()
