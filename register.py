@@ -56,15 +56,18 @@ class Reg(object):
         return newval != old
 
 class Reg_num(Reg, float):
-    def __init__(self, base, count, name=None, scale=1, text=None, write=False, **kwargs):
+    def __init__(self, base, count, name=None, scale=1, text=None, write=False, invalid=None, **kwargs):
         Reg.__init__(self, base, count, name, text, write, **kwargs)
         self.scale = float(scale) if scale != 1 else scale
+        self.invalid = invalid
 
     def set_raw_value(self, val):
         return self.update(type(self.scale)(val / self.scale))
 
     def decode(self, values):
         v = struct.unpack(self.coding[0], struct.pack(self.coding[1], *values))
+        if v[0] == self.invalid:
+            return self.update(None)
         return self.set_raw_value(v[0])
 
     def encode(self):
