@@ -30,7 +30,7 @@ class ABB_Meter(device.EnergyMeter):
             Reg_s32b(0x5B14, '/Ac/Power',          100, '%.1f W'),
             Reg_u16( 0x5B2C, '/Ac/Frequency',      100, '%.1f Hz'),
             Reg_u64b(0x5000, '/Ac/Energy/Forward', 100, '%.1f kWh'),
-            Reg_u64b(0x5004, '/Ac/Energy/Reverse', 100, '%.1f kWh'),
+            Reg_u64b(0x5004, '/Ac/Energy/Reverse', 100, '%.1f kWh', invalid=0xffffffffffffffff),
 
             # We always have L1 voltage and current
             Reg_u32b(0x5B00, '/Ac/L1/Voltage',      10, '%.1f V'),
@@ -50,7 +50,7 @@ class ABB_Meter_1P(ABB_Meter):
         self.data_regs += [
             Reg_s32b(0x5B14, '/Ac/L1/Power',          100, '%.1f W'),
             Reg_u64b(0x5000, '/Ac/L1/Energy/Forward', 100, '%.1f kWh'),
-            Reg_u64b(0x5004, '/Ac/L1/Energy/Reverse', 100, '%.1f kWh'),
+            Reg_u64b(0x5004, '/Ac/L1/Energy/Reverse', 100, '%.1f kWh', invalid=0xffffffffffffffff),
         ]
 
 class ABB_Meter_3P(ABB_Meter):
@@ -71,9 +71,9 @@ class ABB_Meter_3P(ABB_Meter):
             Reg_u64b(0x5460, '/Ac/L1/Energy/Forward', 100, '%.1f kWh'),
             Reg_u64b(0x5464, '/Ac/L2/Energy/Forward', 100, '%.1f kWh'),
             Reg_u64b(0x5468, '/Ac/L3/Energy/Forward', 100, '%.1f kWh'),
-            Reg_u64b(0x546C, '/Ac/L1/Energy/Reverse', 100, '%.1f kWh'),
-            Reg_u64b(0x5470, '/Ac/L2/Energy/Reverse', 100, '%.1f kWh'),
-            Reg_u64b(0x5474, '/Ac/L3/Energy/Reverse', 100, '%.1f kWh'),
+            Reg_u64b(0x546C, '/Ac/L1/Energy/Reverse', 100, '%.1f kWh', invalid=0xffffffffffffffff),
+            Reg_u64b(0x5470, '/Ac/L2/Energy/Reverse', 100, '%.1f kWh', invalid=0xffffffffffffffff),
+            Reg_u64b(0x5474, '/Ac/L3/Energy/Reverse', 100, '%.1f kWh', invalid=0xffffffffffffffff),
         ]
 
 models = {
