@@ -14,6 +14,7 @@ FILES =									\
 	smappee.py							\
 	utils.py							\
 	victron_regs.py							\
+	vreglink.py							\
 	watchdog.py							\
 
 VELIB =									\
