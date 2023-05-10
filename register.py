@@ -5,12 +5,14 @@ class Reg(object):
     def __new__(cls, *args, **kwargs):
         return super(Reg, cls).__new__(cls)
 
-    def __init__(self, base, count, name=None, text=None, write=False, max_age=None):
+    def __init__(self, base, count, name=None, text=None, write=False,
+                 max_age=None, onchange=None):
         self.base = base
         self.count = count
         self.name = name
         self.value = None
         self.write = write
+        self.onchange = onchange
         self.time = 0
         self.max_age = max_age
         if isinstance(text, list):
@@ -44,7 +46,10 @@ class Reg(object):
     def update(self, newval):
         old = self.value
         self.value = newval
-        return newval != old
+        changed = newval != old
+        if self.onchange and changed:
+            self.onchange(self)
+        return changed
 
 class Reg_num(Reg, float):
     def __init__(self, base, count, name=None, scale=1, text=None, write=False, invalid=None, **kwargs):
