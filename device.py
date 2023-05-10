@@ -166,7 +166,6 @@ class ModbusDevice(object):
         self.modbus.get()
         self.destroy()
         self.init(self.settings_dbus)
-        self.need_reinit = False
 
     def sched_reinit(self):
         self.need_reinit = True
@@ -276,6 +275,7 @@ class ModbusDevice(object):
 
         self.latfilt = LatencyFilter(self.latency)
         self.device_init_late()
+        self.need_reinit = False
 
     def device_init(self):
         pass
