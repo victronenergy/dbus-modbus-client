@@ -131,7 +131,6 @@ class ModbusDevice(object):
         self.settings_dbus = dbus
         self.settings_path = '/Settings/Devices/' + self.get_ident()
 
-        role = self.role or self.default_role
         def_inst = '%s:%s' % (self.default_role, self.default_instance)
 
         SETTINGS = {
@@ -139,7 +138,12 @@ class ModbusDevice(object):
         }
 
         self.settings = SettingsDevice(dbus, SETTINGS, self.setting_changed)
-        self.role, self.devinst = self.get_role_instance()
+        role, self.devinst = self.get_role_instance()
+
+        if self.role:
+            self.settings['instance'] = '%s:%s' % (self.role, self.devinst)
+        else:
+            self.role = role
 
     def setting_changed(self, name, old, new):
         if name == 'instance':
