@@ -13,7 +13,7 @@ class Reg_serial(Reg, str):
         v = struct.unpack('>i', struct.pack('>2H', *values))
         return self.update(str(v[0]))
 
-class ABB_Meter(device.EnergyMeter):
+class ABB_Meter(device.CustomName, device.EnergyMeter):
     productid = 0xb033
     min_timeout = 0.5
 

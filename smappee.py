@@ -111,7 +111,7 @@ class CurrentTransformer(object):
     def identify(self, v):
         self.dev.write_register(Reg_u16(0x0900 + self.slot), v)
 
-class PowerBox(device.EnergyMeter):
+class PowerBox(device.CustomName, device.EnergyMeter):
     productid = 0xb018
     productname = 'Smappee Power Box'
     min_fwver = (1, 44)

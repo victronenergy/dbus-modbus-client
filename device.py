@@ -321,22 +321,36 @@ class LatencyFilter(object):
 
         return self.val
 
+class CustomName:
+    def customname_setting_changed(self, service, path, value):
+        self.dbus['/CustomName'] = value['Value']
+
+    def init_device_settings(self, dbus):
+        super().init_device_settings(dbus)
+        self.cn_item = self.settings.addSetting(
+            self.settings_path + '/CustomName', '', 0, 0,
+            callback=self.customname_setting_changed)
+
+    def init(self, dbus):
+        super().init(dbus)
+        self.dbus.add_path('/CustomName', self.cn_item.get_value(),
+                           writeable=True,
+                           onchangecallback=self.customname_changed)
+
+    def customname_changed(self, path, val):
+        self.cn_item.set_value(val)
+        return True
+
 class EnergyMeter(ModbusDevice):
     allowed_roles = ['grid', 'pvinverter', 'genset', 'acload']
     default_role = 'grid'
     default_instance = 40
-
-    def customname_setting_changed(self, service, path, value):
-        self.dbus['/CustomName'] = value['Value']
 
     def position_setting_changed(self, service, path, value):
         self.dbus['/Position'] = value['Value']
 
     def init_device_settings(self, dbus):
         super(EnergyMeter, self).init_device_settings(dbus)
-        self.cn_item = self.settings.addSetting(
-            self.settings_path + '/CustomName', '', 0, 0,
-            callback=self.customname_setting_changed)
 
         self.pos_item = None
         if self.role == 'pvinverter':
@@ -347,18 +361,10 @@ class EnergyMeter(ModbusDevice):
     def init(self, dbus):
         super(EnergyMeter, self).init(dbus)
 
-        self.dbus.add_path('/CustomName', self.cn_item.get_value(),
-                           writeable=True,
-                           onchangecallback=self.customname_changed)
-
         if self.pos_item is not None:
             self.dbus.add_path('/Position', self.pos_item.get_value(),
                                writeable=True,
                                onchangecallback=self.position_changed)
-
-    def customname_changed(self, path, val):
-        self.cn_item.set_value(val)
-        return True
 
     def position_changed(self, path, val):
         if not 0 <= val <= 2:
@@ -367,6 +373,7 @@ class EnergyMeter(ModbusDevice):
         return True
 
 __all__ = [
+    'CustomName',
     'EnergyMeter',
     'ModbusDevice',
 ]
