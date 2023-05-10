@@ -115,7 +115,8 @@ class ModbusDevice(object):
 
             if now - reg.time > reg.max_age:
                 if reg.decode(rr.registers[base:end]):
-                    d[reg.name] = copy(reg) if reg.isvalid() else None
+                    if reg.name:
+                        d[reg.name] = copy(reg) if reg.isvalid() else None
                 reg.time = now
 
         return latency
@@ -275,7 +276,8 @@ class ModbusDevice(object):
 
         for r in self.data_regs:
             for rr in r:
-                self.dbus_add_register(rr)
+                if rr.name:
+                    self.dbus_add_register(rr)
 
         self.latfilt = LatencyFilter(self.latency)
         self.device_init_late()
