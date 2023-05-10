@@ -348,7 +348,8 @@ class CustomName:
         return True
 
 class EnergyMeter(ModbusDevice):
-    allowed_roles = ['grid', 'pvinverter', 'genset', 'acload']
+    role_names = ['grid', 'pvinverter', 'genset', 'acload']
+    allowed_roles = role_names
     default_role = 'grid'
     default_instance = 40
 
