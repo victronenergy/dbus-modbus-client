@@ -18,6 +18,7 @@ log = logging.getLogger()
 
 class ModbusDevice(object):
     min_timeout = 0.1
+    refresh_time = None
     age_limit = 4
     age_limit_fast = 1
     fast_regs = ('/Ac/L1/Power', '/Ac/L2/Power', '/Ac/L3/Power', '/Ac/Power')
@@ -279,6 +280,9 @@ class ModbusDevice(object):
                                onchangecallback=self.role_changed)
         else:
             self.dbus.add_path('/Role', self.role)
+
+        if self.refresh_time is not None:
+            self.dbus.add_path('/RefreshTime', self.refresh_time)
 
         for p in self.info:
             self.dbus_add_register(self.info[p])
