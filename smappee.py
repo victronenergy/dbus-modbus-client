@@ -115,6 +115,8 @@ class PowerBox(device.CustomName, device.EnergyMeter):
     productid = 0xb018
     productname = 'Smappee Power Box'
     min_fwver = (1, 44)
+    age_limit_fast = 0
+    refresh_time = 100
 
     def __init__(self, *args):
         super(PowerBox, self).__init__(*args)
@@ -169,7 +171,7 @@ class PowerBox(device.CustomName, device.EnergyMeter):
         ]
 
         self.power_regs += [
-            Reg_f32l(0x0380 + 2 * s, '/Ac/L%d/Power' % n, 1, '%.1f W', max_age=0),
+            Reg_f32l(0x0380 + 2 * s, '/Ac/L%d/Power' % n, 1, '%.1f W'),
         ]
 
         self.energy_regs += [
@@ -190,7 +192,7 @@ class PowerBox(device.CustomName, device.EnergyMeter):
             return
 
         self.data_regs += [
-            Reg_f32l(0x03c0, '/Ac/Power', 1, '%.1f W', max_age=0),
+            Reg_f32l(0x03c0, '/Ac/Power', 1, '%.1f W'),
             Reg_s32l(0x3100, '/Ac/Energy/Forward', 1000, '%.1f kWh'),
             Reg_s32l(0x3102, '/Ac/Energy/Reverse', 1000, '%.1f kWh'),
         ]
@@ -266,7 +268,6 @@ class PowerBox(device.CustomName, device.EnergyMeter):
             self.dbus.add_path('/CT/%d/DeviceChannel' % ct.slot, ct.chan)
 
         self.dbus.add_path('/CTTypes', CT_TYPES)
-        self.dbus.add_path('/RefreshTime', 100)
 
     def dbus_write_register(self, reg, path, val):
         super(PowerBox, self).dbus_write_register(reg, path, val)
