@@ -18,6 +18,9 @@ log = logging.getLogger()
 
 class ModbusDevice(object):
     min_timeout = 0.1
+    age_limit = 4
+    age_limit_fast = 1
+    fast_regs = ('/Ac/L1/Power', '/Ac/L2/Power', '/Ac/L3/Power', '/Ac/Power')
 
     def __init__(self, spec, modbus, model):
         self.spec = spec
@@ -244,6 +247,12 @@ class ModbusDevice(object):
 
         return regs
 
+    def set_max_age(self, reg):
+        if reg.name in self.fast_regs:
+            reg.max_age = self.age_limit_fast
+        else:
+            reg.max_age = self.age_limit
+
     def init(self, dbus):
         self.device_init()
         self.read_info()
@@ -276,6 +285,8 @@ class ModbusDevice(object):
 
         for r in self.data_regs:
             for rr in r:
+                if rr.max_age is None:
+                    self.set_max_age(rr)
                 if rr.name:
                     self.dbus_add_register(rr)
 

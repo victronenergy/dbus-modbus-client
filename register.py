@@ -1,15 +1,6 @@
 import struct
 from utils import get_enum
 
-AGE_LIMIT_DEFAULT = 4
-
-AGE_LIMITS = {
-    '/Ac/L1/Power': 1,
-    '/Ac/L2/Power': 1,
-    '/Ac/L3/Power': 1,
-    '/Ac/Power':    1,
-}
-
 class Reg(object):
     def __new__(cls, *args, **kwargs):
         return super(Reg, cls).__new__(cls)
@@ -21,7 +12,7 @@ class Reg(object):
         self.value = None
         self.write = write
         self.time = 0
-        self.max_age = max_age if max_age is not None else AGE_LIMITS.get(name, AGE_LIMIT_DEFAULT)
+        self.max_age = max_age
         if isinstance(text, list):
             self.text = { i : text[i] for i in range(len(text)) }
         else:
