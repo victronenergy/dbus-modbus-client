@@ -10,8 +10,8 @@ class VEReg_ver(Reg, int):
 
     def __str__(self):
         if self.value[3] == 0xFF:
-            return '%x.%x' % self.value[1:3]
-        return '%x.%x~%x' % self.value[1:4]
+            return 'v%x.%02x' % self.value[1:3]
+        return 'v%x.%02x-beta-%02x' % self.value[1:4]
 
     def decode(self, values):
         return self.update(struct.unpack('4B', struct.pack('>2H', *values)))
