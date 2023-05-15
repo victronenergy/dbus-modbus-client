@@ -129,13 +129,13 @@ class ModbusDevice(object):
             return
 
         self.settings_dbus = dbus
+        self.settings_path = '/Settings/Devices/' + self.get_ident()
 
-        path = '/Settings/Devices/' + self.get_ident()
         role = self.role or self.default_role
         def_inst = '%s:%s' % (self.default_role, self.default_instance)
 
         SETTINGS = {
-            'instance':   [path + '/ClassAndVrmInstance', def_inst, 0, 0],
+            'instance': [self.settings_path + '/ClassAndVrmInstance', def_inst, 0, 0],
         }
 
         self.settings = SettingsDevice(dbus, SETTINGS, self.setting_changed)
@@ -334,13 +334,14 @@ class EnergyMeter(ModbusDevice):
 
     def init_device_settings(self, dbus):
         super(EnergyMeter, self).init_device_settings(dbus)
-        path = '/Settings/Devices/' + self.get_ident()
-        self.cn_item = self.settings.addSetting(path + '/CustomName', '', 0, 0,
+        self.cn_item = self.settings.addSetting(
+            self.settings_path + '/CustomName', '', 0, 0,
             callback=self.customname_setting_changed)
 
         self.pos_item = None
         if self.role == 'pvinverter':
-            self.pos_item = self.settings.addSetting(path + '/Position', 0, 0, 2,
+            self.pos_item = self.settings.addSetting(
+                self.settings_path + '/Position', 0, 0, 2,
                 callback=self.position_setting_changed)
 
     def init(self, dbus):
