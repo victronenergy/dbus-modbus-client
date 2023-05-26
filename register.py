@@ -4,7 +4,7 @@ from collections.abc import Iterable
 
 class Reg(object):
     def __new__(cls, *args, **kwargs):
-        return super(Reg, cls).__new__(cls)
+        return super().__new__(cls)
 
     def __init__(self, base, count, name=None, text=None, write=False,
                  max_age=None, onchange=None):
@@ -54,7 +54,7 @@ class Reg(object):
 
 class Reg_num(Reg, float):
     def __init__(self, base, count, name=None, scale=1, text=None, write=False, invalid=[], **kwargs):
-        Reg.__init__(self, base, count, name, text, write, **kwargs)
+        super().__init__(base, count, name, text, write, **kwargs)
         self.scale = float(scale) if scale != 1 else scale
         self.invalid = list(invalid) if isinstance(invalid, Iterable) else [invalid]
 
@@ -73,48 +73,48 @@ class Reg_num(Reg, float):
 
 class Reg_s16(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_s16, self).__init__(base, 1, *args, **kwargs)
+        super().__init__(base, 1, *args, **kwargs)
         self.coding = ('h', 'H')
 
 class Reg_u16(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_u16, self).__init__(base, 1, *args, **kwargs)
+        super().__init__(base, 1, *args, **kwargs)
         self.coding = ('H', 'H')
 
 class Reg_s32b(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_s32b, self).__init__(base, 2, *args, **kwargs)
+        super().__init__(base, 2, *args, **kwargs)
         self.coding = ('>i', '>2H')
 
 class Reg_u32b(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_u32b, self).__init__(base, 2, *args, **kwargs)
+        super().__init__(base, 2, *args, **kwargs)
         self.coding = ('>I', '>2H')
 
 class Reg_u64b(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_u64b, self).__init__(base, 4, *args, **kwargs)
+        super().__init__(base, 4, *args, **kwargs)
         self.coding = ('>Q', '>4H')
 
 class Reg_s32l(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_s32l, self).__init__(base, 2, *args, **kwargs)
+        super().__init__(base, 2, *args, **kwargs)
         self.coding = ('<i', '<2H')
 
 class Reg_u32l(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_u32l, self).__init__(base, 2, *args, **kwargs)
+        super().__init__(base, 2, *args, **kwargs)
         self.coding = ('<I', '<2H')
 
 class Reg_f32l(Reg_num):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_f32l, self).__init__(base, 2, *args, **kwargs)
+        super().__init__(base, 2, *args, **kwargs)
         self.coding = ('<f', '<2H')
         self.scale = float(self.scale)
 
 class Reg_e16(Reg, int):
     def __init__(self, base, name, enum, *args, **kwargs):
-        super(Reg_e16, self).__init__(base, 1, name, *args, **kwargs)
+        super().__init__(base, 1, name, *args, **kwargs)
         self.enum = enum
         if self.write == True:
             self.write = [m.value for m in enum]
@@ -127,7 +127,7 @@ class Reg_e16(Reg, int):
 
 class Reg_text(Reg, str):
     def __init__(self, base, count, name=None, little=False, encoding=None, *args, **kwargs):
-        super(Reg_text, self).__init__(base, count, name, *args, **kwargs)
+        super().__init__(base, count, name, *args, **kwargs)
         self.encoding = encoding or 'ascii'
         self.pfmt = '%c%dH' % (['>', '<'][little], count)
 
@@ -142,7 +142,7 @@ class Reg_text(Reg, str):
 
 class Reg_map(Reg):
     def __init__(self, base, name, tab, *args, **kwargs):
-        super(Reg_map, self).__init__(base, name, *args, **kwargs)
+        super().__init__(base, name, *args, **kwargs)
         self.tab = tab
 
     def decode(self, values):
