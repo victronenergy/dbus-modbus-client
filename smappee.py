@@ -54,7 +54,7 @@ MAX_CT_SLOTS    = 28
 
 class Reg_ser(Reg_text):
     def __init__(self, base, *args):
-        Reg.__init__(self, base, 4, *args)
+        super().__init__(base, 4, *args)
 
     def decode(self, values):
         v = '%04d%06d' % (values[0], values[3] << 16 | values[2])
@@ -62,7 +62,7 @@ class Reg_ser(Reg_text):
 
 class Reg_ver(Reg, int):
     def __init__(self, base, *args):
-        Reg.__init__(self, base, 2, *args)
+        super().__init__(base, 2, *args)
 
     def __int__(self):
         v = self.value
@@ -267,7 +267,7 @@ class PowerBox(device.CustomName, device.EnergyMeter):
         self.dbus.add_path('/CTTypes', CT_TYPES)
 
     def dbus_write_register(self, reg, path, val):
-        super(PowerBox, self).dbus_write_register(reg, path, val)
+        super().dbus_write_register(reg, path, val)
         self.sched_reinit()
 
     def get_ident(self):
