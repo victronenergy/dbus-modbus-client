@@ -255,7 +255,7 @@ class Client(object):
 
 class NetClient(Client):
     def __init__(self):
-        Client.__init__(self, 'tcp')
+        super().__init__('tcp')
 
     def new_scanner(self, full):
         return NetScanner(MODBUS_TCP_PORT, if_blacklist)
@@ -278,7 +278,7 @@ class NetClient(Client):
         self.mdns_query_time = 0
 
     def update(self):
-        super(NetClient, self).update()
+        super().update()
 
         now = time.time()
 
@@ -318,7 +318,7 @@ class NetClient(Client):
 
 class SerialClient(Client):
     def __init__(self, tty, rate, mode):
-        Client.__init__(self, tty)
+        super().__init__(tty)
         self.tty = tty
         self.rate = rate
         self.mode = mode
