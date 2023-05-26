@@ -53,8 +53,8 @@ class Reg:
         return changed
 
 class Reg_num(Reg, float):
-    def __init__(self, base, count, name=None, scale=1, text=None, write=False, invalid=[], **kwargs):
-        super().__init__(base, count, name, text, write, **kwargs)
+    def __init__(self, base, name=None, scale=1, text=None, write=False, invalid=[], **kwargs):
+        super().__init__(base, self.count, name, text, write, **kwargs)
         self.scale = float(scale) if scale != 1 else scale
         self.invalid = list(invalid) if isinstance(invalid, Iterable) else [invalid]
 
@@ -72,44 +72,38 @@ class Reg_num(Reg, float):
         return struct.unpack(self.coding[1], struct.pack(self.coding[0], v))
 
 class Reg_s16(Reg_num):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, 1, *args, **kwargs)
-        self.coding = ('h', 'H')
+    coding = ('h', 'H')
+    count = 1
 
 class Reg_u16(Reg_num):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, 1, *args, **kwargs)
-        self.coding = ('H', 'H')
+    coding = ('H', 'H')
+    count = 1
 
 class Reg_s32b(Reg_num):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, 2, *args, **kwargs)
-        self.coding = ('>i', '>2H')
+    coding = ('>i', '>2H')
+    count = 2
 
 class Reg_u32b(Reg_num):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, 2, *args, **kwargs)
-        self.coding = ('>I', '>2H')
+    coding = ('>I', '>2H')
+    count = 2
 
 class Reg_u64b(Reg_num):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, 4, *args, **kwargs)
-        self.coding = ('>Q', '>4H')
+    coding = ('>Q', '>4H')
+    count = 4
 
 class Reg_s32l(Reg_num):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, 2, *args, **kwargs)
-        self.coding = ('<i', '<2H')
+    coding = ('<i', '<2H')
+    count = 2
 
 class Reg_u32l(Reg_num):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, 2, *args, **kwargs)
-        self.coding = ('<I', '<2H')
+    coding = ('<I', '<2H')
+    count = 2
 
 class Reg_f32l(Reg_num):
+    coding = ('<f', '<2H')
+    count = 2
     def __init__(self, base, *args, **kwargs):
-        super().__init__(base, 2, *args, **kwargs)
-        self.coding = ('<f', '<2H')
+        super().__init__(base, *args, **kwargs)
         self.scale = float(self.scale)
 
 class Reg_e16(Reg, int):
