@@ -74,7 +74,7 @@ class Reg_ver(Reg, int):
     def decode(self, values):
         return self.update((values[1], values[0]))
 
-class CurrentTransformer(object):
+class CurrentTransformer:
     def __init__(self, dev, slot, sdev, chan):
         self.dev = dev
         self.slot = slot

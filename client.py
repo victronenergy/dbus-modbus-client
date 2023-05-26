@@ -6,7 +6,7 @@ import time
 from pymodbus.client.sync import *
 from pymodbus.utilities import computeCRC
 
-class RefCount(object):
+class RefCount:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.refcount = 1

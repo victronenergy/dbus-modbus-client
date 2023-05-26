@@ -21,7 +21,7 @@ def add_service(svc):
 def mreqn(maddr):
     return struct.pack("4sii", socket.inet_aton(maddr), socket.INADDR_ANY, 0)
 
-class MDNS(object):
+class MDNS:
     def __init__(self):
         self.lock = threading.Lock()
         self.found = set()

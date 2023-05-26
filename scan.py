@@ -18,7 +18,7 @@ MODBUS_UNIT_MAX = 247
 class ScanAborted(Exception):
     pass
 
-class Scanner(object):
+class Scanner:
     def __init__(self):
         self.devices = []
         self.running = None

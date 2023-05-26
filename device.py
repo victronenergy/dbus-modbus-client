@@ -15,7 +15,7 @@ from utils import *
 
 log = logging.getLogger()
 
-class ModbusDevice(object):
+class ModbusDevice:
     min_timeout = 0.1
     refresh_time = None
     age_limit = 4
@@ -349,7 +349,7 @@ class ModbusDevice(object):
             self.latency = self.latfilt.filter(latency)
             self.timeout = max(self.min_timeout, self.latency * 4)
 
-class LatencyFilter(object):
+class LatencyFilter:
     def __init__(self, val):
         self.length = 8
         self.pos = 0

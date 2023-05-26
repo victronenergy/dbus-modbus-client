@@ -6,7 +6,7 @@ import time
 
 log = logging.getLogger()
 
-class Watchdog(object):
+class Watchdog:
     def __init__(self, timeout=30):
         self.time = None
         self.timeout = timeout

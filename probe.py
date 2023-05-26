@@ -89,7 +89,7 @@ def get_units(method):
 def get_rates(method):
     return get_attrs('rates', method)
 
-class ModelRegister(object):
+class ModelRegister:
     def __init__(self, reg, models, **args):
         self.reg = reg
         self.models = models

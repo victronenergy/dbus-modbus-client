@@ -15,7 +15,7 @@ def private_bus():
         return dbus.SessionBus(private=True)
     return dbus.SystemBus(private=True)
 
-class timeout(object):
+class timeout:
     '''Temporarily set the `timeout` attribute of an object
 
     To be used in a `with` statement.  Example:

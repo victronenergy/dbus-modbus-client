@@ -2,7 +2,7 @@ import struct
 from utils import get_enum
 from collections.abc import Iterable
 
-class Reg(object):
+class Reg:
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls)
 

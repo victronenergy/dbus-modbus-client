@@ -56,7 +56,7 @@ if_blacklist = [
 def percent(path, val):
     return '%d%%' % val
 
-class Client(object):
+class Client:
     def __init__(self, name):
         self.name = name
         self.devices = []
