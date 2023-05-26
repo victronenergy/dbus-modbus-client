@@ -8,7 +8,7 @@ from pymodbus.utilities import computeCRC
 
 class RefCount(object):
     def __init__(self, *args, **kwargs):
-        super(RefCount, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.refcount = 1
         self.in_transaction = False
 
@@ -24,12 +24,12 @@ class RefCount(object):
 
     def close(self):
         if self.refcount == 0 or self.in_transaction:
-            super(RefCount, self).close()
+            super().close()
 
     def execute(self, *args):
         try:
             self.in_transaction = True
-            return super(RefCount, self).execute(*args)
+            return super().execute(*args)
         finally:
             self.in_transaction = False
 
@@ -51,7 +51,7 @@ class UdpClient(RefCount, ModbusUdpClient):
 
 class SerialClient(RefCount, ModbusSerialClient):
     def __init__(self, *args, **kwargs):
-        super(SerialClient, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.lock = threading.RLock()
 
     @property
@@ -65,20 +65,20 @@ class SerialClient(RefCount, ModbusSerialClient):
             self.socket.timeout = t
 
     def put(self):
-        super(SerialClient, self).put()
+        super().put()
         if self.refcount == 0:
             del serial_ports[os.path.basename(self.port)]
 
     def execute(self, request=None):
         with self.lock:
-            return super(SerialClient, self).execute(request)
+            return super().execute(request)
 
     def __enter__(self):
         self.lock.acquire()
-        return super(SerialClient, self).__enter__()
+        return super().__enter__()
 
     def __exit__(self, *args):
-        super(SerialClient, self).__exit__(*args)
+        super().__exit__(*args)
         self.lock.release()
 
 serial_ports = {}
