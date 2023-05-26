@@ -8,7 +8,7 @@ log = logging.getLogger()
 
 class Reg_ver(Reg, int):
     def __init__(self, base, name):
-        Reg.__init__(self, base, 1, name)
+        super().__init__(base, 1, name)
 
     def __int__(self):
         v = self.value
@@ -95,7 +95,7 @@ class EM24_Meter(device.CustomName, device.EnergyMeter):
         self.nr_phases = phases
 
     def dbus_write_register(self, reg, path, val):
-        super(EM24_Meter, self).dbus_write_register(reg, path, val)
+        super().dbus_write_register(reg, path, val)
         self.sched_reinit()
 
     def get_ident(self):
