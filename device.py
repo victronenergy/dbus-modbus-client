@@ -352,8 +352,8 @@ class CustomName:
             self.settings_path + '/CustomName', '', 0, 0,
             callback=self.customname_setting_changed)
 
-    def init(self, dbus):
-        super().init(dbus)
+    def device_init_late(self):
+        super().device_init_late()
         self.dbus.add_path('/CustomName', self.cn_item.get_value(),
                            writeable=True,
                            onchangecallback=self.customname_changed)
@@ -381,8 +381,8 @@ class EnergyMeter(ModbusDevice):
                 self.settings_path + '/Position', 0, 0, 2,
                 callback=self.position_setting_changed)
 
-    def init(self, dbus):
-        super(EnergyMeter, self).init(dbus)
+    def device_init_late(self):
+        super().device_init_late()
 
         if self.nr_phases is not None:
             self.dbus.add_path('/NrOfPhases', self.nr_phases)
