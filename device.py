@@ -401,7 +401,7 @@ class EnergyMeter(ModbusDevice):
         self.dbus['/Position'] = value['Value']
 
     def init_device_settings(self, dbus):
-        super(EnergyMeter, self).init_device_settings(dbus)
+        super().init_device_settings(dbus)
 
         self.pos_item = None
         if self.role == 'pvinverter':
