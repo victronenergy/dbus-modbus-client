@@ -8,14 +8,11 @@ log = logging.getLogger()
 
 class Reg_ver(Reg, int):
     def __init__(self, base, name):
-        super().__init__(base, 1, name)
+        super().__init__(base, 1, name, text='%d.%d.%d')
 
     def __int__(self):
         v = self.value
         return v[0] << 16 | v[1] << 8 | v[2]
-
-    def __str__(self):
-        return '%d.%d.%d' % self.value
 
     def decode(self, values):
         v = values[0]
