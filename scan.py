@@ -77,7 +77,7 @@ class Scanner(object):
 
 class NetScanner(Scanner):
     def __init__(self, port, blacklist, timeout=0.25):
-        Scanner.__init__(self)
+        super().__init__()
         self.protos = ['tcp', 'udp']
         self.port = port
         self.blacklist = blacklist
@@ -136,11 +136,11 @@ class NetScanner(Scanner):
         num_hosts = sum([n.network.num_addresses - 3 for n in self.nets])
         self.total = len(self.protos) * num_hosts
 
-        return Scanner.start(self)
+        return super().start()
 
 class SerialScanner(Scanner):
     def __init__(self, tty, rates, mode, timeout=0.1, full=False):
-        Scanner.__init__(self)
+        super().__init__()
         self.tty = tty
         self.rates = rates
         self.mode = mode
@@ -148,7 +148,7 @@ class SerialScanner(Scanner):
         self.full = full
 
     def progress(self, n, dev):
-        super(SerialScanner, self).progress(n, dev)
+        super().progress(n, dev)
         if self.num_found:
             time.sleep(1)
 
@@ -180,6 +180,6 @@ class SerialScanner(Scanner):
 
     def start(self):
         self.total = MODBUS_UNIT_MAX
-        return Scanner.start(self)
+        return super().start()
 
 __all__ = ['NetScanner', 'SerialScanner']
