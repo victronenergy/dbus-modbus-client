@@ -7,7 +7,7 @@ class Reg_serial(Reg, str):
     """ ABB meters use a 32-bit integer as serial number. Make it a string
         because that is what dbus (and modbus-tcp) expects. """
     def __init__(self, base, name):
-        Reg.__init__(self, base, 2, name)
+        super().__init__(base, 2, name)
 
     def decode(self, values):
         v = struct.unpack('>i', struct.pack('>2H', *values))
@@ -42,7 +42,7 @@ class ABB_Meter_1P(ABB_Meter):
     nr_phases = 1
 
     def device_init(self):
-        super(ABB_Meter_1P, self).device_init()
+        super().device_init()
 
         # Copies of overall values, because phase values show not-supported.
         self.data_regs += [
@@ -56,7 +56,7 @@ class ABB_Meter_3P(ABB_Meter):
     nr_phases = 3
 
     def device_init(self):
-        super(ABB_Meter_3P, self).device_init()
+        super().device_init()
         self.data_regs += [
             Reg_u32b(0x5B02, '/Ac/L2/Voltage',      10, '%.1f V'),
             Reg_u32b(0x5B04, '/Ac/L3/Voltage',      10, '%.1f V'),
