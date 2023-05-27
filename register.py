@@ -146,8 +146,5 @@ class Reg_map(Reg):
             v = None
         return self.update(v)
 
-class Reg_mapstr(Reg_map, Reg_text):
-    pass
-
 class Reg_mapu16(Reg_map, Reg_u16):
     pass
