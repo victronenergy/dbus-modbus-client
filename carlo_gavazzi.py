@@ -43,16 +43,6 @@ class EM24_Meter(device.CustomName, device.EnergyMeter):
     productname = 'Carlo Gavazzi EM24 Ethernet Energy Meter'
     min_timeout = 0.5
 
-    def __init__(self, *args):
-        super(EM24_Meter, self).__init__(*args)
-
-        self.info_regs = [
-            Reg_ver( 0x0302, '/HardwareVersion'),
-            Reg_ver( 0x0304, '/FirmwareVersion'),
-            Reg_u16( 0x1002, '/PhaseConfig', text=phase_configs, write=(0, 4)),
-            Reg_text(0x5000, 7, '/Serial'),
-        ]
-
     def phase_regs(self, n):
         s = 2 * (n - 1)
         return [
@@ -63,6 +53,13 @@ class EM24_Meter(device.CustomName, device.EnergyMeter):
         ]
 
     def device_init(self):
+        self.info_regs = [
+            Reg_ver( 0x0302, '/HardwareVersion'),
+            Reg_ver( 0x0304, '/FirmwareVersion'),
+            Reg_u16( 0x1002, '/PhaseConfig', text=phase_configs, write=(0, 4)),
+            Reg_text(0x5000, 7, '/Serial'),
+        ]
+
         # make sure application is set to H
         appreg = Reg_u16(0xa000)
         if self.read_register(appreg) != 7:
