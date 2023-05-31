@@ -1,5 +1,6 @@
 FILES =									\
 	dbus-modbus-client.py						\
+	abb.py								\
 	carlo_gavazzi.py						\
 	comap.py							\
 	device.py							\
@@ -11,7 +12,6 @@ FILES =									\
 	smappee.py							\
 	utils.py							\
 	watchdog.py							\
-	abb.py								\
 
 VELIB =									\
 	settingsdevice.py						\
