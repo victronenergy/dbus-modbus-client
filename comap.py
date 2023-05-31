@@ -24,9 +24,7 @@ class ComAp_Generator(device.ModbusDevice):
     default_instance = 40
     min_timeout = 0.5
 
-    def __init__(self, *args):
-        super(ComAp_Generator, self).__init__(*args)
-
+    def device_init(self):
         self.info_regs = [
             Reg_text(1323, 8, '/FirmwareVersion'),
             Reg_text(3000, 8, '/CustomName'),
@@ -37,7 +35,6 @@ class ComAp_Generator(device.ModbusDevice):
             })
         ]
 
-    def device_init(self):
         self.data_regs = [
             Reg_s16(1020, '/Ac/Power',      0.001, '%.0f W'),
             Reg_s16(1021, '/Ac/L1/Power',   0.001, '%.0f W'),
