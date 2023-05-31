@@ -10,7 +10,7 @@ class Reg_Comap_ident(Reg, str):
         register allows us to read 16 registers, but only decode the 12
         characters we care about. """
     def __init__(self):
-        Reg.__init__(self, 1307, 16)
+        super().__init__(1307, 16)
 
     def decode(self, values):
         v = struct.pack('>16H', *values).rstrip(b'\0')
