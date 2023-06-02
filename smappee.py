@@ -118,9 +118,6 @@ class PowerBox(device.CustomName, device.EnergyMeter):
     age_limit_fast = 0
     refresh_time = 100
 
-    def __init__(self, *args):
-        super(PowerBox, self).__init__(*args)
-
     def probe_device(self, n):
         base = 0x1480 + 0x20 * n
 
