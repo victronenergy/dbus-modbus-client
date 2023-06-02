@@ -1,7 +1,6 @@
 from copy import copy
 import dbus
 from functools import partial
-from pymodbus.register_read_message import ReadHoldingRegistersResponse
 import logging
 import os
 import time
@@ -73,7 +72,7 @@ class ModbusDevice(object):
         rr = self.modbus.read_holding_registers(reg.base, reg.count,
                                                 unit=self.unit)
 
-        if not isinstance(rr, ReadHoldingRegistersResponse):
+        if rr.isError():
             log.error('Error reading register %#04x: %s', reg.base, rr)
             raise Exception(rr)
 
@@ -108,7 +107,7 @@ class ModbusDevice(object):
 
         latency = time.time() - now
 
-        if not isinstance(rr, ReadHoldingRegistersResponse):
+        if rr.isError():
             log.error('Error reading registers %#04x-%#04x: %s',
                       start, start + count - 1, rr)
             raise Exception(rr)
