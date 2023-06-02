@@ -17,15 +17,12 @@ class ABB_Meter(device.CustomName, device.EnergyMeter):
     productid = 0xb033
     min_timeout = 0.5
 
-    def __init__(self, *args):
-        super(ABB_Meter, self).__init__(*args)
-
+    def device_init(self):
         self.info_regs = [
             Reg_serial(0x8900, '/Serial'),
             Reg_text(0x8908, 8, '/FirmwareVersion'),
         ]
 
-    def device_init(self):
         self.data_regs = [
             Reg_s32b(0x5B14, '/Ac/Power',          100, '%.1f W'),
             Reg_u16( 0x5B2C, '/Ac/Frequency',      100, '%.1f Hz'),
