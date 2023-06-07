@@ -16,10 +16,7 @@ class Reg:
         self.onchange = onchange
         self.time = 0
         self.max_age = max_age
-        if isinstance(text, list):
-            self.text = { i : text[i] for i in range(len(text)) }
-        else:
-            self.text = text
+        self.text = text
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
@@ -35,8 +32,11 @@ class Reg:
     def __str__(self):
         if isinstance(self.text, str):
             return self.text % self.value
-        if isinstance(self.text, dict) and self.value in self.text:
-            return self.text[self.value]
+        if hasattr(self.text, '__getitem__'):
+            try:
+                return self.text[self.value]
+            except:
+                pass
         if callable(self.text):
             return self.text(self.value)
         return str(self.value)
