@@ -52,9 +52,9 @@ DEV_TYPES = {
 MAX_BUS_DEVICES = 10
 MAX_CT_SLOTS    = 28
 
-class Reg_ser(Reg_text):
-    def __init__(self, base, *args):
-        super().__init__(base, 4, *args)
+class Reg_ser(Reg, str):
+    def __init__(self, base, name):
+        super().__init__(base, 4, name)
 
     def decode(self, values):
         v = '%04d%06d' % (values[0], values[3] << 16 | values[2])
