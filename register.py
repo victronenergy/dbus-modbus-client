@@ -120,8 +120,8 @@ class Reg_e16(Reg, int):
         return [self.value]
 
 class Reg_text(Reg, str):
-    def __init__(self, base, count, name=None, little=False, encoding=None, *args, **kwargs):
-        super().__init__(base, count, name, *args, **kwargs)
+    def __init__(self, base, count, name=None, little=False, encoding=None, **kwargs):
+        super().__init__(base, count, name, **kwargs)
         self.encoding = encoding or 'ascii'
         self.pfmt = '%c%dH' % (['>', '<'][little], count)
 
