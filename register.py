@@ -53,9 +53,11 @@ class Reg:
         return changed
 
 class Reg_num(Reg, float):
+    rtype = int
+
     def __init__(self, base, name=None, scale=1, text=None, write=False, invalid=[], **kwargs):
         super().__init__(base, self.count, name, text, write, **kwargs)
-        self.scale = float(scale) if scale != 1 else scale
+        self.scale = float(scale) if scale != 1 else self.rtype(scale)
         self.invalid = list(invalid) if isinstance(invalid, Iterable) else [invalid]
 
     def set_raw_value(self, val):
@@ -68,7 +70,7 @@ class Reg_num(Reg, float):
         return self.set_raw_value(v[0])
 
     def encode(self):
-        v = int(self.value * self.scale)
+        v = self.rtype(self.value * self.scale)
         return struct.unpack(self.coding[1], struct.pack(self.coding[0], v))
 
 class Reg_s16(Reg_num):
@@ -102,9 +104,7 @@ class Reg_u32l(Reg_num):
 class Reg_f32l(Reg_num):
     coding = ('<f', '<2H')
     count = 2
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, *args, **kwargs)
-        self.scale = float(self.scale)
+    rtype = float
 
 class Reg_e16(Reg, int):
     def __init__(self, base, name, enum, *args, **kwargs):
