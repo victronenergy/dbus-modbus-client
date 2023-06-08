@@ -107,8 +107,8 @@ class Reg_f32l(Reg_num):
     rtype = float
 
 class Reg_e16(Reg, int):
-    def __init__(self, base, name, enum, *args, **kwargs):
-        super().__init__(base, 1, name, *args, **kwargs)
+    def __init__(self, base, name, enum, **kwargs):
+        super().__init__(base, 1, name, **kwargs)
         self.enum = enum
         if self.write == True:
             self.write = [m.value for m in enum]
