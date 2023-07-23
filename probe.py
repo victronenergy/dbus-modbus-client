@@ -95,7 +95,7 @@ def make_modbus(m):
         return client.get()
 
     dev = '/dev/%s' % tty
-    client = SerialClient(method, port=dev, baudrate=rate)
+    client = SerialClient(method, port=dev, baudrate=rate, parity='E')
     if not client.connect():
         client.put()
         return None
