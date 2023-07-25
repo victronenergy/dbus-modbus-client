@@ -367,6 +367,7 @@ class EnergyMeter(ModbusDevice):
     allowed_roles = role_names
     default_role = 'grid'
     default_instance = 40
+    nr_phases = None
 
     def position_setting_changed(self, service, path, value):
         self.dbus['/Position'] = value['Value']
@@ -382,6 +383,9 @@ class EnergyMeter(ModbusDevice):
 
     def init(self, dbus):
         super(EnergyMeter, self).init(dbus)
+
+        if self.nr_phases is not None:
+            self.dbus.add_path('/NrOfPhases', self.nr_phases)
 
         if self.pos_item is not None:
             self.dbus.add_path('/Position', self.pos_item.get_value(),
