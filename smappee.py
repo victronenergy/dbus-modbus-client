@@ -245,6 +245,8 @@ class PowerBox(device.CustomName, device.EnergyMeter):
             self.energy_regs,
         ]
 
+        self.nr_phases = len(self.voltage_regs)
+
         self.init_virtual()
 
         # save settings to Power Box flash
