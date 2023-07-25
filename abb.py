@@ -42,6 +42,7 @@ class ABB_Meter(device.CustomName, device.EnergyMeter):
 
 class ABB_Meter_1P(ABB_Meter):
     productname = 'ABB B21 Energy Meter'
+    nr_phases = 1
 
     def device_init(self):
         super(ABB_Meter_1P, self).device_init()
@@ -55,6 +56,7 @@ class ABB_Meter_1P(ABB_Meter):
 
 class ABB_Meter_3P(ABB_Meter):
     productname = 'ABB B23/B24 Energy Meter'
+    nr_phases = 3
 
     def device_init(self):
         super(ABB_Meter_3P, self).device_init()
