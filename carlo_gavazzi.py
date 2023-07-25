@@ -95,6 +95,7 @@ class EM24_Meter(device.CustomName, device.EnergyMeter):
             regs += self.phase_regs(n)
 
         self.data_regs = regs
+        self.nr_phases = phases
 
     def dbus_write_register(self, reg, path, val):
         super(EM24_Meter, self).dbus_write_register(reg, path, val)
