@@ -1,4 +1,5 @@
 import os
+import struct
 import threading
 import time
 
