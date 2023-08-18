@@ -2,8 +2,6 @@ import logging
 import struct
 import time
 
-from pymodbus.register_read_message import ReadHoldingRegistersResponse
-
 import client
 import utils
 
@@ -107,7 +105,7 @@ class ModelRegister(object):
             rr = modbus.read_holding_registers(self.reg.base, self.reg.count,
                 unit=spec.unit)
 
-        if not isinstance(rr, ReadHoldingRegistersResponse):
+        if rr.isError():
             log.debug('%s: %s', modbus, rr)
             return None
 
