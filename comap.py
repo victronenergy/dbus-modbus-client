@@ -111,6 +111,7 @@ class ComAp_Generator(device.ModbusDevice):
 
         self.dbus.add_path('/Start', state, writeable=True,
                            onchangecallback=self._start_genset)
+        self.dbus.add_path('/ErrorCode', 0)
 
     def _start_genset(self, path, value):
         # This is documented in the Comap global manual, page 204.
