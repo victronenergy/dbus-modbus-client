@@ -36,6 +36,7 @@ class VregLink:
         self.dbus.add_path('/Devices/0/CustomName', self.dbus['/CustomName'])
         self.dbus.add_path('/Devices/0/FirmwareVersion',
                            self.dbus['/FirmwareVersion'])
+        self.dbus.add_path('/Devices/0/IpAddress', self.spec.target)
 
     def vreglink_get(self, regid):
         return self.vreglink_exec(regid)
