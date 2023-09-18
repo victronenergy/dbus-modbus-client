@@ -4,6 +4,7 @@ FILES =									\
 	carlo_gavazzi.py						\
 	client.py							\
 	comap.py							\
+	dse.py							\
 	device.py							\
 	devspec.py							\
 	ev_charger.py							\
