@@ -22,6 +22,7 @@ from utils import *
 import watchdog
 
 import carlo_gavazzi
+import dse
 import ev_charger
 import smappee
 import abb
