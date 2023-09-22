@@ -1,5 +1,6 @@
 import struct
 from utils import get_enum
+from collections.abc import Iterable
 
 class Reg(object):
     def __new__(cls, *args, **kwargs):
@@ -52,17 +53,17 @@ class Reg(object):
         return changed
 
 class Reg_num(Reg, float):
-    def __init__(self, base, count, name=None, scale=1, text=None, write=False, invalid=None, **kwargs):
+    def __init__(self, base, count, name=None, scale=1, text=None, write=False, invalid=[], **kwargs):
         Reg.__init__(self, base, count, name, text, write, **kwargs)
         self.scale = float(scale) if scale != 1 else scale
-        self.invalid = invalid
+        self.invalid = list(invalid) if isinstance(invalid, Iterable) else [invalid]
 
     def set_raw_value(self, val):
         return self.update(type(self.scale)(val / self.scale))
 
     def decode(self, values):
         v = struct.unpack(self.coding[0], struct.pack(self.coding[1], *values))
-        if v[0] == self.invalid:
+        if v[0] in self.invalid:
             return self.update(None)
         return self.set_raw_value(v[0])
 
