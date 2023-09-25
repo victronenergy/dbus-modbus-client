@@ -14,7 +14,7 @@ class Reg_DSE_serial(Reg, str):
     """ Deep Sea Electronics Controllers use a 32-bit integer as serial number. Make it a string
         because that is what dbus (and modbus-tcp) expects. """
     def __init__(self, base, name):
-        Reg.__init__(self, base, 2, name)
+        super().__init__(base, 2, name)
 
     def decode(self, values):
         v = struct.unpack('>I', struct.pack('>2H', *values))
@@ -30,7 +30,7 @@ class Reg_DSE_ident(Reg, str):
         Therefore we concatenate manufacturer code and model number to a
         dash-separated string. """
     def __init__(self):
-        Reg.__init__(self, 768, 2)
+        super().__init__(768, 2)
         self.coding = ('H', 'H')
 
     def decode(self, values):
@@ -41,7 +41,7 @@ class Reg_DSE_ident(Reg, str):
 
 class Reg_DSE_s16(Reg_s16):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_DSE_s16, self).__init__(base, *args, **kwargs)
+        super().__init__(base, *args, **kwargs)
         if not self.invalid:
             # DSE GenComm defines the following non-numeric `Sentinel values for instrumentation`
             self.invalid = [
@@ -57,7 +57,7 @@ class Reg_DSE_s16(Reg_s16):
 
 class Reg_DSE_u16(Reg_u16):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_DSE_u16, self).__init__(base, *args, **kwargs)
+        super().__init__(base, *args, **kwargs)
         if not self.invalid:
             self.invalid = [
                 0xFFFF, # Unimplemented
@@ -72,7 +72,7 @@ class Reg_DSE_u16(Reg_u16):
 
 class Reg_DSE_s32b(Reg_s32b):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_DSE_s32b, self).__init__(base, *args, **kwargs)
+        super().__init__(base, *args, **kwargs)
         if not self.invalid:
             self.invalid = [
                 0x7FFFFFFF, # Unimplemented
@@ -87,7 +87,7 @@ class Reg_DSE_s32b(Reg_s32b):
 
 class Reg_DSE_u32b(Reg_u32b):
     def __init__(self, base, *args, **kwargs):
-        super(Reg_DSE_u32b, self).__init__(base, *args, **kwargs)
+        super().__init__(base, *args, **kwargs)
         if not self.invalid:
             self.invalid = [
                 0xFFFFFFFF, # Unimplemented
@@ -107,7 +107,7 @@ class Reg_DSE_alarm(Reg, int):
     def __init__(self, base, count, error_code_offset):
         # Note: Base register has to be first on GenComm page
         # definition ("Number of named alarms")
-        Reg.__init__(self, base=base, count=count, name='/ErrorCode')
+        super().__init__(base=base, count=count, name='/ErrorCode')
         self.error_code_offset = error_code_offset
         self.coding = ('H', 'H')
 
@@ -165,7 +165,7 @@ class Reg_DSE_alarm_old_system(Reg_DSE_alarm):
     """ This uses the "old alarm system" of GenComm page 8,
         related error strings allocate 0x1000 to 0x10FF """
     def __init__(self):
-        super(Reg_DSE_alarm_old_system, self).__init__(
+        super().__init__(
             base=2048,
             count=26,
             error_code_offset=0x1000
@@ -175,7 +175,7 @@ class Reg_DSE_alarm_61xx_MkII(Reg_DSE_alarm):
     """ This uses "Named Alarm Conditions" of GenComm page 154 for
         DSE 61xx MkII, related error strings allocate 0x1100 to 0x11FF """
     def __init__(self):
-        super(Reg_DSE_alarm_61xx_MkII, self).__init__(
+        super().__init__(
             base=39424,
             count=16,
             error_code_offset=0x1100
@@ -186,7 +186,7 @@ class Reg_DSE_alarm_72xx_73xx_61xx_74xx_MkII(Reg_DSE_alarm):
         DSE 72xx/73xx/61xx/74xx MkII family, related error strings
         allocate 0x1200 to 0x12FF """
     def __init__(self):
-        super(Reg_DSE_alarm_72xx_73xx_61xx_74xx_MkII, self).__init__(
+        super().__init__(
             base=39424,
             count=21,
             error_code_offset=0x1200
@@ -196,7 +196,7 @@ class Reg_DSE_alarm_8xxx(Reg_DSE_alarm):
     """ This uses "Named Alarm Conditions" of GenComm page 154 for
         DSE 8xxx family, related error strings allocate 0x1300 to 0x13FF """
     def __init__(self):
-        super(Reg_DSE_alarm_8xxx, self).__init__(
+        super().__init__(
             base=39424,
             count=40,
             error_code_offset=0x1300
@@ -206,7 +206,7 @@ class Reg_DSE_alarm_7450(Reg_DSE_alarm):
     """ This uses "Named Alarm Conditions" of GenComm page 154 for
         DSE 7540, related error strings allocate 0x1400 to 0x14FF """
     def __init__(self):
-        super(Reg_DSE_alarm_7450, self).__init__(
+        super().__init__(
             base=39424,
             count=28,
             error_code_offset=0x1400
@@ -217,7 +217,7 @@ class Reg_DSE_alarm_71xx_66xx_60xx_L40x_4xxx_45xx_MkII(Reg_DSE_alarm):
         DSE 71xx/66xx/60xx/L40x/4xxx/45xx MkII family, related
         error strings allocate 0x1500 to 0x15FF """
     def __init__(self):
-        super(Reg_DSE_alarm_71xx_66xx_60xx_L40x_4xxx_45xx_MkII, self).__init__(
+        super().__init__(
             base=39424,
             count=12,
             error_code_offset=0x1500
@@ -244,7 +244,7 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
     scf_reg_vals = None
 
     def __init__(self, *args):
-        super(DSE_Generator, self).__init__(*args)
+        super().__init__(*args)
 
         self.status_reg = Reg_mapu16(1408, '/StatusCode', {
             0: 0,  # Engine stopped = Stopped
@@ -392,7 +392,7 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
             )
 
     def update(self):
-        super(DSE_Generator, self).update()
+        super().update()
 
         if self.detect_status_by_rpm and self.dbus['/StatusCode'] is not None:
             self.dbus['/StatusCode'] = self._get_status_code_from_rpm()
@@ -409,7 +409,7 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
 class DSE4xxx_Generator(DSE_Generator):
 
     def device_init(self):
-        super(DSE4xxx_Generator, self).device_init()
+        super().device_init()
 
         self.data_regs.append(
             Reg_DSE_alarm_old_system()
