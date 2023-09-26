@@ -419,16 +419,75 @@ class DSE4xxx_Generator(DSE_Generator):
 
     def device_init(self):
         super().device_init()
-
         self.data_regs.append(
             Reg_DSE_alarm_old_system()
+        )
+
+class DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator(DSE_Generator):
+
+    def device_init(self):
+        super().device_init()
+        self.data_regs.append(
+            Reg_DSE_alarm_71xx_66xx_60xx_L40x_4xxx_45xx_MkII()
+        )
+
+class DSE61xx_MkII_Generator(DSE_Generator):
+
+    def device_init(self):
+        super().device_init()
+        self.data_regs.append(
+            Reg_DSE_alarm_61xx_MkII()
+        )
+
+class DSE72xx_73xx_61xx_74xx_MkII_Generator(DSE_Generator):
+
+    def device_init(self):
+        super().device_init()
+        self.data_regs.append(
+            Reg_DSE_alarm_72xx_73xx_61xx_74xx_MkII()
+        )
+
+class DSE8xxx_Generator(DSE_Generator):
+
+    def device_init(self):
+        super().device_init()
+        self.data_regs.append(
+            Reg_DSE_alarm_8xxx()
         )
 
 
 models = {
     '1-4623': {
-        'model':    'DSE4620/4623',
+        'model':    'DSE 4620/4623',
         'handler':  DSE4xxx_Generator,
+    },
+    '1-32808': {
+        'model':    'DSE 4510 MKII',
+        'handler':  DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator,
+    },
+    '1-32800': {
+        'model':    'DSE 6110 MKII',
+        'handler':  DSE61xx_MkII_Generator,
+    },
+    '1-32840': {
+        'model':    'DSE 7310 MKII',
+        'handler':  DSE72xx_73xx_61xx_74xx_MkII_Generator,
+    },
+    '1-32845': {
+        'model':    'DSE 7410 MKII',
+        'handler':  DSE72xx_73xx_61xx_74xx_MkII_Generator,
+    },
+    '1-32846': {
+        'model':    'DSE 7420 MKII',
+        'handler':  DSE72xx_73xx_61xx_74xx_MkII_Generator,
+    },
+    '1-32832': {
+        'model':    'DSE 8610 MKII',
+        'handler':  DSE8xxx_Generator,
+    },
+    '1-32834': {
+        'model':    'DSE 8660 MKII',
+        'handler':  DSE8xxx_Generator,
     },
 }
 
