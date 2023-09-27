@@ -49,6 +49,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
                      invalid=0xffffffff),
             Reg_u32b(0x3036, '/Ac/Energy/Reverse', 100, '%.1f kWh',
                      invalid=0xffffffff),
+            Reg_u16( 0x3038, '/ErrorCode'),
         ]
 
         phase_cfg = self.read_register(self.data_regs[0])
