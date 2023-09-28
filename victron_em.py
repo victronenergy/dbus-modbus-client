@@ -19,15 +19,16 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
     refresh_time = 20
 
     def phase_regs(self, n):
-        base = 0x3000 + 0x10 * (n - 1)
+        base = 0x3040 + 8 * (n - 1)
+        power = 0x3082 + 4 * (n - 1)
         return [
             Reg_s16( base + 0, '/Ac/L%d/Voltage' % n,        100, '%.1f V'),
             Reg_s16( base + 1, '/Ac/L%d/Current' % n,        100, '%.1f A'),
-            Reg_s32b(base + 2, '/Ac/L%d/Power' % n,            1, '%.1f W'),
-            Reg_u32b(base + 6, '/Ac/L%d/Energy/Forward' % n, 100, '%.1f kWh',
+            Reg_u32b(base + 2, '/Ac/L%d/Energy/Forward' % n, 100, '%.1f kWh',
                      invalid=0xffffffff),
-            Reg_u32b(base + 8, '/Ac/L%d/Energy/Reverse' % n, 100, '%.1f kWh',
+            Reg_u32b(base + 4, '/Ac/L%d/Energy/Reverse' % n, 100, '%.1f kWh',
                      invalid=0xffffffff),
+            Reg_s32b(power,    '/Ac/L%d/Power' % n,            1, '%.1f W'),
         ]
 
     def device_init(self):
@@ -42,7 +43,22 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             Reg_u16( 0x2001, onchange=self.pr_changed), # role
             Reg_text(0x2002, 32, '/CustomName', encoding='utf-8',
                      write=self.set_name, onchange=self.name_changed),
-            Reg_s32b(0x3030, '/Ac/Power',            1, '%.1f W'),
+        ]
+
+        phase_cfg = self.read_register(self.data_regs[0])
+        phases = [phase_cfg + 1] if phase_cfg < 3 else [1, 2, 3]
+        self.nr_phases = len(phases)
+
+        role_id = self.read_register(self.data_regs[1])
+        if role_id < len(self.role_names):
+            self.role = self.role_names[role_id]
+
+        ver = self.read_register(self.info_regs[1])
+        if ver < (0, 1, 2, 4):
+            log.info('Old firmware, data not available')
+            return
+
+        self.data_regs += [
             Reg_u16( 0x3032, '/Ac/Frequency',      100, '%.1f Hz'),
             Reg_s16( 0x3033, '/Ac/PENVoltage',     100, '%.1f V'),
             Reg_u32b(0x3034, '/Ac/Energy/Forward', 100, '%.1f kWh',
@@ -50,18 +66,11 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             Reg_u32b(0x3036, '/Ac/Energy/Reverse', 100, '%.1f kWh',
                      invalid=0xffffffff),
             Reg_u16( 0x3038, '/ErrorCode'),
+            Reg_s32b(0x3080, '/Ac/Power',            1, '%.1f W'),
         ]
-
-        phase_cfg = self.read_register(self.data_regs[0])
-        phases = [phase_cfg + 1] if phase_cfg < 3 else [1, 2, 3]
-        self.nr_phases = len(phases)
 
         for n in phases:
             self.data_regs += self.phase_regs(n)
-
-        role_id = self.read_register(self.data_regs[1])
-        if role_id < len(self.role_names):
-            self.role = self.role_names[role_id]
 
     def set_name(self, val):
         self.vreglink_set(0x10c, bytes(val, encoding='utf-8'))
