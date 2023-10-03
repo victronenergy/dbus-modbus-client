@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 import dbus
 import dbus.mainloop.glib
 import faulthandler
+from functools import partial
 import os
 import pymodbus.constants
 from settingsdevice import SettingsDevice
@@ -259,14 +260,17 @@ class NetClient(Client):
     def new_scanner(self, full):
         return NetScanner(MODBUS_TCP_PORT, if_blacklist)
 
-    def init(self, *args):
-        super(NetClient, self).init(*args)
+    def init_settings(self):
+        super().init_settings()
 
         svcname = 'com.victronenergy.modbusclient.%s' % self.name
         self.svc = VeDbusService(svcname, self.dbusconn)
         self.svc.add_path('/Scan', False, writeable=True,
                           onchangecallback=self.set_scan)
         self.svc.add_path('/ScanProgress', None, gettextcallback=percent)
+
+    def init(self, *args):
+        super().init(*args)
 
         self.mdns = mdns.MDNS()
         self.mdns.start()
@@ -288,6 +292,28 @@ class NetClient(Client):
             if maddr:
                 self.probe_devices(maddr, nosave=True)
 
+    def init_device(self, dev, *args):
+        super().init_device(dev, *args)
+
+        if dev.nosave:
+            dev_path = '/Devices/' + dev.get_ident()
+            with self.svc as s:
+                s.add_path(dev_path + '/Enabled', int(dev.enabled),
+                           writeable=True,
+                           onchangecallback=partial(self.enable_device, dev))
+                s.add_path(dev_path + '/Serial', dev.info['/Serial'])
+                name = str(dev.info['/CustomName']) or dev.productname
+                s.add_path(dev_path + '/Name', name)
+
+    def del_device(self, dev):
+        with self.svc as s:
+            s.del_tree('/Devices/' + dev.get_ident())
+        super().del_device(dev)
+
+    def enable_device(self, dev, path, val):
+        dev.enabled = bool(val)
+        dev.settings['enabled'] = dev.enabled
+        dev.sched_reinit()
         return True
 
 class SerialClient(Client):
