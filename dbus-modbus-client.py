@@ -93,8 +93,7 @@ class Client(object):
                 continue
 
             try:
-                d.init(self.dbusconn)
-                d.nosave = False
+                self.init_device(d, False)
                 self.devices.append(d)
             except:
                 log.info('Error initialising %s, skipping', d)
@@ -116,6 +115,14 @@ class Client(object):
 
         return True
 
+    def init_device(self, dev, nosave=False):
+        dev.init(self.dbusconn)
+        dev.nosave = nosave
+
+    def del_device(self, dev):
+        self.devices.remove(dev)
+        dev.destroy()
+
     def update_device(self, dev):
         try:
             dev.update()
@@ -126,10 +133,9 @@ class Client(object):
                 log.info('Device %s failed', dev)
                 if self.err_exit:
                     os._exit(1)
-                self.devices.remove(dev)
                 if not dev.nosave:
                     self.failed.append(dev.spec)
-                dev.destroy()
+                self.del_device(dev)
 
     def probe_filter(self, dev):
         return dev not in self.devices
@@ -140,8 +146,7 @@ class Client(object):
 
         for d in devs:
             try:
-                d.init(self.dbusconn)
-                d.nosave = nosave
+                self.init_device(d, nosave)
                 self.devices.append(d)
             except:
                 failed.append(d.spec)
@@ -162,8 +167,8 @@ class Client(object):
         rem = old - new
 
         for d in rem & cur:
-            dd = self.devices.pop(self.devices.index(d))
-            dd.destroy()
+            dd = self.devices[self.devices.index(d)]
+            self.del_device(dd)
 
         self.failed = self.probe_devices(new);
         self.save_devices()
