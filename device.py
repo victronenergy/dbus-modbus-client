@@ -139,6 +139,7 @@ class ModbusDevice(object):
         def_inst = '%s:%s' % (self.default_role, self.default_instance)
 
         SETTINGS = {
+            'enabled':  [self.settings_path + '/Enabled', 0, 0, 1],
             'instance': [self.settings_path + '/ClassAndVrmInstance', def_inst, 0, 0],
         }
 
@@ -149,6 +150,11 @@ class ModbusDevice(object):
             self.settings['instance'] = '%s:%s' % (self.role, self.devinst)
         else:
             self.role = role
+
+        if self.enabled:
+            self.settings['enabled'] = 1
+        else:
+            self.enabled = self.settings['enabled']
 
     def setting_changed(self, name, old, new):
         if name == 'instance':
@@ -169,6 +175,12 @@ class ModbusDevice(object):
                 self.dbus['/Position'] = new
             return
 
+        if name == 'enabled':
+            if new != old:
+                self.enabled = bool(new)
+                self.sched_reinit()
+            return
+
     def get_role_instance(self):
         val = self.settings['instance'].split(':')
         return val[0], int(val[1])
@@ -176,7 +188,8 @@ class ModbusDevice(object):
     def reinit(self):
         self.modbus.get()
         self.destroy()
-        self.init(self.settings_dbus)
+        self.init(self.settings_dbus, self.enabled)
+        self.need_reinit = False
 
     def sched_reinit(self):
         self.need_reinit = True
@@ -258,10 +271,15 @@ class ModbusDevice(object):
         else:
             reg.max_age = self.age_limit
 
-    def init(self, dbus):
+    def init(self, dbus, enable=True):
+        self.enabled = enable
         self.device_init()
         self.read_info()
         self.init_device_settings(dbus)
+        self.need_reinit = False
+
+        if not self.enabled:
+            return
 
         self.data_regs = self.pack_regs(self.data_regs)
         ident = self.get_ident()
@@ -311,6 +329,9 @@ class ModbusDevice(object):
     def update(self):
         if self.need_reinit:
             self.reinit()
+
+        if not self.enabled:
+            return
 
         self.modbus.timeout = self.timeout
         latency = []
