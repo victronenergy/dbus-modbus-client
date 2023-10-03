@@ -116,8 +116,8 @@ class Client(object):
 
         return True
 
-    def init_device(self, dev, nosave=False):
-        dev.init(self.dbusconn)
+    def init_device(self, dev, nosave=False, enable=True):
+        dev.init(self.dbusconn, enable)
         dev.nosave = nosave
 
     def del_device(self, dev):
@@ -141,13 +141,13 @@ class Client(object):
     def probe_filter(self, dev):
         return dev not in self.devices
 
-    def probe_devices(self, devlist, nosave=False):
+    def probe_devices(self, devlist, nosave=False, enable=True):
         devs = set(devlist) - set(self.devices)
         devs, failed = probe.probe(devs, filt=self.probe_filter)
 
         for d in devs:
             try:
-                self.init_device(d, nosave)
+                self.init_device(d, nosave, enable)
                 self.devices.append(d)
             except:
                 failed.append(d.spec)
@@ -290,7 +290,7 @@ class NetClient(Client):
             self.mdns_check_time = now
             maddr = self.mdns.get_devices()
             if maddr:
-                self.probe_devices(maddr, nosave=True)
+                self.probe_devices(maddr, nosave=True, enable=False)
 
     def init_device(self, dev, *args):
         super().init_device(dev, *args)
