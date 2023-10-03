@@ -173,7 +173,7 @@ class Client(object):
             self.update_devlist(old, new)
             return
 
-    def init(self, force_scan):
+    def init_settings(self):
         settings_path = '/Settings/ModbusClient/' + self.name
         SETTINGS = {
             'devices':  [settings_path + '/Devices', '', 0, 0],
@@ -186,6 +186,7 @@ class Client(object):
         self.settings = SettingsDevice(self.dbusconn, SETTINGS,
                                        self.setting_changed, timeout=10)
 
+    def init_devices(self, force_scan):
         self.update_devlist('', self.settings['devices'])
 
         if not self.keep_failed:
@@ -201,6 +202,10 @@ class Client(object):
             self.start_scan(force_scan)
 
         self.watchdog.start()
+
+    def init(self, force_scan):
+        self.init_settings()
+        self.init_devices(force_scan)
 
     def update(self):
         if self.scanner:
