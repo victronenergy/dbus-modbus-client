@@ -36,6 +36,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             Reg_text( 0x1001, 8, '/Serial'),
             VEReg_ver(0x1009, '/FirmwareVersion'),
             Reg_u16(  0x100b, '/HardwareVersion'),
+            Reg_text( 0x2002, 32, '/CustomName', encoding='utf-8'),
         ]
 
         self.data_regs = [
