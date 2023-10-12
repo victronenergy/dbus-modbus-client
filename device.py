@@ -159,7 +159,9 @@ class ModbusDevice(object):
                 self.sched_reinit()
                 return
 
-            self.dbus['/DeviceInstance'] = inst
+            if self.dbus:
+                self.dbus['/DeviceInstance'] = inst
+
             return
 
         if name == 'position':
