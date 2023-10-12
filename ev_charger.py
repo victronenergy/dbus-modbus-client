@@ -54,6 +54,7 @@ class EV_Charger(device.ModbusDevice):
         self.info_regs = [
             Reg_text(5001, 6, '/Serial', little=True),
             VEReg_ver(5007, '/FirmwareVersion'),
+            Reg_text(5027, 22, '/CustomName', little=True, encoding='utf-8'),
         ]
 
         self.data_regs = [
