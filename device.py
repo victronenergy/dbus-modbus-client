@@ -8,7 +8,7 @@ import time
 import traceback
 
 from settingsdevice import SettingsDevice
-from vedbus import VeDbusService
+from vedbus import VeDbusService, VeDbusItemImport
 
 import __main__
 from register import Reg
@@ -136,10 +136,14 @@ class ModbusDevice(object):
         self.settings_dbus = dbus
         self.settings_path = '/Settings/Devices/' + self.get_ident()
 
+        settings_root = VeDbusItemImport(dbus, 'com.victronenergy.settings',
+                                         self.settings_path)
+
+        def_enable = settings_root.exists
         def_inst = '%s:%s' % (self.default_role, self.default_instance)
 
         SETTINGS = {
-            'enabled':  [self.settings_path + '/Enabled', 0, 0, 1],
+            'enabled':  [self.settings_path + '/Enabled', def_enable, 0, 1],
             'instance': [self.settings_path + '/ClassAndVrmInstance', def_inst, 0, 0],
         }
 
