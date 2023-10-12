@@ -210,6 +210,8 @@ class ModbusDevice(object):
         return False
 
     def dbus_add_register(self, r):
+        if r.name in self.dbus:
+            del self.dbus[r.name]
         v = r if r.isvalid() else None
         if r.write:
             cb = partial(self.dbus_write_register, r)
