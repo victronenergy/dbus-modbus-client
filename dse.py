@@ -232,7 +232,7 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
     default_instance = 40
     min_timeout = 1         # Increased timeout for less corrupted messages
 
-    detect_status_by_rpm = False
+    init_status_code = None
 
     # GenComm System Control Function keys
     SCF_SELECT_AUTO_MODE = 35701     # Select Auto mode
@@ -341,9 +341,20 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
             }),
         ]
 
+        # Check, if status register is implemented on controller
+        self.init_status_code = self.read_register(self.status_reg)
+        if self._status_register_available():
+            self.data_regs.append(self.status_reg)
+        else:
+            log.info('DSE status code register is not available')
+
 
     def get_ident(self):
         return 'dse_%s' % self.info['/Serial']
+
+
+    def _status_register_available(self):
+        return self.init_status_code is not None
 
 
     def _get_status_code_from_rpm(self, rpm=None):
@@ -363,19 +374,15 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
 
         is_running = None
 
-        # Check, if status register is implemented on controller,
-        # otherwise detect engine status by RPM
-        status_reg_val = self.read_register(self.status_reg)
-        if status_reg_val is not None:
-            self.data_regs.append(self.status_reg)
-            is_running = status_reg_val > 0
+        # If status register is not available, detect status by rpm value
+        if self._status_register_available():
+            is_running = self.init_status_code > 0
         else:
-            log.warning('DSE status code register is not available, detecting engine status by RPM')
-            self.detect_status_by_rpm = True
             engine_speed_reg_val = self.read_register(self.engine_speed_reg)
             if engine_speed_reg_val is None:
                 log.error('Cannot detect engine status by RPM, as register is not available')
             else:
+                log.info('Detecting engine status by RPM')
                 status_code = self._get_status_code_from_rpm(engine_speed_reg_val)
                 self.dbus.add_path(
                     '/StatusCode',
@@ -396,7 +403,7 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
     def update(self):
         super().update()
 
-        if self.detect_status_by_rpm and self.dbus['/StatusCode'] is not None:
+        if not self._status_register_available() and self.dbus['/StatusCode'] is not None:
             self.dbus['/StatusCode'] = self._get_status_code_from_rpm()
 
 
