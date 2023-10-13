@@ -76,7 +76,6 @@ class Reg_DSE_alarm(Reg, int):
         # definition ("Number of named alarms")
         super().__init__(base=base, count=count, name='/ErrorCode')
         self.error_code_offset = error_code_offset
-        self.coding = ('H', 'H')
 
     def _interpret_alarm_value(self, val):
         """ Meaning according to GenComm specification:
@@ -113,8 +112,7 @@ class Reg_DSE_alarm(Reg, int):
             None indicates an unimplemented or unknown alarm state """
         alarms = list()
         for reg_val in values:
-            v = struct.unpack(self.coding[0], struct.pack(self.coding[1], reg_val))
-            alarms.extend(self._decode_into_4bits(v[0]))
+            alarms.extend(self._decode_into_4bits(reg_val))
         return alarms
 
     def decode(self, values):
