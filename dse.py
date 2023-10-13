@@ -31,11 +31,10 @@ class Reg_DSE_ident(Reg, str):
         dash-separated string. """
     def __init__(self):
         super().__init__(768, 2)
-        self.coding = ('H', 'H')
 
     def decode(self, values):
-        manufacturer_code = struct.unpack(self.coding[0], struct.pack(self.coding[1], values[0]))[0]
-        model_number = struct.unpack(self.coding[0], struct.pack(self.coding[1], values[1]))[0]
+        manufacturer_code = values[0]
+        model_number = values[1]
         ident_str = f"{ manufacturer_code }-{ model_number }"
         return self.update(ident_str)
 
