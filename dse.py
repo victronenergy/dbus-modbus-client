@@ -38,66 +38,34 @@ class Reg_DSE_ident(Reg, str):
         ident_str = f"{ manufacturer_code }-{ model_number }"
         return self.update(ident_str)
 
-class Reg_DSE_s16(Reg_s16):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, *args, **kwargs)
-        if not self.invalid:
-            # DSE GenComm defines the following non-numeric `Sentinel values for instrumentation`
-            self.invalid = [
-                0x7FFF, # Unimplemented
-                0x7FFE, # Over measurable range
-                0x7FFD, # Under measurable range
-                0x7FFC, # Transducer fault
-                0x7FFB, # Bad data
-                0x7FFA, # High digital input
-                0x7FF9, # Low digital input
-                0x7FF8  # Reserved
-            ]
+INVALID = [
+    -1,     # Unimplemented
+    -2,     # Over measurable range
+    -3,     # Under measurable range
+    -4,     # Transducer fault
+    -5,     # Bad data
+    -6,     # High digital input
+    -7,     # Low digital input
+    -8,     # Reserved
+]
 
-class Reg_DSE_u16(Reg_u16):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, *args, **kwargs)
+class Reg_DSE_num:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         if not self.invalid:
-            self.invalid = [
-                0xFFFF, # Unimplemented
-                0xFFFE, # Over measurable range
-                0xFFFD, # Under measurable range
-                0xFFFC, # Transducer fault
-                0xFFFB, # Bad data
-                0xFFFA, # High digital input
-                0xFFF9, # Low digital input
-                0xFFF8  # Reserved
-            ]
+            self.invalid = [x & self.invalid_mask for x in INVALID]
 
-class Reg_DSE_s32b(Reg_s32b):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, *args, **kwargs)
-        if not self.invalid:
-            self.invalid = [
-                0x7FFFFFFF, # Unimplemented
-                0x7FFFFFFE, # Over measurable range
-                0x7FFFFFFD, # Under measurable range
-                0x7FFFFFFC, # Transducer fault
-                0x7FFFFFFB, # Bad data
-                0x7FFFFFFA, # High digital input
-                0x7FFFFFF9, # Low digital input
-                0x7FFFFFF8  # Reserved
-            ]
+class Reg_DSE_s16(Reg_DSE_num, Reg_s16):
+    invalid_mask = 0x7fff
 
-class Reg_DSE_u32b(Reg_u32b):
-    def __init__(self, base, *args, **kwargs):
-        super().__init__(base, *args, **kwargs)
-        if not self.invalid:
-            self.invalid = [
-                0xFFFFFFFF, # Unimplemented
-                0xFFFFFFFE, # Over measurable range
-                0xFFFFFFFD, # Under measurable range
-                0xFFFFFFFC, # Transducer fault
-                0xFFFFFFFB, # Bad data
-                0xFFFFFFFA, # High digital input
-                0xFFFFFFF9, # Low digital input
-                0xFFFFFFF8  # Reserved
-            ]
+class Reg_DSE_u16(Reg_DSE_num, Reg_u16):
+    invalid_mask = 0xffff
+
+class Reg_DSE_s32b(Reg_DSE_num, Reg_s32b):
+    invalid_mask = 0x7fffffff
+
+class Reg_DSE_u32b(Reg_DSE_num, Reg_u32b):
+    invalid_mask = 0xffffffff
 
 class Reg_DSE_alarm(Reg, int):
     """ Decode DSE alarm registers into error codes, which
