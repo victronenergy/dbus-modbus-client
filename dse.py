@@ -5,8 +5,6 @@ import device
 import probe
 from register import Reg, Reg_s16, Reg_u16, Reg_s32b, Reg_u32b, Reg_mapu16
 
-from pymodbus.register_read_message import ReadHoldingRegistersResponse
-
 log = logging.getLogger()
 
 
@@ -240,7 +238,7 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
 
         reg_base = 4096
         rr = self.modbus.read_holding_registers(reg_base, 8, unit=self.unit)
-        if not isinstance(rr, ReadHoldingRegistersResponse):
+        if rr.isError():
             log.error('Error reading GenComm system control function registers 4096 to 4103: %s', rr)
             raise Exception(rr)
         self.scf_reg_vals = rr.registers
