@@ -23,6 +23,8 @@ class ModbusDevice:
     fast_regs = ('/Ac/L1/Power', '/Ac/L2/Power', '/Ac/L3/Power', '/Ac/Power')
 
     def __init__(self, spec, modbus, model):
+        self.data_regs = []
+        self.info_regs = []
         self.spec = spec
         self.modbus = modbus.get()
         self.method = modbus.method
