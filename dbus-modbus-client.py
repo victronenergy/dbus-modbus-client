@@ -29,6 +29,7 @@ import smappee
 import abb
 import comap
 import victron_em
+import shelly
 
 import logging
 log = logging.getLogger()
