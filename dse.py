@@ -353,6 +353,8 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
 
 
     def device_init_late(self):
+        super().device_init_late()
+
         # Additional static paths
         if '/ErrorCode' not in self.dbus:
             self.dbus.add_path('/ErrorCode', 0)
