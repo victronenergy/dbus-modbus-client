@@ -55,7 +55,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             self.role = self.role_names[role_id]
 
         ver = self.read_register(self.info_regs[1])
-        if ver < (0, 1, 2, 4):
+        if ver < (0, 1, 3, 1):
             log.info('Old firmware, data not available')
             return
 
