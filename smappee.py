@@ -257,6 +257,8 @@ class PowerBox(device.CustomName, device.EnergyMeter):
         return False
 
     def device_init_late(self):
+        super().device_init_late()
+
         for ct in self.all_cts:
             cb = partial(self.ct_identify, ct)
             self.dbus.add_path('/CT/%d/Identify' % ct.slot, None,
