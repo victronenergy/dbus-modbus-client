@@ -87,6 +87,12 @@ class EV_Charger_AC22E(EV_Charger):
 class EV_Charger_AC22NS(EV_Charger):
     productid = 0xc026
 
+class EV_Charger_AC22_V2(EV_Charger):
+    productid = 0xc023
+
+class EV_Charger_AC22_V2_NS(EV_Charger):
+    productid = 0xc027
+
 models = {
     EV_Charger.productid: {
         'model':    'AC22',
@@ -99,6 +105,14 @@ models = {
     EV_Charger_AC22NS.productid: {
         'model':    'AC22NS',
         'handler':  EV_Charger_AC22NS,
+    },
+    EV_Charger_AC22_V2.productid: {
+        'model':    'EVCS 32A V2',
+        'handler':  EV_Charger_AC22_V2,
+    },
+    EV_Charger_AC22_V2_NS.productid: {
+        'model':    'EVCS 32A NS V2',
+        'handler':  EV_Charger_AC22_V2_NS,
     },
 }
 
