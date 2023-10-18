@@ -281,6 +281,7 @@ class ModbusDevice:
         self.need_reinit = False
 
         if not self.enabled:
+            self.modbus.put()
             return
 
         self.data_regs = self.pack_regs(self.data_regs)
@@ -351,6 +352,8 @@ class ModbusDevice:
     def set_enabled(self, enabled):
         self.enabled = enabled
         self.settings['enabled'] = enabled
+        if enabled:
+            self.modbus.get()
         self.sched_reinit()
 
 class LatencyFilter:
