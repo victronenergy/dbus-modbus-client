@@ -1,6 +1,5 @@
 import dbus
 import logging
-from pymodbus.register_read_message import ReadWriteMultipleRegistersResponse
 import struct
 
 from vedbus import VeDbusItemExport
@@ -66,7 +65,7 @@ class VregLink:
                                             write_registers=data,
                                             unit=self.unit)
 
-        if not isinstance(r, ReadWriteMultipleRegistersResponse):
+        if r.isError():
             log.error('Modbus error accessing vreg %#04x: %s', regid, r)
             return 0x8100 if iswrite else 0x8000, []
 
