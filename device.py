@@ -180,8 +180,7 @@ class ModbusDevice:
 
         if name == 'enabled':
             if new != old:
-                self.enabled = bool(new)
-                self.sched_reinit()
+                self.set_enabled(bool(new))
             return
 
     def get_role_instance(self):
@@ -348,6 +347,11 @@ class ModbusDevice:
         if latency:
             self.latency = self.latfilt.filter(latency)
             self.timeout = max(self.min_timeout, self.latency * 4)
+
+    def set_enabled(self, enabled):
+        self.enabled = enabled
+        self.settings['enabled'] = enabled
+        self.sched_reinit()
 
 class LatencyFilter:
     def __init__(self, val):

@@ -311,9 +311,7 @@ class NetClient(Client):
         super().del_device(dev)
 
     def enable_device(self, dev, path, val):
-        dev.enabled = bool(val)
-        dev.settings['enabled'] = dev.enabled
-        dev.sched_reinit()
+        dev.set_enabled(bool(val))
         return True
 
 class SerialClient(Client):
