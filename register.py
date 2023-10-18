@@ -101,6 +101,11 @@ class Reg_u32l(Reg_num):
     coding = ('<I', '<2H')
     count = 2
 
+class Reg_f16(Reg_num):
+    coding = ('e', 'H')
+    count = 1
+    rtype = float
+
 class Reg_f32l(Reg_num):
     coding = ('<f', '<2H')
     count = 2
