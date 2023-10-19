@@ -73,7 +73,10 @@ class EV_Charger(device.ModbusDevice):
         ]
 
         # Firmware check, before 1.21~1 we could only fetch 50 registers
-        if self.read_register(self.info_regs[1]) >= (0, 0x01, 0x21, 0x01):
+        if self.read_register(self.info_regs[1]) < (0, 0x01, 0x21, 0x01):
+            return
+
+        if self.have_display:
             self.data_regs.append(
                 Reg_u16(5050, '/EnableDisplay', write=(0, 1)))
 
@@ -82,18 +85,23 @@ class EV_Charger(device.ModbusDevice):
 
 class EV_Charger_AC22(EV_Charger):
     productid = 0xc024
+    have_display = False
 
 class EV_Charger_AC22E(EV_Charger):
     productid = 0xc025
+    have_display = True
 
 class EV_Charger_AC22NS(EV_Charger):
     productid = 0xc026
+    have_display = False
 
 class EV_Charger_AC22_V2(EV_Charger):
     productid = 0xc023
+    have_display = True
 
 class EV_Charger_AC22_V2_NS(EV_Charger):
     productid = 0xc027
+    have_display = False
 
 models = {
     EV_Charger_AC22.productid: {
