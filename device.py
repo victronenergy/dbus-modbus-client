@@ -331,6 +331,9 @@ class ModbusDevice:
         if not self.enabled:
             return
 
+        self.device_update()
+
+    def device_update(self):
         self.modbus.timeout = self.timeout
         latency = []
 
