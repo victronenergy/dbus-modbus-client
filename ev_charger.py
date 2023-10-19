@@ -44,7 +44,6 @@ class EV_Charger(device.ModbusDevice):
     allowed_roles = None
     default_role = 'evcharger'
     default_instance = 40
-    productid = 0xc024
     productname = 'EV Charging Station'
     min_timeout = 0.5
 
@@ -81,6 +80,9 @@ class EV_Charger(device.ModbusDevice):
     def get_ident(self):
         return 'evc_%s' % self.info['/Serial']
 
+class EV_Charger_AC22(EV_Charger):
+    productid = 0xc024
+
 class EV_Charger_AC22E(EV_Charger):
     productid = 0xc025
 
@@ -94,9 +96,9 @@ class EV_Charger_AC22_V2_NS(EV_Charger):
     productid = 0xc027
 
 models = {
-    EV_Charger.productid: {
+    EV_Charger_AC22.productid: {
         'model':    'AC22',
-        'handler':  EV_Charger,
+        'handler':  EV_Charger_AC22,
     },
     EV_Charger_AC22E.productid: {
         'model':    'AC22E',
