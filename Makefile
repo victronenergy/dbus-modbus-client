@@ -12,6 +12,7 @@ FILES =									\
 	probe.py							\
 	register.py							\
 	scan.py								\
+	shmexport.py							\
 	smappee.py							\
 	utils.py							\
 	victron_em.py							\
