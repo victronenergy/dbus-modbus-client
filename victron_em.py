@@ -4,12 +4,13 @@ import device
 import mdns
 import probe
 from register import *
+import shmexport
 from victron_regs import *
 import vreglink
 
 log = logging.getLogger()
 
-class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
+class VE_Meter_A1B1(shmexport.ShmExport, vreglink.VregLink, device.EnergyMeter):
     productid = 0xa1b1
     productname = 'Energy Meter VM-3P75CT'
     vreglink_base = 0x4000
@@ -17,6 +18,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
     allowed_roles = None
     age_limit_fast = 0
     refresh_time = 20
+    shm_format = '6f'
 
     def phase_regs(self, n):
         base = 0x3040 + 8 * (n - 1)
@@ -72,6 +74,19 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
 
         for n in phases:
             self.data_regs += self.phase_regs(n)
+
+        if ver < (0, 1, 4, 1):
+            log.info('Old firmware, snapshot data not available')
+            return
+
+        self.shm_regs = [
+            Reg_f16(0x3090),
+            Reg_f16(0x3091),
+            Reg_f16(0x3092),
+            Reg_f16(0x3093),
+            Reg_f16(0x3094),
+            Reg_f16(0x3095),
+        ]
 
     def set_name(self, val):
         self.vreglink_set(0x10c, bytes(val, encoding='utf-8'))
