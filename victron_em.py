@@ -16,7 +16,6 @@ class VE_Meter_A1B1(shmexport.ShmExport, vreglink.VregLink, device.EnergyMeter):
     vreglink_base = 0x4000
     vreglink_size = 32
     allowed_roles = None
-    age_limit_fast = 0
     refresh_time = 20
     shm_format = '6f'
 
