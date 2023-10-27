@@ -15,6 +15,37 @@ from utils import *
 
 log = logging.getLogger()
 
+def pack_regs(method, regs):
+    rr = []
+    for r in regs:
+        rr += r if isinstance(r, list) else [r]
+    rr.sort(key=lambda r: r.base)
+
+    overhead = 5 + 2                # request + response
+    if method == 'tcp':
+        overhead += 2 * (20 + 7)    # TCP + MBAP
+    elif method == 'udp':
+        overhead += 2 * (8 + 7)     # UDP + MBAP
+    elif method == 'rtu':
+        overhead += 2 * (1 + 2)     # address + crc
+
+    regs = []
+    rg = [rr.pop(0)]
+
+    for r in rr:
+        end = rg[-1].base + rg[-1].count
+        nr = r.base + r.count - rg[0].base
+        if nr > 125 or 2 * (r.base - end) > overhead:
+            regs.append(rg)
+            rg = []
+
+        rg.append(r)
+
+    if rg:
+        regs.append(rg)
+
+    return regs
+
 class ModbusDevice:
     min_timeout = 0.1
     refresh_time = None
@@ -231,37 +262,6 @@ class ModbusDevice:
         else:
             self.dbus.add_path(r.name, v)
 
-    def pack_regs(self, regs):
-        rr = []
-        for r in regs:
-            rr += r if isinstance(r, list) else [r]
-        rr.sort(key=lambda r: r.base)
-
-        overhead = 5 + 2                # request + response
-        if self.method == 'tcp':
-            overhead += 2 * (20 + 7)    # TCP + MBAP
-        elif self.method == 'udp':
-            overhead += 2 * (8 + 7)     # UDP + MBAP
-        elif self.method == 'rtu':
-            overhead += 2 * (1 + 2)     # address + crc
-
-        regs = []
-        rg = [rr.pop(0)]
-
-        for r in rr:
-            end = rg[-1].base + rg[-1].count
-            nr = r.base + r.count - rg[0].base
-            if nr > 125 or 2 * (r.base - end) > overhead:
-                regs.append(rg)
-                rg = []
-
-            rg.append(r)
-
-        if rg:
-            regs.append(rg)
-
-        return regs
-
     def set_max_age(self, reg):
         if reg.name in self.fast_regs:
             reg.max_age = self.age_limit_fast
@@ -279,7 +279,7 @@ class ModbusDevice:
             self.modbus.put()
             return
 
-        self.data_regs = self.pack_regs(self.data_regs)
+        self.data_regs = pack_regs(self.method, self.data_regs)
         ident = self.get_ident()
 
         svcname = 'com.victronenergy.%s.%s' % (self.role, ident)
