@@ -173,11 +173,6 @@ class ModbusDevice:
 
             return
 
-        if name == 'position':
-            if self.role == 'pvinverter':
-                self.dbus['/Position'] = new
-            return
-
         if name == 'enabled':
             if new != old:
                 self.set_enabled(bool(new))
