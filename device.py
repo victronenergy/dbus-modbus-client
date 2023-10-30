@@ -46,57 +46,29 @@ def pack_regs(method, regs):
 
     return regs
 
-class ModbusDevice:
+class BaseDevice:
     min_timeout = 0.1
     refresh_time = None
     age_limit = 4
     age_limit_fast = 1
     fast_regs = ('/Ac/L1/Power', '/Ac/L2/Power', '/Ac/L3/Power', '/Ac/Power')
+    allowed_roles = None
 
-    def __init__(self, spec, modbus, model):
-        self.spec = spec
-        self.modbus = modbus.get()
-        self.unit = spec.unit
-        self.model = model
+    def __init__(self):
         self.role = None
         self.info = {}
         self.dbus = None
         self.settings = None
-        self.err_count = 0
-        self.latency = modbus.timeout
-        self.need_reinit = False
+        self.info_regs = []
+        self.data_regs = []
 
     def destroy(self):
-        self.info = {}
         if self.dbus:
             self.dbus.__del__()
             self.dbus = None
         if self.settings:
             self.settings._settings = None
             self.settings = None
-        self.modbus.put()
-
-    def __eq__(self, other):
-        return str(self) == str(other)
-
-    def __hash__(self):
-        return hash(self.spec)
-
-    def __str__(self):
-        return str(self.spec)
-
-    def connection(self):
-        if self.modbus.method == 'tcp':
-            return 'Modbus %s %s' % (self.modbus.method.upper(),
-                                     self.modbus.socket.getpeername()[0])
-        elif self.modbus.method == 'udp':
-            return 'Modbus %s %s' % (self.modbus.method.upper(),
-                                     self.modbus.host)
-        elif self.modbus.method in ['rtu', 'ascii']:
-            return 'Modbus %s %s:%d' % (self.modbus.method.upper(),
-                                        os.path.basename(self.modbus.port),
-                                        self.unit)
-        return 'Modbus'
 
     def read_register(self, reg):
         rr = self.modbus.read_holding_registers(reg.base, reg.count,
@@ -165,14 +137,9 @@ class ModbusDevice:
         self.settings_dbus = dbus
         self.settings_path = '/Settings/Devices/' + self.get_ident()
 
-        settings_root = VeDbusItemImport(dbus, 'com.victronenergy.settings',
-                                         self.settings_path)
-
-        def_enable = settings_root.exists
         def_inst = '%s:%s' % (self.default_role, self.default_instance)
 
         SETTINGS = {
-            'enabled':  [self.settings_path + '/Enabled', def_enable, 0, 1],
             'instance': [self.settings_path + '/ClassAndVrmInstance', def_inst, 0, 0],
         }
 
@@ -184,11 +151,6 @@ class ModbusDevice:
         else:
             self.role = role
 
-        if self.enabled:
-            self.settings['enabled'] = 1
-        else:
-            self.enabled = self.settings['enabled']
-
     def setting_changed(self, name, old, new):
         if name == 'instance':
             role, inst = self.get_role_instance()
@@ -196,30 +158,18 @@ class ModbusDevice:
             if role != self.role:
                 self.role = role
                 self.sched_reinit()
-                return
+                return True
 
             if self.dbus:
                 self.dbus['/DeviceInstance'] = inst
 
-            return
+            return True
 
-        if name == 'enabled':
-            if new != old:
-                self.set_enabled(bool(new))
-            return
+        return False
 
     def get_role_instance(self):
         val = self.settings['instance'].split(':')
         return val[0], int(val[1])
-
-    def reinit(self):
-        self.modbus.get()
-        self.destroy()
-        self.init(self.settings_dbus, self.enabled)
-        self.need_reinit = False
-
-    def sched_reinit(self):
-        self.need_reinit = True
 
     def role_changed(self, path, val):
         if val not in self.allowed_roles:
@@ -267,18 +217,7 @@ class ModbusDevice:
         else:
             reg.max_age = self.age_limit
 
-    def init(self, dbus, enable=True):
-        self.enabled = enable
-        self.device_init()
-        self.read_info()
-        self.init_device_settings(dbus)
-        self.need_reinit = False
-
-        if not self.enabled:
-            self.modbus.put()
-            return
-
-        self.data_regs = pack_regs(self.modbus.method, self.data_regs)
+    def init_dbus(self):
         ident = self.get_ident()
 
         svcname = 'com.victronenergy.%s.%s' % (self.role, ident)
@@ -306,6 +245,9 @@ class ModbusDevice:
         for p in self.info:
             self.dbus_add_register(self.info[p])
 
+    def init_data_regs(self):
+        self.data_regs = pack_regs(self.modbus.method, self.data_regs)
+
         for r in self.data_regs:
             for rr in r:
                 if rr.max_age is None:
@@ -313,15 +255,125 @@ class ModbusDevice:
                 if rr.name:
                     self.dbus_add_register(rr)
 
-        self.latfilt = LatencyFilter(self.latency)
-        self.device_init_late()
-        self.need_reinit = False
+    def update_data_regs(self):
+        latency = []
+
+        with self.dbus as d:
+            for r in self.data_regs:
+                t = self.read_data_regs(r, d)
+                if t:
+                    latency.append(t)
+
+        return latency
 
     def device_init(self):
         pass
 
     def device_init_late(self):
         pass
+
+class ModbusDevice(BaseDevice):
+    def __init__(self, spec, modbus, model):
+        super().__init__()
+        self.spec = spec
+        self.modbus = modbus.get()
+        self.unit = spec.unit
+        self.model = model
+        self.subdevices = []
+        self.err_count = 0
+        self.latency = modbus.timeout
+        self.need_reinit = False
+
+    def destroy(self):
+        for s in self.subdevices:
+            s.destroy()
+
+        super().destroy()
+        self.info.clear()
+        self.modbus.put()
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def __hash__(self):
+        return hash(self.spec)
+
+    def __str__(self):
+        return str(self.spec)
+
+    def connection(self):
+        if self.modbus.method == 'tcp':
+            return 'Modbus %s %s' % (self.modbus.method.upper(),
+                                     self.modbus.socket.getpeername()[0])
+        elif self.modbus.method == 'udp':
+            return 'Modbus %s %s' % (self.modbus.method.upper(),
+                                     self.modbus.host)
+        elif self.modbus.method in ['rtu', 'ascii']:
+            return 'Modbus %s %s:%d' % (self.modbus.method.upper(),
+                                        os.path.basename(self.modbus.port),
+                                        self.unit)
+        return 'Modbus'
+
+    def init_device_settings(self, dbus):
+        if self.settings:
+            return
+
+        self.settings_path = '/Settings/Devices/' + self.get_ident()
+        settings_root = VeDbusItemImport(dbus, 'com.victronenergy.settings',
+                                         self.settings_path)
+        def_enable = settings_root.exists
+
+        super().init_device_settings(dbus)
+
+        self.settings.addSettings({
+            'enabled':  [self.settings_path + '/Enabled', def_enable, 0, 1],
+        })
+
+        if self.enabled:
+            self.settings['enabled'] = 1
+        else:
+            self.enabled = self.settings['enabled']
+
+    def setting_changed(self, name, old, new):
+        if super().setting_changed(name, old, new):
+            return True
+
+        if name == 'enabled':
+            if new != old:
+                self.set_enabled(bool(new))
+            return True
+
+        return False
+
+    def reinit(self):
+        self.modbus.get()
+        self.destroy()
+        self.init(self.settings_dbus, self.enabled)
+        self.need_reinit = False
+
+    def sched_reinit(self):
+        self.need_reinit = True
+
+    def init(self, dbus, enable=True):
+        self.enabled = enable
+        self.device_init()
+        self.read_info()
+        self.init_device_settings(dbus)
+        self.need_reinit = False
+
+        if not self.enabled:
+            self.modbus.put()
+            return
+
+        self.init_dbus()
+        self.init_data_regs()
+
+        self.latfilt = LatencyFilter(self.latency)
+        self.device_init_late()
+        self.need_reinit = False
+
+        for s in self.subdevices:
+            s.init()
 
     def update(self):
         if self.need_reinit:
@@ -330,17 +382,14 @@ class ModbusDevice:
         if not self.enabled:
             return
 
+        self.modbus.timeout = self.timeout
         self.device_update()
 
     def device_update(self):
-        self.modbus.timeout = self.timeout
-        latency = []
+        latency = self.update_data_regs()
 
-        with self.dbus as d:
-            for r in self.data_regs:
-                t = self.read_data_regs(r, d)
-                if t:
-                    latency.append(t)
+        for s in self.subdevices:
+            s.device_update()
 
         if latency:
             self.latency = self.latfilt.filter(latency)
@@ -355,6 +404,48 @@ class ModbusDevice:
         if enabled:
             self.modbus.get()
         self.sched_reinit()
+
+class SubDevice(BaseDevice):
+    inherit_info = (
+        '/Serial',
+        '/FirmwareVersion',
+        '/HardwareVersion',
+    )
+
+    def __init__(self, parent, subid):
+        super().__init__()
+        self.parent = parent
+        self.subid = subid
+        self.modbus = parent.modbus
+        self.unit = parent.unit
+        self.model = parent.model
+        self.productid = parent.productid
+        self.productname = parent.productname
+
+    def connection(self):
+        return self.parent.connection()
+
+    def get_ident(self):
+        return self.parent.get_ident() + '_%s' % self.subid
+
+    def init(self):
+        self.device_init()
+        self.read_info()
+
+        for i in self.inherit_info:
+            if i in self.parent.info:
+                self.info.setdefault(i, self.parent.info[i])
+
+        self.init_device_settings(self.parent.settings_dbus)
+        self.init_dbus()
+        self.init_data_regs()
+        self.device_init_late()
+
+    def sched_reinit(self):
+        self.parent.sched_reinit()
+
+    def device_update(self):
+        self.update_data_regs()
 
 class LatencyFilter:
     def __init__(self, val):
@@ -437,4 +528,5 @@ __all__ = [
     'CustomName',
     'EnergyMeter',
     'ModbusDevice',
+    'SubDevice',
 ]
