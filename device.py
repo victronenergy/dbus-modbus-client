@@ -345,6 +345,9 @@ class ModbusDevice:
             self.timeout = max(self.min_timeout, self.latency * 4)
 
     def set_enabled(self, enabled):
+        if enabled == self.enabled:
+            return
+
         self.enabled = enabled
         self.settings['enabled'] = enabled
         if enabled:
