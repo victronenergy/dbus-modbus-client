@@ -301,7 +301,7 @@ class NetClient(Client):
                            writeable=True,
                            onchangecallback=partial(self.enable_device, dev))
                 s.add_path(dev_path + '/Serial', dev.info['/Serial'])
-                name = str(dev.info['/CustomName']) or dev.productname
+                name = str(dev.info.get('/CustomName', '')) or dev.productname
                 s.add_path(dev_path + '/Name', name)
 
     def del_device(self, dev):
