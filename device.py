@@ -1,6 +1,7 @@
 from copy import copy
 import dbus
 from functools import partial
+from enum import Enum
 import logging
 import os
 import time
@@ -15,6 +16,12 @@ from utils import *
 
 log = logging.getLogger()
 
+
+class RegisterType(Enum):
+    INPUT = 1
+    HOLDING = 2
+
+
 class ModbusDevice:
     min_timeout = 0.1
     refresh_time = None
@@ -23,9 +30,13 @@ class ModbusDevice:
     fast_regs = ('/Ac/L1/Power', '/Ac/L2/Power', '/Ac/L3/Power', '/Ac/Power')
 
     def __init__(self, spec, modbus, model):
+        self.data_regs = []
+        self.info_regs = []
         self.spec = spec
         self.modbus = modbus.get()
         self.method = modbus.method
+        # Whether to read from holding registers or input registers
+        self.register_type = RegisterType.HOLDING
         self.unit = spec.unit
         self.model = model
         self.role = None
@@ -69,8 +80,12 @@ class ModbusDevice:
         return 'Modbus'
 
     def read_register(self, reg):
-        rr = self.modbus.read_holding_registers(reg.base, reg.count,
-                                                unit=self.unit)
+        if self.register_type == RegisterType.HOLDING:
+            rr = self.modbus.read_holding_registers(reg.base, reg.count,
+                                                    unit=self.unit)
+        else:
+            rr = self.modbus.read_input_registers(reg.base, reg.count,
+                                                  unit=self.unit)
 
         if rr.isError():
             log.error('Error reading register %#04x: %s', reg.base, rr)
@@ -103,7 +118,10 @@ class ModbusDevice:
         start = regs[0].base
         count = regs[-1].base + regs[-1].count - start
 
-        rr = self.modbus.read_holding_registers(start, count, unit=self.unit)
+        if self.register_type == RegisterType.HOLDING:
+            rr = self.modbus.read_holding_registers(start, count, unit=self.unit)
+        else:
+            rr = self.modbus.read_input_registers(start, count, unit=self.unit)
 
         latency = time.time() - now
 
