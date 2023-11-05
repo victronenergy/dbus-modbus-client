@@ -17,6 +17,7 @@ class Reg:
         self.time = 0
         self.max_age = max_age
         self.text = text
+        self.base_register_type = 4
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
@@ -40,6 +41,10 @@ class Reg:
         if callable(self.text):
             return self.text(self.value)
         return str(self.value)
+
+    def as_input_register(self):
+        self.base_register_type = 3
+        return self
 
     def isvalid(self):
         return self.value is not None
