@@ -158,3 +158,65 @@ class Reg_map:
 
 class Reg_mapu16(Reg_map, Reg_u16):
     pass
+
+
+def register_from_object(obj):
+    try:
+        ref = None
+        if obj['data_type'] == 's16':
+            ref = Reg_s16
+        elif obj['data_type'] == 'u16 ':
+            ref = Reg_u16
+        elif obj['data_type'] == 's32b':
+            ref = Reg_s32b
+        elif obj['data_type'] == 'u32b':
+            ref = Reg_u32b
+        elif obj['data_type'] == 'u64b':
+            ref = Reg_u64b
+        elif obj['data_type'] == 's32l':
+            ref = Reg_s32l
+        elif obj['data_type'] == 'u32l':
+            ref = Reg_u32l
+        elif obj['data_type'] == 'f32l':
+            ref = Reg_f32l
+        elif obj['data_type'] == 'f32b':
+            ref = Reg_f32b
+        elif obj['data_type'] == 'e16':
+            ref = Reg_e16
+        elif obj['data_type'] == 'text':
+            ref = Reg_text
+        elif obj['data_type'] == 'mapu16':
+            ref = Reg_mapu16
+
+
+        base =  obj.get('base', None)
+        name  = obj.get('name', None)
+        text  = obj.get('text', None)
+        write = obj.get('write', False)
+        extra = obj.get('extra', {})
+        reg_type  = obj.get('type', 'holding_register')
+
+        ret = None
+        if issubclass(ref, Reg_num):
+            scale =   obj.get('scale', 1)
+            invalid = obj.get('invalid', [])
+            ret = ref(base, name, scale, text, write, invalid, *extra)
+        elif issubclass(ref, Reg_e16):
+            enum = obj.get('enum', {})
+            ret = ref(base, name, enum, *extra)
+        elif issubclass(ref, Reg_text):
+            count = obj.get('count', 1)
+            little = obj.get('little', False)
+            encoding = obj.get('encoding', None)
+            ret = ref(base, name, count, name, little, encoding, *extra)
+        elif issubclass(ref, Reg_map):
+            args = obj.get('extra', {})
+            tab = obj.get('tab', {})
+            ret = ref(base, name, tab, args, *extra)
+
+        if reg_type == 'input_register':
+            ret.as_input_register();
+
+        return ret
+    except:
+        return None
