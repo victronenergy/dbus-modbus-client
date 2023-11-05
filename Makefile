@@ -18,6 +18,7 @@ FILES =									\
 	victron_regs.py							\
 	vreglink.py							\
 	watchdog.py							\
+	generic_modbus_meter.py						\
 
 VELIB =									\
 	settingsdevice.py						\

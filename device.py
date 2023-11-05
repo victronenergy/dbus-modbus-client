@@ -102,8 +102,13 @@ class ModbusDevice:
 
         start = regs[0].base
         count = regs[-1].base + regs[-1].count - start
+        register_type = regs[0].base_register_type
 
-        rr = self.modbus.read_holding_registers(start, count, unit=self.unit)
+        rr = None
+        if(register_type == 3):
+            rr = self.modbus.read_input_registers(start, count, unit=self.unit)
+        else:
+            rr = self.modbus.read_holding_registers(start, count, unit=self.unit)
 
         latency = time.time() - now
 
@@ -235,7 +240,7 @@ class ModbusDevice:
         rr = []
         for r in regs:
             rr += r if isinstance(r, list) else [r]
-        rr.sort(key=lambda r: r.base)
+        rr.sort(key=lambda r: 10000*r.base_register_type + r.base)
 
         overhead = 5 + 2                # request + response
         if self.method == 'tcp':
@@ -246,12 +251,14 @@ class ModbusDevice:
             overhead += 2 * (1 + 2)     # address + crc
 
         regs = []
-        rg = [rr.pop(0)]
+        r = rr.pop(0)
+        brt = r.base_register_type
+        rg = [r]
 
         for r in rr:
             end = rg[-1].base + rg[-1].count
             nr = r.base + r.count - rg[0].base
-            if nr > 125 or 2 * (r.base - end) > overhead:
+            if nr > 125 or 2 * (r.base - end) > overhead or r.base_register_type != brt:
                 regs.append(rg)
                 rg = []
 
