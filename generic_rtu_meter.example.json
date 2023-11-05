@@ -1,0 +1,38 @@
+[
+  {
+    "product_id": 0,
+    "product_name": "TestProduct",
+    "model": "TestName",
+    "version": "0.1",
+    "serial": "12345678",
+    "probe": {
+      "reg": {
+        "base": 0,
+        "type": "holding_register",
+        "data_type": "f32b"
+      },
+      "match": 9600.0
+    },
+    "data_regs": [
+      {
+	"type": "input_register",
+	"data_type": "f32b",
+	"name": "/Ac/Power",
+	"base": 10,
+	"scale": 1,
+	"text": "%.1f W"
+      },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/Frequency",      "base": 54,    "scale": 1, "text": "%.1f Hz" },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/Energy/Forward", "base": 256,   "scale": 1, "text": "%.1f kWh" },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/L1/Voltage",     "base": 0,     "scale": 1, "text": "%.1f V" },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/L2/Voltage",     "base": 2,     "scale": 1, "text": "%.1f V" },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/L3/Voltage",     "base": 4,     "scale": 1, "text": "%.1f V" },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/L1/Current",     "base": 8,     "scale": 1, "text": "%.1f A" },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/L2/Current",     "base": 10,     "scale": 1, "text": "%.1f A" },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/L3/Current",     "base": 12,     "scale": 1, "text": "%.1f A" },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/L1/Power",       "base": 16,    "scale": 1, "text": "%.1f W" },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/L2/Power",       "base": 18,    "scale": 1, "text": "%.1f W" },
+      { "type": "input_register", "data_type": "f32b", "name": "/Ac/L3/Power",       "base": 20,    "scale": 1, "text": "%.1f W" }
+    ]
+  }
+]
