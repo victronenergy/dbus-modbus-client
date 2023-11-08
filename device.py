@@ -7,7 +7,7 @@ import time
 import traceback
 
 from settingsdevice import SettingsDevice
-from vedbus import VeDbusService, VeDbusItemImport
+from vedbus import VeDbusService, VeDbusItemImport, ServiceContext
 
 import __main__
 from register import Reg
@@ -64,7 +64,8 @@ class BaseDevice:
 
     def destroy(self):
         if self.dbus:
-            self.dbus.__del__()
+            self._dbus.__del__()
+            self._dbus = None
             self.dbus = None
         if self.settings:
             self.settings._settings = None
@@ -221,7 +222,8 @@ class BaseDevice:
         ident = self.get_ident()
 
         svcname = 'com.victronenergy.%s.%s' % (self.role, ident)
-        self.dbus = VeDbusService(svcname, private_bus())
+        self._dbus = VeDbusService(svcname, private_bus())
+        self.dbus = ServiceContext(self._dbus)
 
         self.dbus.add_path('/Mgmt/ProcessName', __main__.NAME)
         self.dbus.add_path('/Mgmt/ProcessVersion', __main__.VERSION)
@@ -258,13 +260,15 @@ class BaseDevice:
     def update_data_regs(self):
         latency = []
 
-        with self.dbus as d:
-            for r in self.data_regs:
-                t = self.read_data_regs(r, d)
-                if t:
-                    latency.append(t)
+        for r in self.data_regs:
+            t = self.read_data_regs(r, self.dbus)
+            if t:
+                latency.append(t)
 
         return latency
+
+    def post_update(self):
+        self.dbus.flush()
 
     def device_init(self):
         pass
@@ -372,6 +376,8 @@ class ModbusDevice(BaseDevice):
         self.device_init_late()
         self.need_reinit = False
 
+        self.dbus.flush()
+
         for s in self.subdevices:
             s.init()
 
@@ -384,12 +390,14 @@ class ModbusDevice(BaseDevice):
 
         self.modbus.timeout = self.timeout
         self.device_update()
+        self.post_update()
 
     def device_update(self):
         latency = self.update_data_regs()
 
         for s in self.subdevices:
             s.device_update()
+            s.post_update()
 
         if latency:
             self.latency = self.latfilt.filter(latency)
@@ -440,6 +448,7 @@ class SubDevice(BaseDevice):
         self.init_dbus()
         self.init_data_regs()
         self.device_init_late()
+        self.dbus.flush()
 
     def sched_reinit(self):
         self.parent.sched_reinit()
