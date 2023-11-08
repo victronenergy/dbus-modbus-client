@@ -59,6 +59,8 @@ class BaseDevice:
         self.info = {}
         self.dbus = None
         self.settings = None
+        self._settings = None
+        self.dbus_settings = {}
         self.info_regs = []
         self.data_regs = []
 
@@ -140,11 +142,11 @@ class BaseDevice:
 
         def_inst = '%s:%s' % (self.default_role, self.default_instance)
 
-        SETTINGS = {
+        self._settings = {
             'instance': [self.settings_path + '/ClassAndVrmInstance', def_inst, 0, 0],
         }
 
-        self.settings = SettingsDevice(dbus, SETTINGS, self.setting_changed)
+        self.settings = SettingsDevice(dbus, self._settings, self.setting_changed)
         role, self.devinst = self.get_role_instance()
 
         if self.role:
@@ -153,6 +155,9 @@ class BaseDevice:
             self.role = role
 
     def setting_changed(self, name, old, new):
+        if self.dbus and name in self.dbus_settings:
+            self.dbus[self.dbus_settings[name]] = new
+
         if name == 'instance':
             role, inst = self.get_role_instance()
 
@@ -167,6 +172,31 @@ class BaseDevice:
             return True
 
         return False
+
+    def add_settings(self, settings):
+        for s in settings.values():
+            if not s[0].startswith('/Settings/'):
+                s[0] = self.settings_path + s[0]
+
+        self._settings.update(settings)
+        self.settings.addSettings(settings)
+
+    def update_setting(self, setting, path, val):
+        s = self._settings[setting]
+
+        if type(s[1]) == type(s[2]): # valid range limits
+            if not s[2] <= val <= s[3]:
+                return False
+
+        self.settings[setting] = val
+
+        return True
+
+    def add_dbus_setting(self, setting, path):
+        self.dbus_settings[setting] = path
+        cb = partial(self.update_setting, setting)
+        self.dbus.add_path(path, self.settings[setting], writeable=True,
+                           onchangecallback=cb)
 
     def get_role_instance(self):
         val = self.settings['instance'].split(':')
