@@ -520,34 +520,15 @@ class EnergyMeter(ModbusDevice):
     default_instance = 40
     nr_phases = None
 
-    def position_setting_changed(self, service, path, value):
-        self.dbus['/Position'] = value['Value']
-
-    def init_device_settings(self, dbus):
-        super().init_device_settings(dbus)
-
-        self.pos_item = None
-        if self.role == 'pvinverter':
-            self.pos_item = self.settings.addSetting(
-                self.settings_path + '/Position', 0, 0, 2,
-                callback=self.position_setting_changed)
-
     def device_init_late(self):
         super().device_init_late()
 
         if self.nr_phases is not None:
             self.dbus.add_path('/NrOfPhases', self.nr_phases)
 
-        if self.pos_item is not None:
-            self.dbus.add_path('/Position', self.pos_item.get_value(),
-                               writeable=True,
-                               onchangecallback=self.position_changed)
-
-    def position_changed(self, path, val):
-        if not 0 <= val <= 2:
-            return False
-        self.pos_item.set_value(val)
-        return True
+        if self.role == 'pvinverter':
+            self.add_settings({'position': ['/Position', 0, 0, 2]})
+            self.add_dbus_setting('position', '/Position')
 
 __all__ = [
     'CustomName',
