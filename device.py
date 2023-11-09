@@ -508,24 +508,10 @@ class LatencyFilter:
         return self.val
 
 class CustomName:
-    def customname_setting_changed(self, service, path, value):
-        self.dbus['/CustomName'] = value['Value']
-
-    def init_device_settings(self, dbus):
-        super().init_device_settings(dbus)
-        self.cn_item = self.settings.addSetting(
-            self.settings_path + '/CustomName', '', 0, 0,
-            callback=self.customname_setting_changed)
-
     def device_init_late(self):
         super().device_init_late()
-        self.dbus.add_path('/CustomName', self.cn_item.get_value(),
-                           writeable=True,
-                           onchangecallback=self.customname_changed)
-
-    def customname_changed(self, path, val):
-        self.cn_item.set_value(val)
-        return True
+        self.add_settings({'customname': ['/CustomName', '', 0, 0]})
+        self.add_dbus_setting('customname', '/CustomName')
 
 class EnergyMeter(ModbusDevice):
     role_names = ['grid', 'pvinverter', 'genset', 'acload']
