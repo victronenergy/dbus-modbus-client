@@ -207,9 +207,8 @@ class Client:
         if scan:
             self.start_scan(force_scan)
 
-        self.watchdog.start()
-
     def init(self, force_scan):
+        self.watchdog.start()
         self.init_settings()
         self.init_devices(force_scan)
 
