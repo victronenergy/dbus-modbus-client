@@ -530,6 +530,50 @@ class EnergyMeter(ModbusDevice):
             self.add_settings({'position': ['/Position', 0, 0, 2]})
             self.add_dbus_setting('position', '/Position')
 
+class Tank:
+    default_role = 'tank'
+    default_instance = 20
+
+    def device_init_late(self):
+        super().device_init_late()
+
+        rvmin = self.raw_value_min
+        rvmax = self.raw_value_max
+
+        self.add_settings({
+            'capacity':       ['/Capacity', 0.2, 0, 1000],
+            'fluidtype':      ['/FluidType', 0, 0, 11],
+            'rawvalempty':    ['/RawValueEmpty', rvmin, rvmin, rvmax],
+            'rawvalfull':     ['/RawValueFull', rvmax, rvmin, rvmax],
+        })
+
+        self.add_dbus_setting('capacity', '/Capacity')
+        self.add_dbus_setting('fluidtype', '/FluidType')
+        self.add_dbus_setting('rawvalempty', '/RawValueEmpty')
+        self.add_dbus_setting('rawvalfull', '/RawValueFull')
+
+        self.dbus.add_path('/RawUnit', self.raw_unit)
+        self.dbus.add_path('/Level', None)
+        self.dbus.add_path('/Remaining', None)
+
+    def device_update(self):
+        super().device_update()
+
+        rvempty = self.settings['rawvalempty']
+        rvfull = self.settings['rawvalfull']
+
+        rvlo = min(rvempty, rvfull)
+        rvhi = max(rvempty, rvfull)
+
+        rval = float(self.dbus['/RawValue'])
+        rval = min(max(rval, rvlo), rvhi)
+
+        level = (rval - rvempty) / (rvfull - rvempty)
+        remain = level * self.settings['capacity']
+
+        self.dbus['/Level'] = 100 * level
+        self.dbus['/Remaining'] = remain
+
 __all__ = [
     'CustomName',
     'EnergyMeter',
