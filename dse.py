@@ -123,6 +123,15 @@ class Reg_DSE_alarm(Reg, int):
             # No alarms firing
             return self.update(0)
 
+class DSE_Tank(device.CustomName, device.Tank, device.SubDevice):
+    raw_value_min = 0
+    raw_value_max = 100
+    raw_unit = '%'
+
+    def device_init(self):
+        self.data_regs = [
+            Reg_DSE_u16(1027, '/RawValue', 1, '%.0f %%'),
+        ]
 
 class DSE_Generator(device.CustomName, device.ModbusDevice):
     productid = 0xB046
@@ -226,7 +235,6 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
             Reg_DSE_u32b(1798, '/Engine/OperatingHours',      1, '%.1f s'),     # Might only work for xxx/7xxx/6xxx/L40x/4xxx
             Reg_DSE_u32b(1808, '/Engine/Starts',              1, '%.0f'),       # Might only work for 8xxx/7xxx/6xxx/L40x/4xxx
 
-            Reg_DSE_u16(1027, '/FuelLevel',                  1, '%.0f %%'),
             Reg_DSE_u16(1029, '/StarterVoltage',            10, '%.1f V'),
 
             Reg_mapu16(772, '/AutoStart', {
@@ -249,6 +257,10 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
         else:
             log.info('DSE status code register is not available')
 
+        if self.read_register(Reg_DSE_u16(1027)) is not None:
+            self.subdevices = [
+                DSE_Tank(self, 0),
+            ]
 
     def get_ident(self):
         return 'dse_%s' % self.info['/Serial']
