@@ -56,7 +56,6 @@ class ModbusDevice:
     def __init__(self, spec, modbus, model):
         self.spec = spec
         self.modbus = modbus.get()
-        self.method = modbus.method
         self.unit = spec.unit
         self.model = model
         self.role = None
@@ -87,14 +86,14 @@ class ModbusDevice:
         return str(self.spec)
 
     def connection(self):
-        if self.method == 'tcp':
-            return 'Modbus %s %s' % (self.method.upper(),
+        if self.modbus.method == 'tcp':
+            return 'Modbus %s %s' % (self.modbus.method.upper(),
                                      self.modbus.socket.getpeername()[0])
-        elif self.method == 'udp':
-            return 'Modbus %s %s' % (self.method.upper(),
+        elif self.modbus.method == 'udp':
+            return 'Modbus %s %s' % (self.modbus.method.upper(),
                                      self.modbus.host)
-        elif self.method in ['rtu', 'ascii']:
-            return 'Modbus %s %s:%d' % (self.method.upper(),
+        elif self.modbus.method in ['rtu', 'ascii']:
+            return 'Modbus %s %s:%d' % (self.modbus.method.upper(),
                                         os.path.basename(self.modbus.port),
                                         self.unit)
         return 'Modbus'
@@ -279,7 +278,7 @@ class ModbusDevice:
             self.modbus.put()
             return
 
-        self.data_regs = pack_regs(self.method, self.data_regs)
+        self.data_regs = pack_regs(self.modbus.method, self.data_regs)
         ident = self.get_ident()
 
         svcname = 'com.victronenergy.%s.%s' % (self.role, ident)
