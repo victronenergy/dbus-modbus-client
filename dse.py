@@ -135,7 +135,7 @@ class DSE_Tank(device.CustomName, device.Tank, device.SubDevice):
 
 class DSE_Generator(device.CustomName, device.ModbusDevice):
     productid = 0xB046
-    productname = 'Deep Sea Electronics genset controller'
+    productname = 'DSE genset controller'
     allowed_roles = None
     default_role = 'genset'
     default_instance = 40
