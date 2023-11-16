@@ -16,6 +16,17 @@ class Reg_Comap_ident(Reg, str):
         v = struct.pack('>16H', *values).rstrip(b'\0')
         return self.update(v[:12].decode('ascii'))
 
+
+class ComAp_Tank(device.CustomName, device.Tank, device.SubDevice):
+    raw_value_min = 0
+    raw_value_max = 100
+    raw_unit = '%'
+
+    def device_init(self):
+        self.data_regs = [
+            Reg_u16(1055, '/RawValue', 1, '%.0f %%', invalid=0x8000),
+        ]
+
 class ComAp_Generator(device.ModbusDevice):
     productid = 0xB044
     productname = 'Comap genset controller'
@@ -55,7 +66,6 @@ class ComAp_Generator(device.ModbusDevice):
             Reg_u16(1010, '/Engine/Load',                1, '%.0f %%', invalid=0x8000),
             Reg_u32b(1013, '/Engine/OperatingHours',   1/6, '%.1f s', invalid=0x80000000),
             Reg_u16(1053, '/StarterVoltage',            10, '%.1f V'),
-            Reg_u16(1055, '/FuelLevel',                  1, '%.0f %%', invalid=0x8000),
 
             Reg_mapu16(1298, '/StatusCode', {
                 0: 1, # Init = Self-test
@@ -88,6 +98,11 @@ class ComAp_Generator(device.ModbusDevice):
 
         name = self.read_register(self.info_regs[1])
         self.name = ''.join(filter(str.isalnum, name)).lower()
+
+        if self.read_register(Reg_u16(1055, invalid=0x8000)) is not None:
+            self.subdevices = [
+                ComAp_Tank(self, 0),
+            ]
 
     def get_ident(self):
         # Use the custom name as identifier. Reasoning:
