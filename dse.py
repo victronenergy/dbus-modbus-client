@@ -313,8 +313,8 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
                 onchangecallback=self._start_genset
             )
 
-    def update(self):
-        super().update()
+    def device_update(self):
+        super().device_update()
 
         if not self._status_register_available() and self.dbus['/StatusCode'] is not None:
             self.dbus['/StatusCode'] = self._get_status_code_from_rpm()
