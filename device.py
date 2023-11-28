@@ -390,6 +390,7 @@ class ModbusDevice(BaseDevice):
 
     def init(self, dbus, enable=True):
         self.enabled = enable
+        self.modbus.timeout = self.timeout
         self.device_init()
         self.read_info()
         self.init_device_settings(dbus)
