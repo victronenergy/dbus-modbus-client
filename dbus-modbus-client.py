@@ -42,7 +42,7 @@ pymodbus.constants.Defaults.Timeout = 0.5
 
 MODBUS_TCP_PORT = 502
 
-MAX_ERRORS = 5
+FAIL_TIMEOUT = 5
 FAILED_INTERVAL = 10
 MDNS_CHECK_INTERVAL = 5
 MDNS_QUERY_INTERVAL = 60
@@ -118,6 +118,7 @@ class Client:
 
     def init_device(self, dev, nosave=False, enable=True):
         dev.init(self.dbusconn, enable)
+        dev.last_seen = time.time()
         dev.nosave = nosave
 
     def del_device(self, dev):
@@ -127,10 +128,9 @@ class Client:
     def update_device(self, dev):
         try:
             dev.update()
-            dev.err_count = 0
+            dev.last_seen = time.time()
         except:
-            dev.err_count += 1
-            if dev.err_count == MAX_ERRORS:
+            if time.time() - dev.last_seen > FAIL_TIMEOUT:
                 log.info('Device %s failed', dev)
                 if self.err_exit:
                     os._exit(1)

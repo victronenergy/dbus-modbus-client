@@ -314,7 +314,6 @@ class ModbusDevice(BaseDevice):
         self.unit = spec.unit
         self.model = model
         self.subdevices = []
-        self.err_count = 0
         self.latency = modbus.timeout
         self.need_reinit = False
 
