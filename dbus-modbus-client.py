@@ -125,6 +125,10 @@ class Client:
         self.devices.remove(dev)
         dev.destroy()
 
+    def dev_failed(self, dev):
+        if not dev.nosave:
+            self.failed.append(dev.spec)
+
     def update_device(self, dev):
         try:
             dev.update()
@@ -134,8 +138,7 @@ class Client:
                 log.info('Device %s failed', dev)
                 if self.err_exit:
                     os._exit(1)
-                if not dev.nosave:
-                    self.failed.append(dev.spec)
+                self.dev_failed(dev)
                 self.del_device(dev)
 
     def probe_filter(self, dev):
