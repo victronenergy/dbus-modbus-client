@@ -278,13 +278,20 @@ class NetClient(Client):
         self.mdns.start()
         self.mdns_check_time = 0
         self.mdns_query_time = 0
+        self.mdns_query_interval = MDNS_QUERY_INTERVAL / 10
+        self.mdns_fast_query = time.time()
 
     def update(self):
         super().update()
 
         now = time.time()
 
-        if now - self.mdns_query_time > MDNS_QUERY_INTERVAL:
+        if self.mdns_fast_query is not None:
+            if now - self.mdns_fast_query > MDNS_QUERY_INTERVAL:
+                self.mdns_fast_query = None
+                self.mdns_query_interval = MDNS_QUERY_INTERVAL
+
+        if now - self.mdns_query_time > self.mdns_query_interval:
             self.mdns_query_time = now
             self.mdns.req()
 
@@ -311,6 +318,13 @@ class NetClient(Client):
         with self.svc as s:
             s.del_tree('/Devices/' + dev.get_ident())
         super().del_device(dev)
+
+    def dev_failed(self, dev):
+        super().dev_failed(dev)
+
+        if dev.nosave:
+            self.mdns_fast_query = time.time()
+            self.mdns_query_interval = MDNS_QUERY_INTERVAL / 10
 
     def enable_device(self, dev, path, val):
         dev.set_enabled(bool(val))
