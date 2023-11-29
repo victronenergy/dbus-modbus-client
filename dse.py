@@ -271,7 +271,7 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
 
 
     def _get_status_code_from_rpm(self, rpm=None):
-        if rpm is None: rpm = self.read_register(self.engine_speed_reg)
+        if rpm is None: rpm = self.engine_speed_reg.value
         if rpm is None: return None
         return 8 if rpm > 100 else 0
 
