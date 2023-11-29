@@ -69,11 +69,11 @@ class Reg_DSE_alarm(Reg, int):
     """ Decode DSE alarm registers into error codes, which
         are offset for correct error string mapping """
 
-    def __init__(self, base, count, error_code_offset):
+    def __init__(self, base, count, alarm_code_offset):
         # Note: Base register has to be first on GenComm page
         # definition ("Number of named alarms")
         super().__init__(base=base, count=count, name='/ErrorCode')
-        self.error_code_offset = error_code_offset
+        self.alarm_code_offset = alarm_code_offset
 
     def _interpret_alarm_value(self, val):
         """ Meaning according to GenComm specification:
@@ -117,7 +117,7 @@ class Reg_DSE_alarm(Reg, int):
         alarms = self._decode_alarm_registers(values[1:])
         try:
             # if multiple alarms firing, only first one is displayed
-            alarm_idx = self.error_code_offset + alarms.index(True)
+            alarm_idx = self.alarm_code_offset + alarms.index(True)
             return self.update(alarm_idx)
         except ValueError:
             # No alarms firing
@@ -356,7 +356,7 @@ class DSE72xx_73xx_61xx_74xx_MkII_Generator(DSE_Generator):
         allocate 0x1200 to 0x12FF """
     alarm_base = 39424
     alarm_count = 21
-    alarm_error_code_offset = 0x1200
+    alarm_code_offset = 0x1200
 
 class DSE8xxx_Generator(DSE_Generator):
     """ This uses "Named Alarm Conditions" of GenComm page 154 for
