@@ -122,7 +122,7 @@ class BaseDevice:
             end = base + reg.count
 
             if now - reg.time > reg.max_age:
-                if reg.decode(rr.registers[base:end]):
+                if reg.decode(rr.registers[base:end]) or not reg.time:
                     if reg.name:
                         d[reg.name] = copy(reg) if reg.isvalid() else None
                 reg.time = now
