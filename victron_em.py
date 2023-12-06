@@ -73,6 +73,14 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         for n in phases:
             self.data_regs += self.phase_regs(n)
 
+        if ver < (0, 1, 5, 255):
+            return
+
+        if self.role == 'pvinverter':
+            posreg = Reg_u16(0x2022, '/Position')
+            self.position = self.read_register(posreg)
+            self.data_regs.append(posreg)
+
     def set_name(self, val):
         self.vreglink_set(0x10c, bytes(val, encoding='utf-8'))
         return True
