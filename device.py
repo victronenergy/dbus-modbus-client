@@ -519,6 +519,7 @@ class EnergyMeter(ModbusDevice):
     default_role = 'grid'
     default_instance = 40
     nr_phases = None
+    position = None
 
     def device_init_late(self):
         super().device_init_late()
@@ -526,7 +527,7 @@ class EnergyMeter(ModbusDevice):
         if self.nr_phases is not None:
             self.dbus.add_path('/NrOfPhases', self.nr_phases)
 
-        if self.role == 'pvinverter':
+        if self.role == 'pvinverter' and self.position is None:
             self.add_settings({'position': ['/Position', 0, 0, 2]})
             self.add_dbus_setting('position', '/Position')
 
