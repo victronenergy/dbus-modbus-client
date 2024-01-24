@@ -80,6 +80,10 @@ class EV_Charger(device.ModbusDevice):
             self.data_regs.append(
                 Reg_u16(5050, '/EnableDisplay', write=(0, 1)))
 
+        self.data_regs += [
+            Reg_u16(5062, '/MinCurrent',  1, '%d A', write=True)
+        ]
+
     def get_ident(self):
         return 'evc_%s' % self.info['/Serial']
 
