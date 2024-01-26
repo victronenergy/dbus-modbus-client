@@ -63,7 +63,6 @@ class ComAp_Generator(device.ModbusDevice):
             Reg_u16(1004, '/Engine/Speed',               1, '%.0f RPM', invalid=0x8000),
             Reg_s16(1006, '/Engine/CoolantTemperature', 10, '%.1f C', invalid=-0x8000),
             Reg_s16(1008, '/Engine/OilPressure',         1, '%.0f kPa', invalid=-0x8000),
-            Reg_u16(1010, '/Engine/Load',                1, '%.0f %%', invalid=0x8000),
             Reg_u32b(1013, '/Engine/OperatingHours', 1/360, '%.1f s', invalid=0x80000000),
             Reg_u16(1053, '/StarterVoltage',            10, '%.1f V'),
 
