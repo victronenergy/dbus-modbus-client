@@ -7,7 +7,7 @@ from register import *
 log = logging.getLogger(__name__)
 
 
-class ShellyEnergyMeter(device.EnergyMeter):
+class ShellyEnergyMeter(device.CustomName, device.EnergyMeter):
     # Define mandatory properties so the device gets saved
     productid = 0xFFFF
     productname = 'Shelly Energy Meter'
