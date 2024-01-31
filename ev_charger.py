@@ -72,13 +72,18 @@ class EV_Charger(device.ModbusDevice):
             Reg_u16(5049, '/AutoStart', write=(0,1))
         ]
 
+        fwver = self.read_register(self.info_regs[1])
+
         # Firmware check, before 1.21~1 we could only fetch 50 registers
-        if self.read_register(self.info_regs[1]) < (0, 0x01, 0x21, 0x01):
+        if fwver < (0, 0x01, 0x21, 0x01):
             return
 
         if self.have_display:
             self.data_regs.append(
                 Reg_u16(5050, '/EnableDisplay', write=(0, 1)))
+
+        if fwver < (0, 0x01, 0x22, 0x02):
+            return
 
         self.data_regs += [
             Reg_u16(5062, '/MinCurrent',  1, '%d A', write=True)
