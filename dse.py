@@ -379,6 +379,10 @@ models = {
         'model':    'DSE 6110 MKII',
         'handler':  DSE61xx_MkII_Generator,
     },
+    '1-6121': {
+        'model':    'DSE 6120',
+        'handler':  DSE4xxx_Generator,
+    },
     '1-32859': {
         'model':    'DSE 6120 MKIII',
         'handler':  DSE61xx_MkII_Generator,
