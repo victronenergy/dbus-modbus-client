@@ -133,9 +133,9 @@ class Client:
         try:
             dev.update()
             dev.last_seen = time.time()
-        except:
+        except Exception as ex:
             if time.time() - dev.last_seen > FAIL_TIMEOUT:
-                log.info('Device %s failed', dev)
+                dev.log.info('Device failed: %s', ex)
                 if self.err_exit:
                     os._exit(1)
                 self.dev_failed(dev)
