@@ -1,7 +1,4 @@
-import logging
 from typing import NamedTuple
-
-log = logging.getLogger()
 
 class NetDevSpec(NamedTuple):
     method: str
@@ -25,8 +22,6 @@ def tostring(d):
     return ':'.join(map(str, d))
 
 def create(*args, **kwargs):
-    #log.info('create %s %s', args, kwargs)
-
     method = args[0] if len(args) else kwargs.get('method', None)
 
     if method in ['tcp', 'udp']:
