@@ -1,10 +1,7 @@
 import dbus
-import logging
 import struct
 
 from vedbus import VeDbusItemExport
-
-log = logging.getLogger()
 
 class VregLinkItem(VeDbusItemExport):
     def __init__(self, *args, getvreg=None, setvreg=None, **kwargs):
@@ -66,11 +63,11 @@ class VregLink:
                                             unit=self.unit)
 
         if r.isError():
-            log.error('Modbus error accessing vreg %#04x: %s', regid, r)
+            self.log.error('Modbus error accessing vreg %#04x: %s', regid, r)
             return 0x8100 if iswrite else 0x8000, []
 
         if r.registers[0] != regid:
-            log.error('Invalid vreg response: %s', r.registers)
+            self.log.error('Invalid vreg response: %s', r.registers)
             return 0x8100 if iswrite else 0x8000, []
 
         stat = r.registers[1]
@@ -80,8 +77,8 @@ class VregLink:
         data = struct.pack('>%dH' % (len(data)), *data)
 
         if size > len(data):
-            log.warning('Truncated data for vreg %04x: %s < %s',
-                        regid, len(data), size)
+            self.log.warning('Truncated data for vreg %04x: %s < %s',
+                             regid, len(data), size)
             size = len(data)
 
         data = data[0:size]

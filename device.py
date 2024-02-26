@@ -13,8 +13,6 @@ import __main__
 from register import Reg
 from utils import *
 
-log = logging.getLogger()
-
 def pack_regs(method, regs):
     rr = []
     for r in regs:
@@ -78,7 +76,7 @@ class BaseDevice:
                                                 unit=self.unit)
 
         if rr.isError():
-            log.error('Error reading register %#04x: %s', reg.base, rr)
+            self.log.error('Error reading register %#04x: %s', reg.base, rr)
             raise Exception(rr)
 
         reg.decode(rr.registers)
@@ -315,6 +313,12 @@ class ModbusDevice(BaseDevice):
         self.subdevices = []
         self.latency = modbus.timeout
         self.need_reinit = False
+        self.log = logging.getLogger(str(self))
+        self.log.addFilter(self)
+
+    def filter(self, rec):
+        rec.msg = '[%s] %s' % (self, rec.msg)
+        return True
 
     def destroy(self):
         for s in self.subdevices:
@@ -458,6 +462,7 @@ class SubDevice(BaseDevice):
         self.model = parent.model
         self.productid = parent.productid
         self.productname = parent.productname
+        self.log = parent.log
 
     def connection(self):
         return self.parent.connection()

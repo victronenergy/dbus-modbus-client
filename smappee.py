@@ -1,12 +1,9 @@
 from functools import partial
-import logging
 import time
 
 import device
 import probe
 from register import *
-
-log = logging.getLogger()
 
 # CT Type Identifier register to type name mapping
 CT_TYPES = [
@@ -93,7 +90,7 @@ class CurrentTransformer:
         self.phase = self.dev.read_register(self.regs[0])
 
         if self.phase is None:
-            log.warn('CT %d configured outside Venus', n)
+            self.log.warn('CT %d configured outside Venus', n)
             return False
 
         return True
@@ -208,7 +205,7 @@ class PowerBox(device.CustomName, device.EnergyMeter):
 
         fw = self.read_register(self.info_regs[1])
         if fw < self.min_fwver:
-            log.info('%s firmware %s is too old', self.productname, fw)
+            self.log.info('%s firmware %s is too old', self.productname, fw)
             raise Exception()
 
         # reset CT slot mapping
@@ -225,7 +222,7 @@ class PowerBox(device.CustomName, device.EnergyMeter):
             self.probe_device(n)
 
         if not any(self.ct_phase):
-            log.info('No CTs configured, guessing')
+            self.log.info('No CTs configured, guessing')
             for n in range(3):
                 if len(self.all_cts) > n:
                     ct = self.all_cts[n]

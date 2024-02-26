@@ -1,13 +1,9 @@
-import logging
-
 import device
 import mdns
 import probe
 from register import *
 from victron_regs import *
 import vreglink
-
-log = logging.getLogger()
 
 class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
     productid = 0xa1b1
@@ -56,7 +52,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
 
         ver = self.read_register(self.info_regs[1])
         if ver < (0, 1, 3, 1):
-            log.info('Old firmware, data not available')
+            self.log.info('Old firmware, data not available')
             return
 
         self.data_regs += [
