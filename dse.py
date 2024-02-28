@@ -309,6 +309,16 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
                 onchangecallback=self._start_genset
             )
 
+        # Add /SetAutoStart path, if GenComm System Control Function
+        # for setting into auto-mode is available
+        if self._check_scf_support(self.SCF_SELECT_AUTO_MODE):
+            self.dbus.add_path(
+                '/SetAutoStart',
+                0,
+                writeable=True,
+                onchangecallback=self._set_auto_mode
+            )
+
     def device_update(self):
         super().device_update()
 
@@ -322,6 +332,11 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
         else:
             self._write_scf_key(self.SCF_TELEMETRY_STOP)
         return True
+
+    def _set_auto_mode(self, path, value):
+        if value == 1:
+            self._write_scf_key(self.SCF_SELECT_AUTO_MODE)
+        return False
 
 
 class DSE4xxx_Generator(DSE_Generator):
