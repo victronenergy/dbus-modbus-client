@@ -31,6 +31,14 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             Reg_s32b(power,    '/Ac/L%d/Power' % n,            1, '%.1f W'),
         ]
 
+        if self.fwver < (0, 1, 7, 0):
+            return
+
+        self.data_regs += [
+            Reg_u16(base + 6, '/Ac/L%d/VoltageLineToLine' % n, 100, '%.1f V',
+                    invalid=0xffff),
+        ]
+
     def device_init(self):
         self.info_regs = [
             Reg_text( 0x1001, 8, '/Serial'),
