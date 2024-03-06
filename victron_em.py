@@ -80,6 +80,13 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             self.position = self.read_register(posreg)
             self.data_regs.append(posreg)
 
+        if self.ver < (0, 1, 7, 0):
+            return
+
+        self.data_regs += [
+            Reg_u16(0x3039, '/Ac/N/Current', 100, '%.1f A')
+        ]
+
     def set_name(self, val):
         self.vreglink_set(0x10c, bytes(val, encoding='utf-8'))
         return True
