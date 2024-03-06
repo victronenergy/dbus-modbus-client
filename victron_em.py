@@ -20,7 +20,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
     def phase_regs(self, n):
         base = 0x3040 + 8 * (n - 1)
         power = 0x3082 + 4 * (n - 1)
-        return [
+        regs = [
             Reg_s16( base + 0, '/Ac/L%d/Voltage' % n,        100, '%.1f V'),
             Reg_s16( base + 1, '/Ac/L%d/Current' % n,        100, '%.1f A'),
             Reg_u32b(base + 2, '/Ac/L%d/Energy/Forward' % n, 100, '%.1f kWh',
@@ -29,6 +29,16 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
                      invalid=0xffffffff),
             Reg_s32b(power,    '/Ac/L%d/Power' % n,            1, '%.1f W'),
         ]
+
+        if self.ver < (0, 1, 7, 0):
+            return regs
+
+        regs += [
+            Reg_u16(base + 6, '/Ac/L%d/VoltageLineToLine' % n, 100, '%.1f V',
+            invalid=0xffff),
+        ]
+
+        return regs
 
     def device_init(self):
         self.info_regs = [
