@@ -40,6 +40,14 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
 
         return regs
 
+    @staticmethod
+    def get_phases_from_config(phase_cfg):
+        if phase_cfg < 3:
+            return [phase_cfg + 1]
+        if phase_cfg == 4:
+            return [1, 2]
+        return [1, 2, 3]
+
     def device_init(self):
         self.info_regs = [
             Reg_text( 0x1001, 8, '/Serial'),
@@ -56,7 +64,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         ]
 
         phase_cfg = self.read_register(self.data_regs[0])
-        phases = [phase_cfg + 1] if phase_cfg < 3 else [1, 2, 3]
+        phases = self.get_phases_from_config(phase_cfg)
         self.nr_phases = len(phases)
 
         role_id = self.read_register(self.data_regs[1])
