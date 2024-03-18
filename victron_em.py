@@ -18,6 +18,17 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
     age_limit_fast = 0
     refresh_time = 20
 
+    def get_phases(self, cfg):
+        if 0 <= cfg <= 2:
+            return [cfg + 1]
+        if cfg == 3:
+            return [1, 2, 3]
+        if cfg == 4:
+            return [1, 2]
+
+        self.log.warning('Unknown phase configuration, using 3-phase')
+        return [1, 2, 3]
+
     def add_phase_regs(self, n):
         base = 0x3040 + 8 * (n - 1)
         power = 0x3082 + 4 * (n - 1)
@@ -55,7 +66,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         ]
 
         phase_cfg = self.read_register(self.data_regs[0])
-        phases = [phase_cfg + 1] if phase_cfg < 3 else [1, 2, 3]
+        phases = self.get_phases(phase_cfg)
         self.nr_phases = len(phases)
 
         role_id = self.read_register(self.data_regs[1])
