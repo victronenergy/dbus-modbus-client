@@ -89,9 +89,18 @@ class Reg_u32b(Reg_num):
     coding = ('>I', '>2H')
     count = 2
 
+class Reg_s64b(Reg_num):
+    coding = ('>q', '>4H')
+    count = 4
+
 class Reg_u64b(Reg_num):
     coding = ('>Q', '>4H')
     count = 4
+
+class Reg_f32b(Reg_num):
+    coding = ('>f', '>2H')
+    count = 2
+    rtype = float
 
 class Reg_s32l(Reg_num):
     coding = ('<i', '<2H')
@@ -100,6 +109,14 @@ class Reg_s32l(Reg_num):
 class Reg_u32l(Reg_num):
     coding = ('<I', '<2H')
     count = 2
+
+class Reg_s64l(Reg_num):
+    coding = ('<q', '<4H')
+    count = 4
+
+class Reg_u64l(Reg_num):
+    coding = ('<Q', '<4H')
+    count = 4
 
 class Reg_f32l(Reg_num):
     coding = ('<f', '<2H')
