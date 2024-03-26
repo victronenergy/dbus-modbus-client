@@ -371,6 +371,10 @@ models = {
         'model':    'DSE 4510 MKII',
         'handler':  DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator,
     },
+    '1-32807': {
+        'model':    'DSE 4520 MKII',
+        'handler':  DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator,
+    },
     '1-32800': {
         'model':    'DSE 6110 MKII',
         'handler':  DSE61xx_MkII_Generator,
