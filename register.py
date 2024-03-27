@@ -7,7 +7,7 @@ class Reg:
         return super().__new__(cls)
 
     def __init__(self, base, count, name=None, text=None, write=False,
-                 max_age=None, onchange=None):
+                 max_age=None, onchange=None, access=None):
         self.base = base
         self.count = count
         self.name = name
@@ -17,6 +17,7 @@ class Reg:
         self.time = 0
         self.max_age = max_age
         self.text = text
+        self.access = access
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
