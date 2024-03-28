@@ -13,13 +13,14 @@ import __main__
 from register import Reg
 from utils import *
 
-def pack_regs(method, regs):
-    rr = []
-    for r in regs:
-        rr += r if isinstance(r, list) else [r]
-    rr.sort(key=lambda r: r.base)
+class RegList(list):
+    def __init__(self, access=None, regs=[]):
+        super().__init__(regs)
+        self.access = access
 
+def modbus_overhead(method):
     overhead = 5 + 2                # request + response
+
     if method == 'tcp':
         overhead += 2 * (20 + 7)    # TCP + MBAP
     elif method == 'udp':
@@ -27,15 +28,20 @@ def pack_regs(method, regs):
     elif method == 'rtu':
         overhead += 2 * (1 + 2)     # address + crc
 
+    return overhead
+
+def pack_list(overhead, rr, access):
+    rr.sort(key=lambda r: r.base)
+
     regs = []
-    rg = [rr.pop(0)]
+    rg = RegList(access, [rr.pop(0)])
 
     for r in rr:
         end = rg[-1].base + rg[-1].count
         nr = r.base + r.count - rg[0].base
         if nr > 125 or 2 * (r.base - end) > overhead:
             regs.append(rg)
-            rg = []
+            rg = RegList()
 
         rg.append(r)
 
@@ -51,6 +57,7 @@ class BaseDevice:
     age_limit_fast = 1
     fast_regs = ('/Ac/L1/Power', '/Ac/L2/Power', '/Ac/L3/Power', '/Ac/Power')
     allowed_roles = None
+    default_access = 'holding'
 
     def __init__(self):
         self.role = None
@@ -71,9 +78,28 @@ class BaseDevice:
             self.settings._settings = None
             self.settings = None
 
+    def pack_regs(self, regs):
+        overhead = modbus_overhead(self.modbus.method)
+        regs = flatten(regs)
+
+        ra = {}
+        for r in regs:
+            ra.setdefault(r.access or self.default_access, []).append(r)
+
+        rr = []
+        for a, r in ra.items():
+            rr += pack_list(overhead, r, a)
+
+        return rr
+
+    def read_modbus(self, start, count, access):
+        if access is None:
+            access = self.default_access
+
+        return self.modbus.read_registers(start, count, access, unit=self.unit)
+
     def read_register(self, reg):
-        rr = self.modbus.read_holding_registers(reg.base, reg.count,
-                                                unit=self.unit)
+        rr = self.read_modbus(reg.base, reg.count, reg.access)
 
         if rr.isError():
             self.log.error('Error reading register %#04x: %s', reg.base, rr)
@@ -106,7 +132,7 @@ class BaseDevice:
         start = regs[0].base
         count = regs[-1].base + regs[-1].count - start
 
-        rr = self.modbus.read_holding_registers(start, count, unit=self.unit)
+        rr = self.read_modbus(start, count, regs.access)
 
         latency = time.time() - now
 
@@ -282,7 +308,7 @@ class BaseDevice:
             self.dbus_add_register(self.info[p])
 
     def init_data_regs(self):
-        self.data_regs = pack_regs(self.modbus.method, self.data_regs)
+        self.data_regs = self.pack_regs(self.data_regs)
 
         for r in self.data_regs:
             for rr in r:
