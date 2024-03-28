@@ -87,3 +87,14 @@ def get_super(base, t):
         t = type(t)
 
     return t.__mro__[t.__mro__.index(base) + 1]
+
+def flatten(a):
+    b = []
+
+    for x in a:
+        if isinstance(x, (list, tuple)):
+            b += flatten(x)
+        else:
+            b.append(x)
+
+    return b
