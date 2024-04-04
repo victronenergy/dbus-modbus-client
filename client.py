@@ -33,6 +33,15 @@ class ModbusExtras:
         finally:
             self.in_transaction = False
 
+    def read_registers(self, address, count, access, **kwargs):
+        if access == 'holding':
+            return self.read_holding_registers(address, count, **kwargs)
+
+        if access == 'input':
+            return self.read_input_registers(address, count, **kwargs)
+
+        raise Exception('Invalid register access type: %s' % access)
+
 class TcpClient(ModbusExtras, ModbusTcpClient):
     method = 'tcp'
 
