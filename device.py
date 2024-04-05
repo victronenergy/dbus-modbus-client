@@ -1,6 +1,7 @@
 from copy import copy
 import dbus
 from functools import partial
+from enum import Enum
 import logging
 import os
 import time
@@ -44,6 +45,12 @@ def pack_regs(method, regs):
 
     return regs
 
+
+class RegisterType(Enum):
+    INPUT = 1
+    HOLDING = 2
+
+
 class BaseDevice:
     min_timeout = 0.1
     refresh_time = None
@@ -61,6 +68,8 @@ class BaseDevice:
         self.dbus_settings = {}
         self.info_regs = []
         self.data_regs = []
+        # Whether to read from holding registers or input registers
+        self.register_type = RegisterType.HOLDING
 
     def destroy(self):
         if self.dbus:
@@ -72,8 +81,12 @@ class BaseDevice:
             self.settings = None
 
     def read_register(self, reg):
-        rr = self.modbus.read_holding_registers(reg.base, reg.count,
-                                                unit=self.unit)
+        if self.register_type == RegisterType.HOLDING:
+            rr = self.modbus.read_holding_registers(reg.base, reg.count,
+                                                    unit=self.unit)
+        else:
+            rr = self.modbus.read_input_registers(reg.base, reg.count,
+                                                  unit=self.unit)
 
         if rr.isError():
             self.log.error('Error reading register %#04x: %s', reg.base, rr)
@@ -106,7 +119,10 @@ class BaseDevice:
         start = regs[0].base
         count = regs[-1].base + regs[-1].count - start
 
-        rr = self.modbus.read_holding_registers(start, count, unit=self.unit)
+        if self.register_type == RegisterType.HOLDING:
+            rr = self.modbus.read_holding_registers(start, count, unit=self.unit)
+        else:
+            rr = self.modbus.read_input_registers(start, count, unit=self.unit)
 
         latency = time.time() - now
 
