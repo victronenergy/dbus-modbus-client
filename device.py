@@ -30,7 +30,7 @@ def modbus_overhead(method):
 
     return overhead
 
-def pack_list(overhead, rr, access):
+def pack_list(rr, access, hole_max):
     rr.sort(key=lambda r: r.base)
 
     regs = []
@@ -39,7 +39,7 @@ def pack_list(overhead, rr, access):
     for r in rr:
         end = rg[-1].base + rg[-1].count
         nr = r.base + r.count - rg[0].base
-        if nr > 125 or 2 * (r.base - end) > overhead:
+        if nr > 125 or (r.base - end) > hole_max:
             regs.append(rg)
             rg = RegList()
 
@@ -58,6 +58,7 @@ class BaseDevice:
     fast_regs = ('/Ac/L1/Power', '/Ac/L2/Power', '/Ac/L3/Power', '/Ac/Power')
     allowed_roles = None
     default_access = 'holding'
+    reg_hole_max = None
 
     def __init__(self):
         self.role = None
@@ -79,7 +80,11 @@ class BaseDevice:
             self.settings = None
 
     def pack_regs(self, regs):
-        overhead = modbus_overhead(self.modbus.method)
+        if self.reg_hole_max is not None:
+            hole_max = self.reg_hole_max
+        else:
+            hole_max = (modbus_overhead(self.modbus.method) + 1) // 2
+
         regs = flatten(regs)
 
         ra = {}
@@ -88,7 +93,7 @@ class BaseDevice:
 
         rr = []
         for a, r in ra.items():
-            rr += pack_list(overhead, r, a)
+            rr += pack_list(r, a, hole_max)
 
         return rr
 
