@@ -30,7 +30,10 @@ def modbus_overhead(method):
 
     return overhead
 
-def pack_list(rr, access, hole_max):
+def contains_any(a, b, x):
+    return any(a <= xx <= b for xx in x) if x else False
+
+def pack_list(rr, access, hole_max, barrier):
     rr.sort(key=lambda r: r.base)
 
     regs = []
@@ -39,7 +42,8 @@ def pack_list(rr, access, hole_max):
     for r in rr:
         end = rg[-1].base + rg[-1].count
         nr = r.base + r.count - rg[0].base
-        if nr > 125 or (r.base - end) > hole_max:
+        if nr > 125 or (r.base - end) > hole_max or \
+           contains_any(end, r.base, barrier):
             regs.append(rg)
             rg = RegList()
 
@@ -59,6 +63,7 @@ class BaseDevice:
     allowed_roles = None
     default_access = 'holding'
     reg_hole_max = None
+    reg_barrier = None
 
     def __init__(self):
         self.role = None
@@ -93,7 +98,7 @@ class BaseDevice:
 
         rr = []
         for a, r in ra.items():
-            rr += pack_list(r, a, hole_max)
+            rr += pack_list(r, a, hole_max, self.reg_barrier)
 
         return rr
 
