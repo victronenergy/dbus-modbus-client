@@ -16,6 +16,7 @@ FILES +=								\
 	abb.py								\
 	carlo_gavazzi.py						\
 	comap.py							\
+	cre.py								\
 	dse.py								\
 	ev_charger.py							\
 	smappee.py							\
