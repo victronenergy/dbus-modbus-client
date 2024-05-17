@@ -22,12 +22,12 @@ from scan import *
 from utils import *
 import watchdog
 
+import abb
 import carlo_gavazzi
+import comap
 import dse
 import ev_charger
 import smappee
-import abb
-import comap
 import victron_em
 
 import logging
