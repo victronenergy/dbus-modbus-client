@@ -1,23 +1,25 @@
 FILES =									\
 	dbus-modbus-client.py						\
-	abb.py								\
-	carlo_gavazzi.py						\
 	client.py							\
-	comap.py							\
-	dse.py								\
 	device.py							\
 	devspec.py							\
-	ev_charger.py							\
 	mdns.py								\
 	probe.py							\
 	register.py							\
 	scan.py								\
-	smappee.py							\
 	utils.py							\
-	victron_em.py							\
 	victron_regs.py							\
 	vreglink.py							\
 	watchdog.py							\
+
+FILES +=								\
+	abb.py								\
+	carlo_gavazzi.py						\
+	comap.py							\
+	dse.py								\
+	ev_charger.py							\
+	smappee.py							\
+	victron_em.py							\
 
 VELIB =									\
 	settingsdevice.py						\
