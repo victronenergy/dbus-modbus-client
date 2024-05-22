@@ -233,7 +233,7 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
 
             Reg_DSE_u16(1029, '/StarterVoltage',            10, '%.1f V'),
 
-            Reg_mapu16(772, '/AutoStart', {
+            Reg_mapu16(772, '/RemoteStartModeEnabled', {
                 0: 0, # Stop mode
                 1: 1, # Auto mode
                 2: 0, # Manual mode

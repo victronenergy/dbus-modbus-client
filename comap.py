@@ -87,7 +87,7 @@ class ComAp_Generator(device.ModbusDevice):
                 17: 9 # Another kind of venting
             }),
 
-            Reg_mapu16(1382, '/AutoStart', {
+            Reg_mapu16(1382, '/RemoteStartModeEnabled', {
                 0: 0, # OFF
                 1: 0, # MANUAL
                 2: 1, # AUTO
