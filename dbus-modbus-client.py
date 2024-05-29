@@ -342,12 +342,26 @@ class SerialClient(Client):
     def new_scanner(self, full):
         return SerialScanner(self.tty, self.rate, self.mode, full=full)
 
+def print_info(_, d):
+    if not d:
+        return
+
+    d.device_init()
+    d.read_info()
+
+    for i in sorted(d.info.items()):
+        d.log.info('%-20s %s', *i)
+
+def probe_info(devlist):
+    probe.probe(map(devspec.fromstring, devlist), print_info)
+
 def main():
     parser = ArgumentParser(add_help=True)
     parser.add_argument('-d', '--debug', help='enable debug logging',
                         action='store_true')
     parser.add_argument('-f', '--force-scan', action='store_true')
     parser.add_argument('-m', '--mode', choices=['ascii', 'rtu'], default='rtu')
+    parser.add_argument('-P', '--probe', action='append')
     parser.add_argument('-r', '--rate', type=int, action='append')
     parser.add_argument('-s', '--serial')
     parser.add_argument('-x', '--exit', action='store_true',
@@ -359,6 +373,10 @@ def main():
                         level=(logging.DEBUG if args.debug else logging.INFO))
 
     logging.getLogger('pymodbus.client.sync').setLevel(logging.CRITICAL)
+
+    if args.probe:
+        probe_info(args.probe)
+        return
 
     signal.signal(signal.SIGINT, lambda s, f: os._exit(1))
     faulthandler.register(signal.SIGUSR1)
