@@ -135,7 +135,7 @@ class ComAp_Generator(device.Genset):
 
 models = {
     'InteliLite4-': { # InteliLite4-
-        'model': 'ComAp InteliLite4-based genset',
+        'model': 'InteliLite 4',
         'handler': ComAp_Generator,
     }
 }
