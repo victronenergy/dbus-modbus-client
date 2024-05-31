@@ -131,6 +131,7 @@ class DSE_Tank(device.CustomName, device.Tank, device.SubDevice):
 
 class DSE_Generator(device.CustomName, device.Genset):
     vendor_id = 'dse'
+    vendor_name = 'Deep Sea Electronics'
     productid = 0xB046
     productname = 'DSE genset controller'
     min_timeout = 1         # Increased timeout for less corrupted messages

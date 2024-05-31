@@ -56,6 +56,7 @@ def pack_list(rr, access, hole_max, barrier):
 
 class BaseDevice:
     vendor_id = None
+    vendor_name = None
     min_timeout = 0.1
     refresh_time = None
     age_limit = 4

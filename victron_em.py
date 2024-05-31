@@ -7,6 +7,7 @@ import vreglink
 
 class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
     vendor_id = 've'
+    vendor_name = 'Victron Energy'
     productid = 0xa1b1
     productname = 'Energy Meter VM-3P75CT'
     vreglink_base = 0x4000

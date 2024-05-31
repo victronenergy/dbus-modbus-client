@@ -29,6 +29,7 @@ class ComAp_Tank(device.CustomName, device.Tank, device.SubDevice):
 
 class ComAp_Generator(device.Genset):
     vendor_id = 'comap'
+    vendor_name = 'ComAp'
     productid = 0xB044
     productname = 'Comap genset controller'
     min_timeout = 0.5

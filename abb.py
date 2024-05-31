@@ -15,6 +15,7 @@ class Reg_serial(Reg, str):
 
 class ABB_Meter(device.CustomName, device.EnergyMeter):
     vendor_id = 'abb'
+    vendor_name = 'ABB'
     productid = 0xb033
     min_timeout = 0.5
 

@@ -110,6 +110,7 @@ class CurrentTransformer:
 
 class PowerBox(device.CustomName, device.EnergyMeter):
     vendor_id = 'smappee'
+    vendor_name = 'Smappee'
     productid = 0xb018
     productname = 'Smappee Power Box'
     min_fwver = (1, 44)
