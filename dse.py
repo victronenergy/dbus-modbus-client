@@ -129,13 +129,10 @@ class DSE_Tank(device.CustomName, device.Tank, device.SubDevice):
             Reg_DSE_u16(1027, '/RawValue', 1, '%.0f %%'),
         ]
 
-class DSE_Generator(device.CustomName, device.ModbusDevice):
+class DSE_Generator(device.CustomName, device.Genset):
     vendor_id = 'dse'
     productid = 0xB046
     productname = 'DSE genset controller'
-    allowed_roles = None
-    default_role = 'genset'
-    default_instance = 40
     min_timeout = 1         # Increased timeout for less corrupted messages
 
     init_status_code = None
