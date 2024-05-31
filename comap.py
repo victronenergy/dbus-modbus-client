@@ -27,13 +27,10 @@ class ComAp_Tank(device.CustomName, device.Tank, device.SubDevice):
             Reg_u16(1055, '/RawValue', 1, '%.0f %%', invalid=0x8000),
         ]
 
-class ComAp_Generator(device.ModbusDevice):
+class ComAp_Generator(device.Genset):
     vendor_id = 'comap'
     productid = 0xB044
     productname = 'Comap genset controller'
-    allowed_roles = None
-    default_role = 'genset'
-    default_instance = 40
     min_timeout = 0.5
 
     def device_init(self):
