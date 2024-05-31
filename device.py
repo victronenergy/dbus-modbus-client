@@ -585,6 +585,10 @@ class EnergyMeter(ModbusDevice):
             self.add_settings({'position': ['/Position', 0, 0, 2]})
             self.add_dbus_setting('position', '/Position')
 
+class Genset(ModbusDevice):
+    default_role = 'genset'
+    default_instance = 40
+
 class Tank:
     default_role = 'tank'
     default_instance = 20
