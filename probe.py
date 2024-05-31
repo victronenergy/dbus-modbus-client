@@ -123,3 +123,11 @@ class ModelRegister:
         if self.reg.value in self.models:
             m = self.models[self.reg.value]
             return m['handler'](spec, modbus, m['model'])
+
+    def get_models(self):
+        m = []
+        for v in self.models.values():
+            h = v['handler']
+            m.append((h.vendor_name, h.device_type, v['model']))
+
+        return m

@@ -345,6 +345,29 @@ class SerialClient(Client):
     def new_scanner(self, full):
         return SerialScanner(self.tty, self.rate, self.mode, full=full)
 
+def list_models():
+    models = []
+    for d in probe.device_types:
+        models += d.get_models()
+
+    models.sort(key=lambda x: ''.join(x).lower())
+    models.insert(0, ('Manufacturer', 'Type', 'Model'))
+
+    def maxlen(m, n):
+        return max(len(x[n]) for x in m)
+
+    w = (maxlen(models, 0), maxlen(models, 1), maxlen(models, 2))
+    models.insert(1, list(map(lambda x: '-' * x, w)))
+
+    def newval(l, m, n):
+        return m[n] if m[n] != l[n] or m[0] != l[0] else ''
+
+    last = (None, None, None)
+    for m in models:
+        v = list(map(partial(newval, last, m), range(3)))
+        print('| %-*s | %-*s | %-*s |' % (w[0], v[0], w[1], v[1], w[2], v[2]))
+        last = m
+
 def print_info(_, d):
     if not d:
         return
@@ -364,6 +387,8 @@ def main():
                         action='store_true')
     parser.add_argument('-f', '--force-scan', action='store_true')
     parser.add_argument('-m', '--mode', choices=['ascii', 'rtu'], default='rtu')
+    parser.add_argument('--models', action='store_true',
+                        help='List supported device models')
     parser.add_argument('-P', '--probe', action='append')
     parser.add_argument('-r', '--rate', type=int, action='append')
     parser.add_argument('-s', '--serial')
@@ -376,6 +401,10 @@ def main():
                         level=(logging.DEBUG if args.debug else logging.INFO))
 
     logging.getLogger('pymodbus.client.sync').setLevel(logging.CRITICAL)
+
+    if args.models:
+        list_models()
+        return
 
     if args.probe:
         probe_info(args.probe)
