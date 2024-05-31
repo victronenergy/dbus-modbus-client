@@ -48,7 +48,8 @@ def probe(mlist, pr_cb=None, pr_interval=10, timeout=None, filt=None):
                 break
 
             if d:
-                d.log.info('Found %s', d.model)
+                d.log.info('Found %s: %s %s',
+                           d.device_type, d.vendor_name, d.model)
                 d.latency = t1 - t0
                 d.timeout = max(d.min_timeout, d.latency * 4)
                 found.append(d)
