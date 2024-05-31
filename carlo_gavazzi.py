@@ -32,6 +32,7 @@ switch_positions = [
 ]
 
 class EM24_Meter(device.CustomName, device.EnergyMeter):
+    vendor_id = 'cg'
     productid = 0xb017
     productname = 'Carlo Gavazzi EM24 Ethernet Energy Meter'
     min_timeout = 0.5

@@ -41,6 +41,7 @@ class EVC_POSITION(IntEnum):
     INPUT = 1
 
 class EV_Charger(device.ModbusDevice):
+    vendor_id = 've'
     allowed_roles = None
     default_role = 'evcharger'
     default_instance = 40

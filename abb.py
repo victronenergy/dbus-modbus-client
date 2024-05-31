@@ -14,6 +14,7 @@ class Reg_serial(Reg, str):
         return self.update(str(v[0]))
 
 class ABB_Meter(device.CustomName, device.EnergyMeter):
+    vendor_id = 'abb'
     productid = 0xb033
     min_timeout = 0.5
 

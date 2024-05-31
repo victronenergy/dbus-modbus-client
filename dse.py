@@ -130,6 +130,7 @@ class DSE_Tank(device.CustomName, device.Tank, device.SubDevice):
         ]
 
 class DSE_Generator(device.CustomName, device.ModbusDevice):
+    vendor_id = 'dse'
     productid = 0xB046
     productname = 'DSE genset controller'
     allowed_roles = None

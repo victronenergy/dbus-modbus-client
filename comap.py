@@ -28,6 +28,7 @@ class ComAp_Tank(device.CustomName, device.Tank, device.SubDevice):
         ]
 
 class ComAp_Generator(device.ModbusDevice):
+    vendor_id = 'comap'
     productid = 0xB044
     productname = 'Comap genset controller'
     allowed_roles = None
