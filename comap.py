@@ -104,7 +104,7 @@ class ComAp_Generator(device.ModbusDevice):
                 ComAp_Tank(self, 0),
             ]
 
-    def get_ident(self):
+    def get_unique(self):
         # Use the custom name as identifier. Reasoning:
         # 1. Cannot get the serial number from modbus
         # 2. MAC address? It might be on a different subnet.
@@ -112,7 +112,7 @@ class ComAp_Generator(device.ModbusDevice):
         # 4. In the ComAp universe, this is already used to identify units on
         #    mobile connections, according to the manual. Page 222 of global
         #    manual.
-        return 'comap_%s' % self.name
+        return self.name
 
     def device_init_late(self):
         # Fetch the current state of the coil and populate it

@@ -88,9 +88,6 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
     def pr_changed(self, reg):
         self.sched_reinit()
 
-    def get_ident(self):
-        return 've_%s' % self.info['/Serial']
-
 models = {
     VE_Meter_A1B1.productid: {
         'model':    'VM-3P75CT',

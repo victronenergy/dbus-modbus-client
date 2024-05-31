@@ -347,6 +347,12 @@ class BaseDevice:
     def device_init_late(self):
         pass
 
+    def get_unique(self):
+        return self.info['/Serial']
+
+    def get_ident(self):
+        return '%s_%s' % (self.vendor_id, self.get_unique())
+
 class ModbusDevice(BaseDevice):
     def __init__(self, spec, modbus, model):
         super().__init__()

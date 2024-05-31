@@ -259,10 +259,6 @@ class DSE_Generator(device.CustomName, device.ModbusDevice):
                 DSE_Tank(self, 0),
             ]
 
-    def get_ident(self):
-        return 'dse_%s' % self.info['/Serial']
-
-
     def _status_register_available(self):
         return self.init_status_code is not None
 

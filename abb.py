@@ -35,9 +35,6 @@ class ABB_Meter(device.CustomName, device.EnergyMeter):
             Reg_u32b(0x5B0C, '/Ac/L1/Current',     100, '%.1f A'),
         ]
 
-    def get_ident(self):
-        return 'abb_{}'.format(self.info['/Serial'])
-
 class ABB_Meter_1P(ABB_Meter):
     productname = 'ABB B21 Energy Meter'
     nr_phases = 1

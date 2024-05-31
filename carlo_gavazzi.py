@@ -92,9 +92,6 @@ class EM24_Meter(device.CustomName, device.EnergyMeter):
         super().dbus_write_register(reg, path, val)
         self.sched_reinit()
 
-    def get_ident(self):
-        return 'cg_%s' % self.info['/Serial']
-
 models = {
     1648: {
         'model':    'EM24DINAV23XE1X',
