@@ -57,6 +57,7 @@ def pack_list(rr, access, hole_max, barrier):
 class BaseDevice:
     vendor_id = None
     vendor_name = None
+    device_type = None
     min_timeout = 0.1
     refresh_time = None
     age_limit = 4
@@ -569,6 +570,7 @@ class CustomName:
         self.add_dbus_setting('customname', '/CustomName')
 
 class EnergyMeter(ModbusDevice):
+    device_type = 'Energy meter'
     role_names = ['grid', 'pvinverter', 'genset', 'acload']
     allowed_roles = role_names
     default_role = 'grid'
@@ -587,6 +589,7 @@ class EnergyMeter(ModbusDevice):
             self.add_dbus_setting('position', '/Position')
 
 class Genset(ModbusDevice):
+    device_type = 'Generator controller'
     default_role = 'genset'
     default_instance = 40
 
