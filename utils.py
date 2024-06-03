@@ -58,7 +58,7 @@ def get_networks(blacklist):
                 if v[0] in blacklist:
                     continue
 
-                net = ipaddress.IPv4Interface(u'' + v[2])
+                net = ipaddress.IPv4Interface(v[2])
                 nets.append(net)
     except:
         pass
