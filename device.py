@@ -195,9 +195,16 @@ class BaseDevice:
         self.dbus.add_path(path, self.settings[setting], writeable=True,
                            onchangecallback=cb)
 
-    def get_role_instance(self):
-        val = self.settings['instance'].split(':')
-        return val[0], int(val[1])
+    def get_role_instance(self, retry=True):
+        try:
+            val = self.settings['instance'].split(':')
+            return val[0], int(val[1])
+        except:
+            if retry:
+                self.log.info('Invalid role/instance, resetting')
+                self.settings['instance'] = self._settings['instance'][1]
+                return self.get_role_instance(False)
+            raise
 
     def role_changed(self, path, val):
         if val not in self.allowed_roles:
