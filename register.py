@@ -172,3 +172,28 @@ class Reg_map:
 
 class Reg_mapu16(Reg_map, Reg_u16):
     pass
+
+class Reg_packed(Reg):
+    def __init__(self, base, count, *args, bits, items, **kwargs):
+        super().__init__(base, count, *args, **kwargs)
+        self.bits = bits
+        self.mask = (1 << bits) - 1
+        self.init_pos = bits * (items - 1)
+
+    def unpack(self, values):
+        values = iter(values)
+        pos = -1
+
+        while True:
+            if pos < 0:
+                try:
+                    val = next(values)
+                    pos = self.init_pos
+                except StopIteration:
+                    return
+
+            yield (val >> pos) & self.mask
+            pos -= self.bits
+
+    def decode(self, values):
+        return self.update(list(self.unpack(values)))
