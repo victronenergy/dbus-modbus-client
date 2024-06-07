@@ -110,7 +110,7 @@ class Reg_DSE_alarm(Reg, int):
         return alarms
 
     def decode(self, values):
-        alarms = self._decode_alarm_registers(values[1:])
+        alarms = self._decode_alarm_registers(values)
         try:
             # if multiple alarms firing, only first one is displayed
             alarm_idx = self.alarm_code_offset + alarms.index(True)
@@ -322,38 +322,38 @@ class DSE_Generator(device.CustomName, device.Genset):
 class DSE4xxx_Generator(DSE_Generator):
     """ This uses the "old alarm system" of GenComm page 8,
         related error strings allocate 0x1000 to 0x10FF """
-    alarm_base = 2048
-    alarm_count = 26
+    alarm_base = 2049
+    alarm_count = 25
     alarm_code_offset = 0x1000
 
 class DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator(DSE_Generator):
     """ This uses "Named Alarm Conditions" of GenComm page 154 for
         DSE 71xx/66xx/60xx/L40x/4xxx/45xx MkII family, related
         error strings allocate 0x1500 to 0x15FF """
-    alarm_base = 39424
-    alarm_count = 12
+    alarm_base = 39425
+    alarm_count = 11
     alarm_code_offset = 0x1500
 
 class DSE61xx_MkII_Generator(DSE_Generator):
     """ This uses "Named Alarm Conditions" of GenComm page 154 for
         DSE 61xx MkII, related error strings allocate 0x1100 to 0x11FF """
-    alarm_base = 39424
-    alarm_count = 16
+    alarm_base = 39425
+    alarm_count = 15
     alarm_code_offset = 0x1100
 
 class DSE72xx_73xx_61xx_74xx_MkII_Generator(DSE_Generator):
     """ This uses "Named Alarm Conditions" of GenComm page 154 for
         DSE 72xx/73xx/61xx/74xx MkII family, related error strings
         allocate 0x1200 to 0x12FF """
-    alarm_base = 39424
-    alarm_count = 21
+    alarm_base = 39425
+    alarm_count = 20
     alarm_code_offset = 0x1200
 
 class DSE8xxx_Generator(DSE_Generator):
     """ This uses "Named Alarm Conditions" of GenComm page 154 for
         DSE 8xxx family, related error strings allocate 0x1300 to 0x13FF """
-    alarm_base = 39424
-    alarm_count = 40
+    alarm_base = 39425
+    alarm_count = 39
     alarm_code_offset = 0x1300
 
 
