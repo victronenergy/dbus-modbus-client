@@ -569,6 +569,39 @@ class CustomName:
         self.add_settings({'customname': ['/CustomName', '', 0, 0]})
         self.add_dbus_setting('customname', '/CustomName')
 
+class ErrorId:
+    err_path = '/Error/{}/Id'
+    max_errors = 8
+
+    def device_init_late(self):
+        super().device_init_late()
+
+        self.error_ids = [None] * self.max_errors
+
+        for i in range(len(self.error_ids)):
+            self.dbus.add_path(self.err_path.format(i), '')
+
+    def set_error_ids(self, eids):
+        eids = set(eids)
+
+        for i in range(len(self.error_ids)):
+            try:
+                eids.remove(self.error_ids[i])
+            except KeyError:
+                self.error_ids[i] = None
+
+        for err in sorted(eids, key=lambda x: ('ewi'.index(x[0]), x[1])):
+            try:
+                i = self.error_ids.index(None)
+                self.error_ids[i] = err
+            except ValueError:
+                break
+
+        for i in range(len(self.error_ids)):
+            e = self.error_ids[i]
+            s = '%s:%s-%d' % (self.vendor_id, *e) if e is not None else ''
+            self.dbus[self.err_path.format(i)] = s
+
 class EnergyMeter(ModbusDevice):
     device_type = 'Energy meter'
     role_names = ['grid', 'pvinverter', 'genset', 'acload']
