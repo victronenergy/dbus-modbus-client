@@ -2,7 +2,7 @@ import struct
 
 import device
 import probe
-from register import Reg, Reg_s16, Reg_u16, Reg_s32b, Reg_u32b, Reg_mapu16
+from register import *
 
 class Reg_DSE_serial(Reg, str):
     """ Deep Sea Electronics Controllers use a 32-bit integer as serial number. Make it a string
@@ -61,64 +61,6 @@ class Reg_DSE_s32b(Reg_DSE_num, Reg_s32b):
 class Reg_DSE_u32b(Reg_DSE_num, Reg_u32b):
     invalid_mask = 0xffffffff
 
-class Reg_DSE_alarm(Reg, int):
-    """ Decode DSE alarm registers into error codes, which
-        are offset for correct error string mapping """
-
-    def __init__(self, base, count, alarm_code_offset):
-        # Note: Base register has to be first on GenComm page
-        # definition ("Number of named alarms")
-        super().__init__(base=base, count=count, name='/ErrorCode')
-        self.alarm_code_offset = alarm_code_offset
-
-    def _interpret_alarm_value(self, val):
-        """ Meaning according to GenComm specification:
-            0      Disabled digital input
-            1      Not active alarm
-            2      Warning alarm
-            3      Shutdown alarm
-            4      Electrical trip alarm
-            5-7    Reserved
-            8      Inactive indication (no string)
-            9      Inactive indication (displayed string)
-            10     Active indication
-            11-14  Reserved
-            15     Unimplemented alarm """
-        if val == 1: return False
-        if 2 <= val <= 4: return True
-        return None
-
-    def _decode_into_4bits(self, z):
-        """ Splits register value into four 4 bit integers and interprets the
-            numbers """
-        vals = [
-            z >> 12 & 0xF,
-            z >> 8 & 0xF,
-            z >> 4 & 0xF,
-            z & 0xF
-        ]
-        return map(self._interpret_alarm_value, vals)
-
-    def _decode_alarm_registers(self, values):
-        """ Returns a list of all alarms with bool or None values
-            True indicates active alarm,
-            False indicates inactive alarm,
-            None indicates an unimplemented or unknown alarm state """
-        alarms = list()
-        for reg_val in values:
-            alarms.extend(self._decode_into_4bits(reg_val))
-        return alarms
-
-    def decode(self, values):
-        alarms = self._decode_alarm_registers(values)
-        try:
-            # if multiple alarms firing, only first one is displayed
-            alarm_idx = self.alarm_code_offset + alarms.index(True)
-            return self.update(alarm_idx)
-        except ValueError:
-            # No alarms firing
-            return self.update(0)
-
 class DSE_Tank(device.CustomName, device.Tank, device.SubDevice):
     raw_value_min = 0
     raw_value_max = 100
@@ -129,7 +71,7 @@ class DSE_Tank(device.CustomName, device.Tank, device.SubDevice):
             Reg_DSE_u16(1027, '/RawValue', 1, '%.0f %%'),
         ]
 
-class DSE_Generator(device.CustomName, device.Genset):
+class DSE_Generator(device.CustomName, device.ErrorId, device.Genset):
     vendor_id = 'dse'
     vendor_name = 'Deep Sea Electronics'
     productid = 0xB046
@@ -146,6 +88,12 @@ class DSE_Generator(device.CustomName, device.Genset):
     # Stores 8 register values which indicate of a regarding
     # GenComm System Control Functions is available
     scf_reg_vals = None
+
+    alarm_level = {
+        2: 'w',     # Warning alarm
+        3: 'e',     # Shutdown alarm
+        4: 'e',     # Electrical trip alarm
+    }
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -205,6 +153,14 @@ class DSE_Generator(device.CustomName, device.Genset):
                 return False
         return True
 
+    def _get_alarm_codes(self, values):
+        for v in enumerate(values):
+            level = self.alarm_level.get(v[1], None)
+            if level:
+                yield (level, self.alarm_code_offset + v[0])
+
+    def alarm_changed(self, reg):
+        self.set_error_ids(self._get_alarm_codes(reg.value))
 
     def device_init(self):
 
@@ -242,7 +198,8 @@ class DSE_Generator(device.CustomName, device.Genset):
                 6: 0, # Test off load mode
                 7: 0, # Off mode
             }),
-            Reg_DSE_alarm(self.alarm_base, self.alarm_count, self.alarm_code_offset),
+            Reg_packed(self.alarm_base, self.alarm_count, bits=4, items=4,
+                       onchange=self.alarm_changed)
         ]
 
         # Check, if status register is implemented on controller
@@ -271,8 +228,6 @@ class DSE_Generator(device.CustomName, device.Genset):
         super().device_init_late()
 
         # Additional static paths
-        if '/ErrorCode' not in self.dbus:
-            self.dbus.add_path('/ErrorCode', 0)
         if '/FirmwareVersion' not in self.dbus:
             self.dbus.add_path('/FirmwareVersion', None)
 
