@@ -53,6 +53,12 @@ class Reg:
             self.onchange(self)
         return changed
 
+    def decode(self, values):
+        return self.update(values)
+
+    def encode(self):
+        return self.value
+
 class Reg_num(Reg, float):
     rtype = int
 
