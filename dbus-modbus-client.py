@@ -7,12 +7,15 @@ import faulthandler
 from functools import partial
 import os
 import pymodbus.constants
-from settingsdevice import SettingsDevice
 import signal
+import sys
 import time
 import traceback
-from vedbus import VeDbusService
 from gi.repository import GLib
+
+sys.path.insert(1, os.path.join(os.path.dirname(__file__), 'ext', 'velib_python'))
+from settingsdevice import SettingsDevice
+from vedbus import VeDbusService
 
 import device
 import devspec
