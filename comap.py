@@ -34,6 +34,7 @@ class ComAp_Generator(device.ModbusDevice):
     default_role = 'genset'
     default_instance = 40
     min_timeout = 0.5
+    reg_hole_max = 0
 
     def device_init(self):
         self.info_regs = [
