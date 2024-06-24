@@ -33,6 +33,7 @@ class ComAp_Generator(device.Genset):
     productid = 0xB044
     productname = 'Comap genset controller'
     min_timeout = 0.5
+    reg_hole_max = 0
 
     def device_init(self):
         self.info_regs = [
