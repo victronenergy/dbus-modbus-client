@@ -1,3 +1,4 @@
+from copy import copy
 import struct
 from utils import get_enum
 from collections.abc import Iterable
@@ -58,6 +59,9 @@ class Reg:
 
     def encode(self):
         return self.value
+
+    def copy_if_valid(self):
+        return copy(self) if self.isvalid() else None
 
 class Reg_num(Reg, float):
     rtype = int
