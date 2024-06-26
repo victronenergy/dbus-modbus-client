@@ -587,6 +587,10 @@ class CustomName:
 class ErrorId:
     err_path = '/Error/{}/Id'
     max_errors = 8
+    error_code_offset = {
+        'cre': 0x2000,
+        'dse': 0,
+    }
 
     def device_init_late(self):
         super().device_init_late()
@@ -595,6 +599,9 @@ class ErrorId:
 
         for i in range(len(self.error_ids)):
             self.dbus.add_path(self.err_path.format(i), '')
+
+        if '/ErrorCode' not in self.dbus:
+            self.dbus.add_path('/ErrorCode', 0)
 
     def set_error_ids(self, eids):
         eids = set(eids)
@@ -616,6 +623,15 @@ class ErrorId:
             e = self.error_ids[i]
             s = '%s:%s-%d' % (self.vendor_id, *e) if e is not None else ''
             self.dbus[self.err_path.format(i)] = s
+
+        err = next(filter(None, self.error_ids))
+
+        if err and self.vendor_id in self.error_code_offset:
+            err_code = self.error_code_offset[self.vendor_id] + err[1]
+        else:
+            err_code = 0
+
+        self.dbus['/ErrorCode'] = err_code
 
 class EnergyMeter(ModbusDevice):
     device_type = 'Energy meter'
