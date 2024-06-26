@@ -641,6 +641,17 @@ class Genset(ModbusDevice):
     default_role = 'genset'
     default_instance = 40
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.alias_regs.update({
+            '/RemoteStartModeEnabled': ['/AutoStart']
+        })
+
+    def device_init_late(self):
+        super().device_init_late()
+        if '/ErrorCode' not in self.dbus:
+            self.dbus.add_path('/ErrorCode', 0)
+
 class Tank:
     default_role = 'tank'
     default_instance = 20
