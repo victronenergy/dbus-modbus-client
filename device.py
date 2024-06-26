@@ -76,6 +76,7 @@ class BaseDevice:
         self.dbus_settings = {}
         self.info_regs = []
         self.data_regs = []
+        self.alias_regs = {}
 
     def destroy(self):
         if self.dbus:
@@ -274,15 +275,30 @@ class BaseDevice:
 
         return False
 
-    def dbus_add_register(self, r):
-        if r.name in self.dbus:
-            del self.dbus[r.name]
+    def dbus_add_register(self, r, name=None):
+        if name is None:
+            name = r.name
+
+        if name in self.dbus:
+            del self.dbus[name]
         v = r.copy_if_valid()
         if r.write:
             cb = partial(self.dbus_write_register, r)
-            self.dbus.add_path(r.name, v, writeable=True, onchangecallback=cb)
+            self.dbus.add_path(name, v, writeable=True, onchangecallback=cb)
         else:
-            self.dbus.add_path(r.name, v)
+            self.dbus.add_path(name, v)
+
+        for alias in self.alias_regs.get(name, ()):
+            self.dbus_add_reg_alias(r, alias)
+
+    def dbus_add_reg_alias(self, r, name):
+        r.onchange = partial(self.dbus_update_alias, name, r.onchange)
+        self.dbus_add_register(r, name)
+
+    def dbus_update_alias(self, name, onchange, reg):
+        if onchange:
+            onchange(reg)
+        self.dbus[name] = reg.copy_if_valid()
 
     def set_max_age(self, reg):
         if reg.name in self.fast_regs:
