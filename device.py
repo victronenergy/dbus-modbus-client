@@ -1,4 +1,3 @@
-from copy import copy
 import dbus
 from functools import partial
 import logging
@@ -160,7 +159,7 @@ class BaseDevice:
             if now - reg.time > reg.max_age:
                 if reg.decode(rr.registers[base:end]) or not reg.time:
                     if reg.name:
-                        d[reg.name] = copy(reg) if reg.isvalid() else None
+                        d[reg.name] = reg.copy_if_valid()
                 reg.time = now
 
         return latency
@@ -278,7 +277,7 @@ class BaseDevice:
     def dbus_add_register(self, r):
         if r.name in self.dbus:
             del self.dbus[r.name]
-        v = copy(r) if r.isvalid() else None
+        v = r.copy_if_valid()
         if r.write:
             cb = partial(self.dbus_write_register, r)
             self.dbus.add_path(r.name, v, writeable=True, onchangecallback=cb)
