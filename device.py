@@ -104,7 +104,7 @@ class BaseDevice:
 
         return rr
 
-    def read_modbus(self, start, count, access):
+    def read_modbus(self, start, count, access=None):
         if access is None:
             access = self.default_access
 
