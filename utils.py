@@ -42,11 +42,14 @@ class timeout:
 def get_networks(blacklist):
     '''Get IPv4 networks of host
 
-    Return a list of IPv4Interface objects corresponding to active
-    network interfaces with a global scope address.
+    Return a list of IPv4Network objects corresponding to active
+    network interfaces with a global scope address and a (possibly
+    longer) list of IPv4Address objects representing the host's
+    addresses on these networks.
 
     :param blacklist: list of interface names to ignore
-    :returns: list of IPv4Interface objects
+    :returns: list of IPv4Network objects, IPv4Address objects
+
     '''
 
     nets = []
@@ -63,7 +66,10 @@ def get_networks(blacklist):
     except:
         pass
 
-    return nets
+    addrs = [n.ip for n in nets]
+    nets = list(ipaddress.collapse_addresses([n.network for n in nets]))
+
+    return nets, addrs
 
 def get_enum(enum, val, default=None):
     '''Get enum for value

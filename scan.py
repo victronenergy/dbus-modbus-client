@@ -109,9 +109,12 @@ class NetScanner(Scanner):
             t.start()
             tasks.append(t)
 
-        for h in chain(*map(lambda n: filter(n.ip.__ne__, n.network.hosts()), self.nets)):
+        for h in chain(*map(lambda n: n.hosts(), self.nets)):
             if not self.running:
                 break
+
+            if h in self.addrs:
+                continue
 
             self.hosts.put(h)
 
@@ -128,12 +131,13 @@ class NetScanner(Scanner):
         self.hosts = None
 
     def start(self):
-        self.nets = get_networks(self.blacklist)
+        self.nets, self.addrs = get_networks(self.blacklist)
         if not self.nets:
             log.warn('Unable to get network addresses')
             return False
 
-        num_hosts = sum([n.network.num_addresses - 3 for n in self.nets])
+        num_hosts = sum([n.num_addresses - 2 for n in self.nets])
+        num_hosts -= len(self.addrs)
         self.total = len(self.protos) * num_hosts
 
         return super().start()
