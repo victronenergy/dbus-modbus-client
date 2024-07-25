@@ -178,26 +178,45 @@ class Reg_mapu16(Reg_map, Reg_u16):
     pass
 
 class Reg_packed(Reg):
-    def __init__(self, base, count, *args, bits, items, **kwargs):
+    def __init__(self, base, count, *args, bits, items, lsb=False, **kwargs):
         super().__init__(base, count, *args, **kwargs)
         self.bits = bits
         self.mask = (1 << bits) - 1
-        self.init_pos = bits * (items - 1)
+        self.max_pos = bits * (items - 1)
+        self.lsb_mode = lsb
 
-    def unpack(self, values):
-        values = iter(values)
+    def _unpack_from_msb(self, values):
+        """ Unpack bits starting at most significant bit (MSB) """
         pos = -1
-
         while True:
             if pos < 0:
                 try:
                     val = next(values)
-                    pos = self.init_pos
+                    pos = self.max_pos
                 except StopIteration:
                     return
 
             yield (val >> pos) & self.mask
             pos -= self.bits
+
+    def _unpack_from_lsb(self, values):
+        """ Unpack bits starting at least significant bit (LSB) """
+        pos = self.max_pos+1
+        while True:
+            if pos > self.max_pos:
+                try:
+                    val = next(values)
+                    pos = 0
+                except StopIteration:
+                    return
+
+            yield (val >> pos) & self.mask
+            pos += self.bits
+
+    def unpack(self, values):
+        values = iter(values)
+        return self._unpack_from_lsb(values) if self.lsb_mode \
+                else self._unpack_from_msb(values)
 
     def decode(self, values):
         return self.update(list(self.unpack(values)))
