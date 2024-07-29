@@ -411,6 +411,8 @@ def main():
         probe_info(args.probe)
         return
 
+    log.info('%s v%s', NAME, VERSION)
+
     signal.signal(signal.SIGINT, lambda s, f: os._exit(1))
     faulthandler.register(signal.SIGUSR1)
     faulthandler.enable()
