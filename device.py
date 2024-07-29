@@ -590,6 +590,7 @@ class ErrorId:
     error_code_offset = {
         'cre': 0x2000,
         'dse': 0,
+        've': 0,
     }
 
     def device_init_late(self):
@@ -624,11 +625,10 @@ class ErrorId:
             s = '%s:%s-%d' % (self.vendor_id, *e) if e is not None else ''
             self.dbus[self.err_path.format(i)] = s
 
-        err = next(filter(None, self.error_ids))
-
-        if err and self.vendor_id in self.error_code_offset:
+        try:
+            err = next(filter(None, self.error_ids))
             err_code = self.error_code_offset[self.vendor_id] + err[1]
-        else:
+        except:
             err_code = 0
 
         self.dbus['/ErrorCode'] = err_code
