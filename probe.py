@@ -119,10 +119,12 @@ class ModelRegister:
             log.debug('%s: %s', modbus, rr)
             return None
 
-        self.reg.decode(rr.registers)
-        if self.reg.value in self.models:
+        try:
+            self.reg.decode(rr.registers)
             m = self.models[self.reg.value]
             return m['handler'](spec, modbus, m['model'])
+        except:
+            return None
 
     def get_models(self):
         m = []
