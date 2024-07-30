@@ -67,9 +67,10 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         phases = self.get_phases_from_config(phase_cfg)
         self.nr_phases = len(phases)
 
+        role_names = ['grid', 'pvinverter', 'genset', 'acload', 'evcharger', 'heatpump', 'acload', 'acload']
         role_id = self.read_register(self.data_regs[1])
-        if role_id < len(self.role_names):
-            self.role = self.role_names[role_id]
+        if role_id < len(role_names):
+            self.role = role_names[role_id]
 
         self.ver = self.read_register(self.info_regs[1])
         if self.ver < (0, 1, 3, 1):
