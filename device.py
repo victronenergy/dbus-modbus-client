@@ -635,7 +635,8 @@ class ErrorId:
 
 class EnergyMeter(ModbusDevice):
     device_type = 'Energy meter'
-    role_names = ['grid', 'pvinverter', 'genset', 'acload']
+    role_names = ['grid', 'pvinverter', 'genset', 'acload', 'evcharger',
+                  'heatpump']
     allowed_roles = role_names
     default_role = 'grid'
     default_instance = 40
