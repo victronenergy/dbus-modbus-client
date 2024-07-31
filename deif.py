@@ -264,5 +264,12 @@ models = {
     },
 }
 
+# For Modbus via RS485:
+#  - Default settings: Unit 3 @ 9600 Baud
+#  - Unit and baud rate can be configured via controller display
+#   - Parameters > Communication > RS485 > RS485 1 or 2 > Parameters (changes require password '2002'):
+#     - Addr: 1
+#     - Speed: 115200 Baud
+#     - Type: Modbus Slave
 probe.add_handler(probe.ModelRegister(Reg_DEIF_ident(), models,
-                                      methods=['tcp'], units=[1]))
+                                      methods=['tcp', 'rtu'], rates=[115200], units=[1]))
