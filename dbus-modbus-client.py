@@ -28,7 +28,6 @@ import watchdog
 import abb
 import carlo_gavazzi
 import comap
-import cre
 import dse
 import ev_charger
 import smappee
