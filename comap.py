@@ -114,6 +114,8 @@ class ComAp_Generator(device.Genset):
         return self.name
 
     def device_init_late(self):
+        super().device_init_late()
+
         # Fetch the current state of the coil and populate it
         state = None
         coils = self.modbus.read_coils(4700, unit=self.unit)
