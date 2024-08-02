@@ -18,10 +18,10 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
     age_limit_fast = 0
     refresh_time = 20
 
-    def phase_regs(self, n):
+    def add_phase_regs(self, n):
         base = 0x3040 + 8 * (n - 1)
         power = 0x3082 + 4 * (n - 1)
-        return [
+        self.data_regs += [
             Reg_s16( base + 0, '/Ac/L%d/Voltage' % n,        100, '%.1f V'),
             Reg_s16( base + 1, '/Ac/L%d/Current' % n,        100, '%.1f A'),
             Reg_u32b(base + 2, '/Ac/L%d/Energy/Forward' % n, 100, '%.1f kWh',
@@ -71,7 +71,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         ]
 
         for n in phases:
-            self.data_regs += self.phase_regs(n)
+            self.add_phase_regs(n)
 
         if ver < (0, 1, 5, 255):
             return
