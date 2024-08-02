@@ -54,8 +54,8 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         if role_id < len(self.role_names):
             self.role = self.role_names[role_id]
 
-        ver = self.read_register(self.info_regs[1])
-        if ver < (0, 1, 3, 1):
+        self.fwver = self.read_register(self.info_regs[1])
+        if self.fwver < (0, 1, 3, 1):
             self.log.info('Old firmware, data not available')
             return
 
@@ -73,7 +73,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         for n in phases:
             self.add_phase_regs(n)
 
-        if ver < (0, 1, 5, 255):
+        if self.fwver < (0, 1, 5, 255):
             return
 
         if self.role == 'pvinverter':
