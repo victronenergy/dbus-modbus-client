@@ -90,7 +90,7 @@ class CurrentTransformer:
         self.phase = self.dev.read_register(self.regs[0])
 
         if self.phase is None:
-            self.log.warn('CT %d configured outside Venus', n)
+            self.log.warning('CT %d configured outside Venus', n)
             return False
 
         return True

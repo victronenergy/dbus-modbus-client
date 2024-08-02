@@ -46,7 +46,7 @@ class Scanner:
         except ScanAborted:
             pass
         except:
-            log.warn('Exception during bus scan')
+            log.warning('Exception during bus scan')
             traceback.print_exc()
 
         if self.running:
@@ -133,7 +133,7 @@ class NetScanner(Scanner):
     def start(self):
         self.nets, self.addrs = get_networks(self.blacklist)
         if not self.nets:
-            log.warn('Unable to get network addresses')
+            log.warning('Unable to get network addresses')
             return False
 
         num_hosts = sum([n.num_addresses - 2 for n in self.nets])
