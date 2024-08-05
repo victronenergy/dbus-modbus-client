@@ -31,6 +31,7 @@ import comap
 import cre
 import dse
 import ev_charger
+import inepro
 import smappee
 import victron_em
 
