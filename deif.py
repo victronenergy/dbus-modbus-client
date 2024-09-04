@@ -1,6 +1,6 @@
 import device
 import probe
-from register import Reg, Reg_s16, Reg_s32b, Reg_text, Reg_mapu16, Reg_packed
+from register import Reg, Reg_s16, Reg_u16, Reg_s32b, Reg_text, Reg_mapu16, Reg_packed
 
 
 class Reg_DEIF_ident(Reg_text):
@@ -57,6 +57,8 @@ class Reg_DEIF_temp(Reg_DEIF_unit_agnostic):
     """ Converts temperature units from Fahrenheit to Celcius, if necessary """
 
     def _convert(self, val):
+        if val == None:
+            return val
         if self.us_customary_units:
             return (val - 32) / 1.8  # Farenheit to Celcius
         else:
@@ -67,10 +69,16 @@ class Reg_DEIF_pressure(Reg_DEIF_unit_agnostic):
     """ Converts psi or bar to kPa """
 
     def _convert(self, val):
+        if val == None:
+            return val
         if self.us_customary_units:
             return val * 6.89476  # psi to kPa
         else:
             return val * 100      # bar to kPa
+
+
+class Reg_DEIF_pressure_unsigned(Reg_DEIF_pressure, Reg_u16):
+    pass
 
 
 class DEIF_Tank(device.CustomName, device.Tank, device.SubDevice):
@@ -208,6 +216,11 @@ class DEIF_Generator(device.CustomName, device.ErrorId, device.Genset):
             Reg_DEIF_pressure(
                 us_units, pres_reg if pres_reg else 595,
                 '/Engine/OilPressure', 10 if pres_reg else 100, '%.0f kPa'
+            ),
+            Reg_DEIF_pressure_unsigned(
+                us_units, 26022,
+                '/Engine/FuelDeliveryPressure', 100, '%.0f kPa',
+                invalid=0
             ),
             Reg_DEIF_temp(
                 us_units, temp_reg if temp_reg else 594,
