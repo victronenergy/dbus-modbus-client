@@ -389,4 +389,5 @@ models = {
 
 
 probe.add_handler(probe.ModelRegister(Reg_DSE_ident(), models,
-                                      methods=['tcp'], units=[1]))
+                                      methods=['tcp', 'rtu'], units=[1, 10],
+                                      rates=[19200, 115200]))
