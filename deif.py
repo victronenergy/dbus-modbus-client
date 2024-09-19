@@ -25,7 +25,7 @@ class Reg_DEIF_status(Reg, int):
         )
 
 
-class reg_DEIF_RemoteStartMode(Reg, int):
+class Reg_DEIF_RemoteStartMode(Reg, int):
     """
     DEIF terminology: AUTO mode
     """
@@ -112,7 +112,7 @@ class DEIF_Generator(device.CustomName, device.ErrorId, device.Genset):
         super().__init__(*args)
 
         self.status_reg = Reg_DEIF_status()
-        self.remote_start_mode_reg = reg_DEIF_RemoteStartMode()
+        self.remote_start_mode_reg = Reg_DEIF_RemoteStartMode()
 
     def _set_alarm_codes(self, reg):
         """ Victron-internal error id convention for DEIF:
