@@ -79,6 +79,7 @@ class DSE_Generator(device.CustomName, device.ErrorId, device.Genset):
     min_timeout = 1         # Increased timeout for less corrupted messages
 
     init_status_code = None
+    prevent_remote_start = False
 
     # GenComm System Control Function keys
     SCF_SELECT_AUTO_MODE = 35701     # Select Auto mode
@@ -240,6 +241,7 @@ class DSE_Generator(device.CustomName, device.ErrorId, device.Genset):
             engine_speed_reg_val = self.read_register(self.engine_speed_reg)
             if engine_speed_reg_val is None:
                 self.log.error('Cannot detect engine status by RPM, as register is not available')
+                self.dbus.add_path('/StatusCode', None)
             else:
                 self.log.info('Detecting engine status by RPM')
                 status_code = self._get_status_code_from_rpm(engine_speed_reg_val)
@@ -251,7 +253,8 @@ class DSE_Generator(device.CustomName, device.ErrorId, device.Genset):
 
         # Add /Start path, if GenComm System Control Functions
         # for genset telemetry start are available
-        if self._check_scf_support(self.SCF_TELEMETRY_START, self.SCF_TELEMETRY_STOP):
+        if not self.prevent_remote_start and \
+                self._check_scf_support(self.SCF_TELEMETRY_START, self.SCF_TELEMETRY_STOP):
             self.dbus.add_path(
                 '/Start',
                 1 if is_running else 0,
@@ -326,15 +329,24 @@ class DSE8xxx_Generator(DSE_Generator):
     alarm_count = 39
     alarm_code_offset = 0x1300
 
+class DSE4520_MKII(DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator):
+    """ DSE 4520 MKII is a special case, as it reports support for
+        Telemetry Start and Stop, but actually does not support that """
+    prevent_remote_start = True
+
 
 models = {
     '1-4623': {
-        'model':    '4620/4623',
+        'model':    '4620',
         'handler':  DSE4xxx_Generator,
     },
     '1-32808': {
         'model':    '4510 MKII',
         'handler':  DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator,
+    },
+    '1-32807': {
+        'model':    '4520 MKII',
+        'handler':  DSE4520_MKII,
     },
     '1-32800': {
         'model':    '6110 MKII',
