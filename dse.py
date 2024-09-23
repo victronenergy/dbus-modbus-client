@@ -241,6 +241,7 @@ class DSE_Generator(device.CustomName, device.ErrorId, device.Genset):
             engine_speed_reg_val = self.read_register(self.engine_speed_reg)
             if engine_speed_reg_val is None:
                 self.log.error('Cannot detect engine status by RPM, as register is not available')
+                self.dbus.add_path('/StatusCode', None)
             else:
                 self.log.info('Detecting engine status by RPM')
                 status_code = self._get_status_code_from_rpm(engine_speed_reg_val)
