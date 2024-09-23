@@ -338,7 +338,7 @@ class DSE4520_MKII(DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator):
 
 models = {
     '1-4623': {
-        'model':    '4620/4623',
+        'model':    '4620',
         'handler':  DSE4xxx_Generator,
     },
     '1-32808': {
