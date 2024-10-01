@@ -104,3 +104,14 @@ def flatten(a):
             b.append(x)
 
     return b
+
+def getbits(v, size):
+    bit = 0
+
+    for x in iter(v):
+        if x:
+            for b in range(size):
+                if x & (1 << b):
+                    yield bit + b
+
+        bit += size
