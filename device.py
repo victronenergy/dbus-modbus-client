@@ -526,6 +526,7 @@ class SubDevice(BaseDevice):
         self.subid = subid
         self.modbus = parent.modbus
         self.unit = parent.unit
+        self.default_access = parent.default_access
         self.model = parent.model
         self.productid = parent.productid
         self.productname = parent.productname
