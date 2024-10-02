@@ -201,3 +201,14 @@ class Reg_packed(Reg):
 
     def decode(self, values):
         return self.update(list(self.unpack(values)))
+
+class Reg_bit(Reg, int):
+    def __init__(self, base, *args, bit, set=1, unset=0, **kwargs):
+        super().__init__(base, 1 + bit // 16, *args, **kwargs)
+        self.bit = bit
+        self.set = set
+        self.unset = unset
+
+    def decode(self, values):
+        v = values[self.bit // 16] & (1 << self.bit % 16)
+        return self.update(self.set if v else self.unset)
