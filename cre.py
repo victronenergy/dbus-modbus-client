@@ -148,10 +148,9 @@ class CRE_Compact_Generator(device.CustomName, device.ErrorId, device.Genset):
     def device_init_late(self):
         super().device_init_late()
 
-        state = self.read_register(self.remote_start_reg)
         self.dbus.add_path(
             '/Start',
-            state,
+            0,
             writeable=True,
             onchangecallback=self._start_genset
         )
@@ -167,12 +166,12 @@ class CRE_Compact_Generator(device.CustomName, device.ErrorId, device.Genset):
         # Remote start on load [4502]
         # Activation will start generator in automatic mode and close
         # the generator breaker on load
-        self.write_modbus(4502, bool(value))
+        self.write_modbus(4502, [bool(value)])
         return True
 
     def _set_remote_start_mode(self, _, value):
         if value == 1:
-            self.write_modbus(4513, 1)
+            self.write_modbus(4513, [1])
         return False
 
 models = {
