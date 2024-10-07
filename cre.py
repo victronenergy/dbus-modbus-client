@@ -1,3 +1,5 @@
+from math import floor, log10
+
 import device
 import probe
 from register import Reg, Reg_u16, Reg_s16, Reg_u32l, Reg_mapu16, Reg_text
@@ -90,10 +92,17 @@ class CRE_Compact_Generator(device.CustomName, device.ErrorId, device.Genset):
             }),
         ]
 
+        # The active power registers 363-365 have variable scaling
+        # based on the genset nominal power
+        nominal_kw = self.read_register(Reg_u16(2105))
+        power_unit = pow(10, floor(log10(nominal_kw)))
+        power_scale = 1 / power_unit
+        self.log.info('Nominal power %d kW, unit %d W', nominal_kw, power_unit)
+
         self.data_regs = [
-            Reg_s16(363, '/Ac/L1/Power',   1/100,   '%.0f W'),
-            Reg_s16(364, '/Ac/L2/Power',   1/100,   '%.0f W'),
-            Reg_s16(365, '/Ac/L3/Power',   1/100,   '%.0f W'),
+            Reg_s16(363, '/Ac/L1/Power', power_scale, '%.0f W'),
+            Reg_s16(364, '/Ac/L2/Power', power_scale, '%.0f W'),
+            Reg_s16(365, '/Ac/L3/Power', power_scale, '%.0f W'),
             Reg_u16(50,  '/Ac/L1/Voltage',     1,   '%.0f V'),
             Reg_u16(51,  '/Ac/L2/Voltage',     1,   '%.0f V'),
             Reg_u16(52,  '/Ac/L3/Voltage',     1,   '%.0f V'),
