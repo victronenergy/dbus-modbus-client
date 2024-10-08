@@ -90,12 +90,6 @@ class CRE_Compact_Generator(device.CustomName, device.ErrorId, device.Genset):
             }),
         ]
 
-        self.remote_start_reg = Reg_mapu16(4008, '/RemoteStartModeEnabled', {
-            0: 0,  # MAN
-            1: 0,  # TEST
-            2: 1,  # AUTO
-        })
-
         self.data_regs = [
             Reg_s16(363, '/Ac/L1/Power',   1/100,   '%.0f W'),
             Reg_s16(364, '/Ac/L2/Power',   1/100,   '%.0f W'),
@@ -118,8 +112,6 @@ class CRE_Compact_Generator(device.CustomName, device.ErrorId, device.Genset):
             Reg_s16(358, '/Engine/Load',                10,     '%.0f %%'),
             Reg_u16(204, '/StarterVoltage',             10,     '%.1f V'),
 
-            self.remote_start_reg,
-
             Reg_mapu16(4001, '/StatusCode', {
                 0:   0,     # Waiting
                 2:   3,     # Start
@@ -140,6 +132,12 @@ class CRE_Compact_Generator(device.CustomName, device.ErrorId, device.Genset):
                 23:  9,     # Ignition only
                 40:  3,     # Ext. Start seq
                 255: 10,    # Fault
+            }),
+
+            Reg_mapu16(4008, '/RemoteStartModeEnabled', {
+                0: 0,  # MAN
+                1: 0,  # TEST
+                2: 1,  # AUTO
             }),
 
             Reg(4664, 2, onchange=self.alarm_changed),
