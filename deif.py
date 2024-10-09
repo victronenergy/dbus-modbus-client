@@ -49,7 +49,7 @@ class DEIF_Tank(device.CustomName, device.Tank, device.SubDevice):
 class DEIF_Generator(device.CustomName, device.ErrorId, device.Genset):
     vendor_id = 'deif'
     vendor_name = 'DEIF'
-    productid = 0xB044
+    productid = 0xB049
     productname = 'DEIF genset controller'
     min_timeout = 0.5
     default_access = 'input'
