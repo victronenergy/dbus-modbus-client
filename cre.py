@@ -100,6 +100,7 @@ class CRE_Compact_Generator(device.CustomName, device.ErrorId, device.Genset):
         self.log.info('Nominal power %d kW, unit %d W', nominal_kw, power_unit)
 
         self.data_regs = [
+            Reg_s16(369, '/Ac/Power',    power_scale, '%.0f W'),
             Reg_s16(363, '/Ac/L1/Power', power_scale, '%.0f W'),
             Reg_s16(364, '/Ac/L2/Power', power_scale, '%.0f W'),
             Reg_s16(365, '/Ac/L3/Power', power_scale, '%.0f W'),
