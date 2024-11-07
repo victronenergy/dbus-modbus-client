@@ -107,6 +107,14 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             Reg_u16(0x3039, '/Ac/N/Current', 100, '%.1f A')
         ]
 
+        if self.fwver < (0, 1, 9, 0):
+            return
+
+        self.data_regs += [
+             Reg_u16(0x2023, '/N2kSystemInstance',
+                     write=self.set_systeminstance),
+        ]
+
     def set_name(self, val):
         self.vreglink_set(0x10c, bytes(val, encoding='utf-8'))
         return True
@@ -116,6 +124,10 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
 
     def pr_changed(self, reg):
         self.sched_reinit()
+
+    def set_systeminstance(self, val):
+        self.vreglink_set(0x112, int(val).to_bytes(1, 'little'))
+        return True
 
 models = {
     VE_Meter_A1B1.productid: {
