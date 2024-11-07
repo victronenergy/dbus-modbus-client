@@ -136,6 +136,8 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             return
 
         self.data_regs += [
+            Reg_u16(0x2023, '/N2kSystemInstance',
+                    write=self.set_systeminstance),
             Reg_s16(0x303a, '/Ac/PowerFactor', 1000, '%.3f'),
             Reg_u16(0x303b, '/PhaseSequence', invalid=0xff,
                     text=phase_sequences),
@@ -150,6 +152,10 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
 
     def pr_changed(self, reg):
         self.sched_reinit()
+
+    def set_systeminstance(self, val):
+        self.vreglink_set(0x112, int(val).to_bytes(1, 'little'))
+        return True
 
 models = {
     VE_Meter_A1B1.productid: {
