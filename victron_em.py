@@ -63,6 +63,8 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         ]
 
     def device_init(self):
+        self.capabilities1 = 0
+
         self.info_regs = [
             Reg_text( 0x1001, 8, '/Serial'),
             VEReg_ver(0x1009, '/FirmwareVersion'),
@@ -142,6 +144,14 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             Reg_u16(0x303b, '/PhaseSequence', invalid=0xff,
                     text=phase_sequences),
         ]
+
+        self.capabilities1 = self.read_register(Reg_u32b(0x2024))
+
+    def device_init_late(self):
+        super().device_init_late()
+
+        self.dbus.add_path('/Capabilities/HasUdpSnapshots',
+                           1 if self.capabilities1 & 0x0400 else 0)
 
     def set_name(self, val):
         self.vreglink_set(0x10c, bytes(val, encoding='utf-8'))
