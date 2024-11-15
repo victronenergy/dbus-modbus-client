@@ -51,6 +51,8 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         ]
 
     def device_init(self):
+        self.capabilities1 = 0
+
         self.info_regs = [
             Reg_text( 0x1001, 8, '/Serial'),
             VEReg_ver(0x1009, '/FirmwareVersion'),
@@ -110,10 +112,17 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         if self.fwver < (0, 1, 9, 0):
             return
 
+        self.capabilities1 = self.read_register(Reg_u32b(0x2024))
         self.data_regs += [
              Reg_u16(0x2023, '/N2kSystemInstance',
                      write=self.set_systeminstance),
         ]
+
+    def device_init_late(self):
+        super().device_init_late()
+
+        self.dbus.add_path('/Capabilities/HasPQSnapShotTimeOut',
+                           1 if self.capabilities1 & 0x0200 else 0)
 
     def set_name(self, val):
         self.vreglink_set(0x10c, bytes(val, encoding='utf-8'))
