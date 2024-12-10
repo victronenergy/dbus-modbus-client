@@ -50,6 +50,13 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
                     invalid=0xffff),
         ]
 
+        if self.fwver < (0, 1, 9, 0):
+            return
+
+        self.data_regs += [
+            Reg_s16(base + 7, '/Ac/L%d/PowerFactor' % n, 1000, '%.3f')
+        ]
+
     def device_init(self):
         self.info_regs = [
             Reg_text( 0x1001, 8, '/Serial'),
@@ -105,6 +112,13 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
 
         self.data_regs += [
             Reg_s16(0x3039, '/Ac/N/Current', 100, '%.1f A')
+        ]
+
+        if self.fwver < (0, 1, 9, 0):
+            return
+
+        self.data_regs += [
+            Reg_s16(0x303A, '/Ac/PowerFactor', 1000, '%.3f')
         ]
 
     def set_name(self, val):
