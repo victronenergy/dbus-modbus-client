@@ -5,6 +5,11 @@ from register import *
 from victron_regs import *
 import vreglink
 
+phase_sequences = [
+    'L1-L2-L3',
+    'L1-L3-L2',
+]
+
 class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
     vendor_id = 've'
     vendor_name = 'Victron Energy'
@@ -118,7 +123,9 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             return
 
         self.data_regs += [
-            Reg_s16(0x303A, '/Ac/PowerFactor', 1000, '%.3f')
+            Reg_s16(0x303A, '/Ac/PowerFactor', 1000, '%.3f'),
+            Reg_u16(0x303B, '/PhaseSequence', invalid=0xff,
+                    text=phase_sequences),
         ]
 
     def set_name(self, val):
