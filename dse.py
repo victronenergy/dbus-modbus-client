@@ -337,10 +337,182 @@ class DSE4520_MKII(DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator):
     has_remote_start = False
 
 models = {
+
+    # MK I
+    '1-3110': {
+        'model':    '3110',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-3111': {
+        'model':    '3110',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-3211': {
+        'model':    '3210',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4311': {
+        'model':    '4310',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4310': {
+        'model':    '4310',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4320': {
+        'model':    '4320',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4321': {
+        'model':    '4320',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4410': {
+        'model':    '4410',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4411': {
+        'model':    '4410',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4420': {
+        'model':    '4420',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4421': {
+        'model':    '4420',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4511': {
+        'model':    '4510',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4510': {
+        'model':    '4510',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4513': {
+        'model':    '4510',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4521': {
+        'model':    '4520',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4520': {
+        'model':    '4520',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4523': {
+        'model':    '4520',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4611': {
+        'model':    '4610',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4610': {
+        'model':    '4610',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4613': {
+        'model':    '4610',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4621': {
+        'model':    '4620',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-4620': {
+        'model':    '4620',
+        'handler':  DSE4xxx_Generator,
+    },
     '1-4623': {
         'model':    '4620',
         'handler':  DSE4xxx_Generator,
     },
+    '1-6010': {
+        'model':    '6010',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-6011': {
+        'model':    '6010',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-6012': {
+        'model':    '6012',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-6020': {
+        'model':    '6020',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-6021': {
+        'model':    '6020',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-6110': {
+        'model':    '6110',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-6111': {
+        'model':    '6110',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-6120': {
+        'model':    '6120',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-6121': {
+        'model':    '6120',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7110': {
+        'model':    '7110',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7113': {
+        'model':    '7110',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7120': {
+        'model':    '7120',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7123': {
+        'model':    '7120',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7210': {
+        'model':    '7210',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7220': {
+        'model':    '7220',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7310': {
+        'model':    '7310',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7320': {
+        'model':    '7320',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7410': {
+        'model':    '7410',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7420': {
+        'model':    '7420',
+        'handler':  DSE4xxx_Generator,
+    },
+    '1-7450': {
+        'model':    '7450',
+        'handler':  DSE4xxx_Generator,
+    },
+
+    # MK II
     '1-32808': {
         'model':    '4510 MKII',
         'handler':  DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator,
@@ -349,20 +521,36 @@ models = {
         'model':    '4520 MKII',
         'handler':  DSE4520_MKII,
     },
+    '1-32789': {
+        'model':    '6010 MKII',
+        'handler':  DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator,
+    },
+    '1-32790': {
+        'model':    '6010 MKII',
+        'handler':  DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator,
+    },
+    '1-32791': {
+        'model':    '6020 MKII',
+        'handler':  DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator,
+    },
+    '1-32792': {
+        'model':    '6020 MKII',
+        'handler':  DSE71xx_66xx_60xx_L40x_4xxx_45xx_MkII_Generator,
+    },
     '1-32800': {
         'model':    '6110 MKII',
         'handler':  DSE61xx_MkII_Generator,
     },
-    '1-6121': {
-        'model':    '6120',
-        'handler':  DSE4xxx_Generator,
-    },
-    '1-32859': {
-        'model':    '6120 MKIII',
-        'handler':  DSE61xx_MkII_Generator,
+    '1-32801': {
+        'model':    '6120 MKII',
+        'handler':  DSE72xx_73xx_61xx_74xx_MkII_Generator,
     },
     '1-32840': {
         'model':    '7310 MKII',
+        'handler':  DSE72xx_73xx_61xx_74xx_MkII_Generator,
+    },
+    '1-32841': {
+        'model':    '7320 MKII',
         'handler':  DSE72xx_73xx_61xx_74xx_MkII_Generator,
     },
     '1-32845': {
@@ -385,6 +573,17 @@ models = {
         'model':    '8660 MKII',
         'handler':  DSE8xxx_Generator,
     },
+
+    # MK III
+    '1-32858': {
+        'model':    '6110 MKIII',
+        'handler':  DSE61xx_MkII_Generator,
+    },
+    '1-32859': {
+        'model':    '6120 MKIII',
+        'handler':  DSE61xx_MkII_Generator,
+    },
+
 }
 
 
