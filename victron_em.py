@@ -117,7 +117,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             return
 
         self.data_regs += [
-            Reg_u16(0x3039, '/Ac/N/Current', 100, '%.1f A')
+            Reg_s16(0x3039, '/Ac/N/Current', 100, '%.1f A'),
         ]
 
     def set_name(self, val):
