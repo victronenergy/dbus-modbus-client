@@ -109,8 +109,13 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         if self.fwver < (0, 1, 5, 255):
             return
 
-        if self.role == 'pvinverter':
-            posreg = Reg_u16(0x2022, '/Position')
+        if self.role in ['pvinverter', 'evcharger']:
+            posreg = (Reg_mapu16(0x2022, '/Position', {
+                0: 1, # AC input 1 -> Input
+                1: 0, # AC output  -> Output
+                2: 1, # AC input 2 -> Input
+            }) if self.role == 'evcharger' else
+                Reg_u16(0x2022, '/Position'))
             self.position = self.read_register(posreg)
             self.data_regs.append(posreg)
 
