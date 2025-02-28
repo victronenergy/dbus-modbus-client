@@ -128,6 +128,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             Reg_s16(0x303A, '/Ac/PowerFactor', 1000, '%.3f'),
             Reg_u16(0x303B, '/PhaseSequence', invalid=0xff,
                     text=phase_sequences),
+            Reg_u32b(0x303C, onchange=self.alarms_changed),
         ]
 
         if self.fwver < (0, 1, 9, 0):
@@ -144,6 +145,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
 
         self.dbus.add_path('/Capabilities/HasUdpSnapshots',
                            1 if self.capabilities1 & 0x0400 else 0)
+        self.dbus.add_path('/Alarms/PhaseRotation', None)
 
     def set_name(self, val):
         self.vreglink_set(0x10c, bytes(val, encoding='utf-8'))
@@ -154,6 +156,10 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
 
     def pr_changed(self, reg):
         self.sched_reinit()
+
+    def alarms_changed(self, reg):
+        mapping = [None, 0, 1, 2]
+        self.dbus['/Alarms/PhaseRotation'] = mapping[reg.value & 3]
 
     def set_systeminstance(self, val):
         self.vreglink_set(0x112, int(val).to_bytes(1, 'little'))
