@@ -20,7 +20,6 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
     role_names = ['grid', 'pvinverter', 'genset', 'acload', 'evcharger',
                   'heatpump', 'acload', 'acload']
     allowed_roles = None
-    age_limit_fast = 0
     refresh_time = 20
 
     def get_phases(self, cfg):
@@ -86,6 +85,9 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         role_id = self.read_register(self.data_regs[1])
         if role_id < len(self.role_names):
             self.role = self.role_names[role_id]
+
+        if self.role == 'grid':
+            self.age_limit_fast = 0
 
         self.fwver = self.read_register(self.info_regs[1])
         if self.fwver < (0, 1, 3, 1):
