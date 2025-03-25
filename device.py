@@ -654,6 +654,9 @@ class EnergyMeter(ModbusDevice):
             self.add_settings({'position': ['/Position', 0, 0, 2]})
             self.add_dbus_setting('position', '/Position')
 
+        if self.role != 'grid':
+            self.dbus.add_path('/IsGenericEnergyMeter', 1)
+
 class Genset(ModbusDevice):
     device_type = 'Generator controller'
     default_role = 'genset'
