@@ -650,7 +650,7 @@ class EnergyMeter(ModbusDevice):
         if self.nr_phases is not None:
             self.dbus.add_path('/NrOfPhases', self.nr_phases)
 
-        if self.role == 'pvinverter' and self.position is None:
+        if self.role in ('pvinverter', 'evcharger') and self.position is None:
             self.add_settings({'position': ['/Position', 0, 0, 2]})
             self.add_dbus_setting('position', '/Position')
 

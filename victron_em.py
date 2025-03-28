@@ -99,6 +99,17 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             posreg = Reg_u16(0x2022, '/Position')
             self.position = self.read_register(posreg)
             self.data_regs.append(posreg)
+        elif self.role == 'evcharger':
+            # The position mapping is reversed in the EV charger. Also
+            # treat 2 (AC-in-2 for PV-inverter) as AC-in (1). This ensures
+            # that it matches VictronConnect.
+            posreg = Reg_mapu16(0x2022, '/Position', {
+                0: 1,
+                1: 0,
+                2: 1
+            })
+            self.position = self.read_register(posreg)
+            self.data_regs.append(posreg)
 
         if self.fwver < (0, 1, 7, 0):
             return
