@@ -95,10 +95,10 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         if self.fwver < (0, 1, 5, 255):
             return
 
+        posreg = None
+
         if self.role == 'pvinverter':
             posreg = Reg_u16(0x2022, '/Position')
-            self.position = self.read_register(posreg)
-            self.data_regs.append(posreg)
         elif self.role == 'evcharger':
             # The position mapping is reversed in the EV charger. Also
             # treat 2 (AC-in-2 for PV-inverter) as AC-in (1). This ensures
@@ -108,6 +108,8 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
                 1: 0,
                 2: 1
             })
+
+        if posreg is not None:
             self.position = self.read_register(posreg)
             self.data_regs.append(posreg)
 
