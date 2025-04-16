@@ -126,6 +126,7 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             })
 
         if posreg is not None:
+            self.dbus.add_path('/PositionIsAdjustable', 0)
             self.position = self.read_register(posreg)
             self.data_regs.append(posreg)
 
