@@ -271,7 +271,7 @@ class NetClient(Client):
         super().init_settings()
 
         svcname = 'com.victronenergy.modbusclient.%s' % self.name
-        self.svc = VeDbusService(svcname, self.dbusconn)
+        self.svc = VeDbusService(svcname, self.dbusconn, register=True)
         self.svc.add_path('/Scan', False, writeable=True,
                           onchangecallback=self.set_scan)
         self.svc.add_path('/ScanProgress', None, gettextcallback=percent)
