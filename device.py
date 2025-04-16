@@ -310,7 +310,7 @@ class BaseDevice:
         ident = self.get_ident()
 
         svcname = 'com.victronenergy.%s.%s' % (self.role, ident)
-        self._dbus = VeDbusService(svcname, private_bus())
+        self._dbus = VeDbusService(svcname, private_bus(), register=False)
         self.dbus = ServiceContext(self._dbus)
 
         self.dbus.add_path('/Mgmt/ProcessName', __main__.NAME)
@@ -477,6 +477,7 @@ class ModbusDevice(BaseDevice):
         self.need_reinit = False
 
         self.dbus.flush()
+        self._dbus.register()
 
         for s in self.subdevices:
             s.init()
@@ -551,6 +552,7 @@ class SubDevice(BaseDevice):
         self.init_data_regs()
         self.device_init_late()
         self.dbus.flush()
+        self._dbus.register()
 
     def sched_reinit(self):
         self.parent.sched_reinit()
