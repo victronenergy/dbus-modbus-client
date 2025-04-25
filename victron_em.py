@@ -126,7 +126,6 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             })
 
         if posreg is not None:
-            self.dbus.add_path('/PositionIsAdjustable', 0)
             self.position = self.read_register(posreg)
             self.data_regs.append(posreg)
 
@@ -157,6 +156,9 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         self.dbus.add_path('/Capabilities/HasUdpSnapshots',
                            1 if self.capabilities1 & 0x0400 else 0)
         self.dbus.add_path('/Alarms/PhaseRotation', None)
+
+        if self.position is not None:
+            self.dbus.add_path('/PositionIsAdjustable', 0)
 
     def set_name(self, val):
         self.vreglink_set(0x10c, bytes(val, encoding='utf-8'))
