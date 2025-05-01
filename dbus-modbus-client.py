@@ -61,6 +61,21 @@ if_blacklist = [
 def percent(path, val):
     return '%d%%' % val
 
+class Device:
+    def __init__(self, d, nosave):
+        self.d = d
+        self.nosave = nosave
+        self.last_seen = time.time()
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def __hash__(self):
+        return hash(self.d)
+
+    def __str__(self):
+        return str(self.d)
+
 class Client:
     def __init__(self, name):
         self.name = name
@@ -99,8 +114,8 @@ class Client:
                 continue
 
             try:
-                self.init_device(d, False)
-                self.devices.append(d)
+                dd = self.init_device(d, False)
+                self.devices.append(dd)
             except:
                 log.info('Error initialising %s, skipping', d)
                 traceback.print_exc()
@@ -123,24 +138,23 @@ class Client:
 
     def init_device(self, dev, nosave=False, enable=True):
         dev.init(self.dbusconn, enable)
-        dev.last_seen = time.time()
-        dev.nosave = nosave
+        return Device(dev, nosave)
 
     def del_device(self, dev):
         self.devices.remove(dev)
-        dev.destroy()
+        dev.d.destroy()
 
     def dev_failed(self, dev):
         if not dev.nosave:
-            self.failed.append(dev.spec)
+            self.failed.append(dev.d.spec)
 
     def update_device(self, dev):
         try:
-            dev.update()
+            dev.d.update()
             dev.last_seen = time.time()
         except Exception as ex:
             if time.time() - dev.last_seen > FAIL_TIMEOUT:
-                dev.log.info('Device failed: %s', ex)
+                dev.d.log.info('Device failed: %s', ex)
                 if self.err_exit:
                     os._exit(1)
                 self.dev_failed(dev)
@@ -155,8 +169,8 @@ class Client:
 
         for d in devs:
             try:
-                self.init_device(d, nosave, enable)
-                self.devices.append(d)
+                dd = self.init_device(d, nosave, enable)
+                self.devices.append(dd)
             except:
                 failed.append(d.spec)
                 d.destroy()
@@ -307,9 +321,9 @@ class NetClient(Client):
                 self.probe_devices(maddr, nosave=True, enable=False)
 
     def init_device(self, dev, *args):
-        super().init_device(dev, *args)
+        r = super().init_device(dev, *args)
 
-        if dev.nosave:
+        if r.nosave:
             dev_path = '/Devices/' + dev.get_ident()
             with self.svc as s:
                 s.add_path(dev_path + '/Enabled', int(dev.enabled),
@@ -318,9 +332,11 @@ class NetClient(Client):
                 s.add_path(dev_path + '/Serial', dev.info['/Serial'])
                 s.add_path(dev_path + '/Name', dev.get_name())
 
+        return r
+
     def del_device(self, dev):
         with self.svc as s:
-            s.del_tree('/Devices/' + dev.get_ident())
+            s.del_tree('/Devices/' + dev.d.get_ident())
         super().del_device(dev)
 
     def dev_failed(self, dev):
