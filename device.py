@@ -370,6 +370,9 @@ class BaseDevice:
     def get_ident(self):
         return '%s_%s' % (self.vendor_id, self.get_unique())
 
+    def get_name(self):
+        return str(self.info.get('/CustomName', '')) or self.productname
+
 class ModbusDevice(BaseDevice):
     def __init__(self, spec, modbus, model):
         super().__init__()
@@ -586,6 +589,9 @@ class CustomName:
         super().device_init_late()
         self.add_settings({'customname': ['/CustomName', '', 0, 0]})
         self.add_dbus_setting('customname', '/CustomName')
+
+    def get_name(self):
+        return self.settings['customname'] or super().get_name()
 
 class ErrorId:
     err_path = '/Error/{}/Id'
