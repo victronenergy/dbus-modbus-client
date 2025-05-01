@@ -322,21 +322,23 @@ class NetClient(Client):
 
     def init_device(self, dev, *args):
         r = super().init_device(dev, *args)
+        r.dev_path = None
 
         if r.nosave:
-            dev_path = '/Devices/' + dev.get_ident()
+            r.dev_path = '/Devices/' + dev.get_ident()
             with self.svc as s:
-                s.add_path(dev_path + '/Enabled', int(dev.enabled),
+                s.add_path(r.dev_path + '/Enabled', int(dev.enabled),
                            writeable=True,
                            onchangecallback=partial(self.enable_device, dev))
-                s.add_path(dev_path + '/Serial', dev.info['/Serial'])
-                s.add_path(dev_path + '/Name', dev.get_name())
+                s.add_path(r.dev_path + '/Serial', dev.info['/Serial'])
+                s.add_path(r.dev_path + '/Name', dev.get_name())
 
         return r
 
     def del_device(self, dev):
-        with self.svc as s:
-            s.del_tree('/Devices/' + dev.d.get_ident())
+        if dev.dev_path is not None:
+            with self.svc as s:
+                s.del_tree(dev.dev_path)
         super().del_device(dev)
 
     def dev_failed(self, dev):
