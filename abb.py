@@ -2,6 +2,7 @@ import struct
 import device
 import probe
 from register import Reg, Reg_s32b, Reg_u16, Reg_u32b, Reg_u64b, Reg_text
+from register import Reg_s16
 
 class Reg_serial(Reg, str):
     """ ABB meters use a 32-bit integer as serial number. Make it a string
@@ -48,6 +49,7 @@ class ABB_Meter_1P(ABB_Meter):
             Reg_s32b(0x5B14, '/Ac/L1/Power',          100, '%.1f W'),
             Reg_u64b(0x5000, '/Ac/L1/Energy/Forward', 100, '%.1f kWh'),
             Reg_u64b(0x5004, '/Ac/L1/Energy/Reverse', 100, '%.1f kWh', invalid=0xffffffffffffffff),
+            Reg_s16( 0x5B3A, '/Ac/L1/PowerFactor',   1000, '%.3f', invalid=0x7FFF),
         ]
 
 class ABB_Meter_3P(ABB_Meter):
@@ -72,6 +74,10 @@ class ABB_Meter_3P(ABB_Meter):
             Reg_u64b(0x546C, '/Ac/L1/Energy/Reverse', 100, '%.1f kWh', invalid=0xffffffffffffffff),
             Reg_u64b(0x5470, '/Ac/L2/Energy/Reverse', 100, '%.1f kWh', invalid=0xffffffffffffffff),
             Reg_u64b(0x5474, '/Ac/L3/Energy/Reverse', 100, '%.1f kWh', invalid=0xffffffffffffffff),
+
+            Reg_s16( 0x5B3B, '/Ac/L1/PowerFactor',   1000, '%.3f', invalid=0x7FFF),
+            Reg_s16( 0x5B3C, '/Ac/L1/PowerFactor',   1000, '%.3f', invalid=0x7FFF),
+            Reg_s16( 0x5B3D, '/Ac/L1/PowerFactor',   1000, '%.3f', invalid=0x7FFF),
         ]
 
 models = {
