@@ -76,8 +76,8 @@ class ABB_Meter_3P(ABB_Meter):
             Reg_u64b(0x5474, '/Ac/L3/Energy/Reverse', 100, '%.1f kWh', invalid=0xffffffffffffffff),
 
             Reg_s16( 0x5B3B, '/Ac/L1/PowerFactor',   1000, '%.3f', invalid=0x7FFF),
-            Reg_s16( 0x5B3C, '/Ac/L1/PowerFactor',   1000, '%.3f', invalid=0x7FFF),
-            Reg_s16( 0x5B3D, '/Ac/L1/PowerFactor',   1000, '%.3f', invalid=0x7FFF),
+            Reg_s16( 0x5B3C, '/Ac/L2/PowerFactor',   1000, '%.3f', invalid=0x7FFF),
+            Reg_s16( 0x5B3D, '/Ac/L3/PowerFactor',   1000, '%.3f', invalid=0x7FFF),
         ]
 
 models = {
