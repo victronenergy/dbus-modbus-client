@@ -35,6 +35,9 @@ class ABB_Meter(device.CustomName, device.EnergyMeter):
             # We always have L1 voltage and current
             Reg_u32b(0x5B00, '/Ac/L1/Voltage',      10, '%.1f V'),
             Reg_u32b(0x5B0C, '/Ac/L1/Current',     100, '%.1f A'),
+
+            # Overall power factor
+            Reg_s16( 0x5B3A, '/Ac/PowerFactor',      1000, '%.3f', invalid=0x7FFF),
         ]
 
 class ABB_Meter_1P(ABB_Meter):
