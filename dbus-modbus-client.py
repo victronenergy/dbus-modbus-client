@@ -32,6 +32,7 @@ import cre
 import deif
 import dse
 import ev_charger
+import inepro
 import smappee
 import victron_em
 
