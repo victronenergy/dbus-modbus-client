@@ -40,6 +40,16 @@ class ABB_Meter(device.CustomName, device.EnergyMeter):
             Reg_s16( 0x5B3A, '/Ac/PowerFactor',      1000, '%.3f', invalid=0x7FFF),
         ]
 
+    def init_device_settings(self, dbus):
+        super().init_device_settings(dbus)
+
+        # This has to be done here, because we need access to self.role, but
+        # we cannot wait for device_init_late, by then the registers are
+        # already packed.  When measuring an EV charger, also report L1 current
+        # as the charge current (per phase).
+        if self.role == 'evcharger':
+            self.data_regs.append(Reg_u32b(0x5B0C, '/Current', 100, '%.1f A'))
+
 class ABB_Meter_1P(ABB_Meter):
     productname = 'ABB B21 Energy Meter'
     nr_phases = 1
