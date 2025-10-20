@@ -35,6 +35,7 @@ class EVC_STATUS(IntEnum):
     STARTCHARGE     = 21
     SWITCH_TO_3P    = 22
     SWITCH_TO_1P    = 23
+    STOP_CHARGING   = 24
 
 class EVC_POSITION(IntEnum):
     OUTPUT = 0
@@ -68,8 +69,13 @@ class EV_Charger(device.ModbusDevice):
             Reg_u16(5016, '/SetCurrent',  1, '%d A', write=True),
             Reg_u16(5017, '/MaxCurrent',  1, '%d A', write=True),
             Reg_u16(5018, '/Current',    10, '%.1f A'),
-            Reg_u32b(5019, '/ChargingTime', 1, '%d s'),
-            Reg_u16(5021, '/Ac/Energy/Forward', 100, '%.2f kWh'),
+
+            Reg_u32b(5019, '/ChargingTime', 1, '%d s'), # DEPRECATED
+            Reg_u32b(5019, '/Session/Time', 1, '%d s'),
+            Reg_u16(5021,  '/Session/Energy', 100, '%.2f kWh'),
+            Reg_u16(5022,  '/Session/Cost', 100, '%.2f'),
+
+            Reg_u32b(5023, '/Ac/Energy/Forward', 100, '%.2f kWh'),
             Reg_e16(5026, '/Position', EVC_POSITION, write=True),
             Reg_text(5027, 22, '/CustomName', little=True, encoding='utf-8', write=True),
             Reg_u16(5049, '/AutoStart', write=(0,1))
