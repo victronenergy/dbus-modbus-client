@@ -129,6 +129,13 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
             self.position = self.read_register(posreg)
             self.data_regs.append(posreg)
 
+        # When used to measure an EV-charger, L1 current is used as
+        # estimate for the charge current.
+        if self.role == 'evcharger':
+            self.data_regs += [
+                Reg_s16(0x3041, '/Current', 100, '%.1f A'),
+            ]
+
         if self.fwver < (0, 1, 7, 0):
             return
 
