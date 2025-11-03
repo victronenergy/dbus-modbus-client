@@ -28,6 +28,7 @@ import watchdog
 import abb
 import carlo_gavazzi
 import comap
+import comap_2
 import cre
 import deif
 import dse
