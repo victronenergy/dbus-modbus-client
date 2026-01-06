@@ -44,7 +44,7 @@ def pack_list(rr, access, hole_max, barrier):
         if nr > 125 or (r.base - end) > hole_max or \
            contains_any(end, r.base, barrier):
             regs.append(rg)
-            rg = RegList()
+            rg = RegList(access)
 
         rg.append(r)
 
