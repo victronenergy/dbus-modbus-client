@@ -126,6 +126,17 @@ class ET112_Meter(device.CustomName, device.EnergyMeter):
             Reg_text_et112(0x5000, 7, '/Serial'),
         ]
 
+        # make sure measurement mode is set to 1 (B) for bidirectional
+        appreg = Reg_u16(0x1103)
+        if self.read_register(appreg) != 1:
+            self.write_register(appreg, 1)
+
+            # read back the value in case the setting is not accepted
+            # for some reason
+            if self.read_register(appreg) != 1:
+                self.log.error('%s: failed to set measurement to bidirectional', self)
+                return
+
         self.read_info()
 
         regs = [
