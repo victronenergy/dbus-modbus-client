@@ -10,11 +10,9 @@ phase_sequences = [
     'L1-L3-L2',
 ]
 
-class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
+class VE_Meter(vreglink.VregLink, device.EnergyMeter):
     vendor_id = 've'
     vendor_name = 'Victron Energy'
-    productid = 0xa1b1
-    productname = 'Energy Meter VM-3P75CT'
     vreglink_base = 0x4000
     vreglink_size = 32
     role_names = ['grid', 'pvinverter', 'genset', 'acload', 'evcharger',
@@ -185,10 +183,22 @@ class VE_Meter_A1B1(vreglink.VregLink, device.EnergyMeter):
         self.vreglink_set(0x112, int(val).to_bytes(1, 'little'))
         return True
 
+class VE_Meter_A1B1(VE_Meter):
+    productid = 0xa1b1
+    productname = 'Energy Meter VM-3P75CT'
+
+class VE_Meter_A1B2(VE_Meter):
+    productid = 0xa1b2
+    productname = 'Energy Meter VM-3P5A'
+
 models = {
     VE_Meter_A1B1.productid: {
         'model':    'VM-3P75CT',
         'handler':  VE_Meter_A1B1,
+    },
+    VE_Meter_A1B2.productid: {
+        'model':    'VM-3P5A',
+        'handler':  VE_Meter_A1B2,
     },
 }
 
