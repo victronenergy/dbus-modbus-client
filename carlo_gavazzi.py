@@ -144,12 +144,12 @@ class ET112_Meter(device.CustomName, device.EnergyMeter):
             Reg_s16( 0x000F, '/Ac/Frequency',         10, '%.1f Hz'),
             Reg_s16( 0x000E, '/Ac/PowerFactor',     1000, '%.2f'),
             Reg_s32l(0x0010, '/Ac/Energy/Forward',    10, '%.1f kWh'),
-            Reg_s32l(0x0020, '/Ac/Energy/Reverse',    10, '%.1f kWh'),
+            Reg_s32l(0x0020, '/Ac/Energy/Reverse',    -10, '%.1f kWh'),
             Reg_s32l(0x0000, '/Ac/L1/Voltage',        10, '%.1f V'),
             Reg_s32l(0x0002, '/Ac/L1/Current',      1000, '%.1f A'),
             Reg_s32l(0x0004, '/Ac/L1/Power',          10, '%.1f W'),
             Reg_s32l(0x0010, '/Ac/L1/Energy/Forward', 10, '%.1f kWh'),
-            Reg_s32l(0x0020, '/Ac/L1/Energy/Reverse', 10, '%.1f kWh'),
+            Reg_s32l(0x0020, '/Ac/L1/Energy/Reverse', -10, '%.1f kWh'),
         ]
 
         self.data_regs = regs
