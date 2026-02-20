@@ -134,6 +134,11 @@ class Reg_f32l(Reg_num):
     count = 2
     rtype = float
 
+class Reg_f32b(Reg_num):                             
+    coding = ('>f', '>2H')                         
+    count = 2                                                                         
+    rtype = float                                    
+
 class Reg_e16(Reg, int):
     def __init__(self, base, name, enum, **kwargs):
         super().__init__(base, 1, name, **kwargs)
