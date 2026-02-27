@@ -36,7 +36,6 @@ class VE_Meter(vreglink.VregLink, device.EnergyMeter):
         power = 0x3082 + 4 * (n - 1)
         self.data_regs += [
             Reg_s16( base + 0, '/Ac/L%d/Voltage' % n,        100, '%.1f V'),
-            Reg_s16( base + 1, '/Ac/L%d/Current' % n,        100, '%.1f A'),
             Reg_u32b(base + 2, '/Ac/L%d/Energy/Forward' % n, 100, '%.1f kWh',
                      invalid=0xffffffff),
             Reg_u32b(base + 4, '/Ac/L%d/Energy/Reverse' % n, 100, '%.1f kWh',
@@ -127,13 +126,6 @@ class VE_Meter(vreglink.VregLink, device.EnergyMeter):
             self.position = self.read_register(posreg)
             self.data_regs.append(posreg)
 
-        # When used to measure an EV-charger, L1 current is used as
-        # estimate for the charge current.
-        if self.role == 'evcharger':
-            self.data_regs += [
-                Reg_s16(0x3041, '/Current', 100, '%.1f A'),
-            ]
-
         if self.fwver < (0, 1, 7, 0):
             return
 
@@ -187,9 +179,49 @@ class VE_Meter_A1B1(VE_Meter):
     productid = 0xa1b1
     productname = 'Energy Meter VM-3P75CT'
 
+    def add_phase_regs(self, n):
+        super().add_phase_regs(n)
+
+        self.data_regs += [
+            Reg_s16(0x3041 + 8 * (n - 1), '/Ac/L%d/Current' % n, 100, '%.1f A'),
+        ]
+
+    def device_init(self):
+        super().device_init()
+
+        if self.fwver < (0, 1, 5, 255):
+            return
+
+        # When used to measure an EV-charger, L1 current is used as
+        # estimate for the charge current.
+        if self.role == 'evcharger':
+            self.data_regs += [
+                Reg_s16(0x3041, '/Current', 100, '%.1f A'),
+            ]
+
 class VE_Meter_A1B2(VE_Meter):
     productid = 0xa1b2
     productname = 'Energy Meter VM-3P5A'
+
+    def add_phase_regs(self, n):
+        super().add_phase_regs(n)
+
+        self.data_regs += [
+            Reg_s32b(0x3058 + 2 * (n - 1), '/Ac/L%d/Current' % n, 100, '%.1f A'),
+        ]
+
+    def device_init(self):
+        super().device_init()
+
+        if self.fwver < (0, 1, 5, 255):
+            return
+
+        # When used to measure an EV-charger, L1 current is used as
+        # estimate for the charge current.
+        if self.role == 'evcharger':
+            self.data_regs += [
+                Reg_s32b(0x3058, '/Current', 100, '%.1f A'),
+            ]
 
 models = {
     VE_Meter_A1B1.productid: {
