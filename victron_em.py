@@ -137,7 +137,7 @@ class VE_Meter(vreglink.VregLink, device.EnergyMeter):
             return
 
         self.data_regs += [
-            Reg_s16(0x3039, '/Ac/N/Current', 100, '%.1f A'),
+            Reg_s16(0x3039, '/Ac/N/Current', 10, '%.1f A'),
         ]
 
         if self.fwver < (0, 1, 9, 0):
