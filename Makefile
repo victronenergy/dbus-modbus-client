@@ -22,6 +22,7 @@ FILES +=								\
 	ev_charger.py							\
 	smappee.py							\
 	victron_em.py							\
+	victron_p1link.py						\
 
 VELIB =									\
 	settingsdevice.py						\
