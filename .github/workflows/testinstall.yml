@@ -1,0 +1,21 @@
+name: Test Install
+
+on:
+  push:
+    paths:
+      - '**.py'
+      - 'Makefile'
+
+jobs:
+  testinstall:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: pip install pymodbus==2.5.3 dnslib==0.9.16
+
+      - name: Run testinstall
+        run: make testinstall
