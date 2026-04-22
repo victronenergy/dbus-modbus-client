@@ -35,6 +35,7 @@ import ev_charger
 import smappee
 import victron_em
 import victron_p1link
+import datakom
 
 import logging
 log = logging.getLogger()
