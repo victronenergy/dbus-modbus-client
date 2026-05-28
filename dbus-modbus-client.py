@@ -29,13 +29,13 @@ import abb
 import carlo_gavazzi
 import comap
 import cre
+import datakom
 import deif
 import dse
 import ev_charger
 import smappee
 import victron_em
 import victron_p1link
-import datakom
 
 import logging
 log = logging.getLogger()
