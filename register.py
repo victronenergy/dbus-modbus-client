@@ -162,6 +162,17 @@ class Reg_text(Reg, str):
         return struct.unpack(self.pfmt,
             self.value.encode(self.encoding).ljust(2 * self.count, b'\0'))
 
+class Reg_hexstr(Reg, str):
+    def __init__(self, base, count, name=None, little=False, upper=False, **kwargs):
+        super().__init__(base, count, name, **kwargs)
+        self.pfmt = '%c%dH' % (['>', '<'][little], count)
+
+    def decode(self, values):
+        newval = struct.pack(self.pfmt, *values).hex()
+        if self.upper:
+            newval = newval.upper()
+        return self.update(newval)
+
 class Reg_map:
     def __init__(self, base, name, tab, *args, **kwargs):
         super().__init__(base, name, *args, **kwargs)
