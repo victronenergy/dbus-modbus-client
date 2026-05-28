@@ -116,19 +116,9 @@ class Datakom_Generator(device.CustomName, device.Genset):
             onchangecallback=self._start_genset
         )
 
-        self.dbus.add_path(
-            '/EnableRemoteStartMode',
-            0,
-            writeable=True,
-            onchangecallback=self._set_remote_start_mode
-        )
-
     def _start_genset(self, _, value):
         v = 18 if value else 4
         self.write_modbus(8193, [v])
-        return True
-
-    def _set_remote_start_mode(self, _, value):
         return True
 
 models = {
