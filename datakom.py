@@ -8,7 +8,8 @@ class Reg_Datakom_fw(Reg, str):
         super().__init__(10611, 1, '/FirmwareVersion')
 
     def decode(self, values):
-        return self.update('.'.join(str(x) for x in divmod(values[0], 16)))
+        v = struct.pack('>H', values[0]).hex().lstrip('0');
+        return self.update('.'.join(v))
 
 class Datakom_Tank(device.CustomName, device.Tank, device.SubDevice):
     raw_value_min = 0
