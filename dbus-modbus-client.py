@@ -33,6 +33,7 @@ import datakom
 import deif
 import dse
 import ev_charger
+import inepro
 import smappee
 import victron_em
 import victron_p1link
