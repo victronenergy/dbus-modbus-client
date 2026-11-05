@@ -80,9 +80,12 @@ class BaseDevice:
 
     def destroy(self):
         if self.dbus:
+            conn = self._dbus.dbusconn
             self._dbus.__del__()
             self._dbus = None
             self.dbus = None
+            conn.set_exit_on_disconnect(False)
+            conn.close()
         if self.settings:
             self.settings._settings = None
             self.settings = None
